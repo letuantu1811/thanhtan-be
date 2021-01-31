@@ -1,0 +1,47 @@
+{
+  "res": {
+    "status": {
+      "bad": 400,
+      "unauthorized": 401,
+      "forbidden": 403,
+      "ok": 200,
+      "created": 201,
+      "updated": 201,
+      "nocontent": 204,
+      "notfound": 404,
+      "internal": 505
+    },
+    "http": {
+      "bad": "Dữ liệu không hợp lệ",
+      "ok": "Xử lý thành công",
+      "error": "Xảy ra lỗi hệ thống",
+      "created": "Tạo dữ liệu thành công",
+      "updated": "Cập nhật dữ liệu thành công",
+      "nocontent": "Xử lý thành công",
+      "notfound": "Không tìm thấy"
+    },
+    "common": {
+      "getSuccess": "Lấy dữ liệu thành công",
+      "getFailed": "Lấy dữ liệu không thành công",
+      "createSuccess": "Tạo dữ liệu thành công",
+      "createFailed": "Tạo dữ liệu thất bại, vui lòng thử lại",
+      "updateSuccess": "Cập nhật dữ liệu thành công",
+      "updateFailed": "Cập nhật dữ liệu thất bại",
+      "deleteSuccess": "Xóa dữ liệu thành công",
+      "deleteFailed": "Xóa dữ liệu thất bại"
+    },
+    "not_found": {
+      "accountant": "Tài khoản kế toán không hợp lệ",
+      "customer": "Không tìm thấy thông tin khách hàng",
+      "bill": "Không tìm thấy hóa đơn bán hàng"
+    }
+    
+  },
+  "validate":{
+    "common":{
+      "isempty": "Không được để trống",
+      "errtype": "Không đúng kiểu dữ liệu"
+    }
+  }
+
+}
