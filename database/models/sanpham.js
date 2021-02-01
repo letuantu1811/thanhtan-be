@@ -1,4 +1,6 @@
 const Sequelize = require("sequelize");
+const nhomsanpham = require('./nhomsanpham');
+const donvitinh = require('./donvitinh');
 const db = require("../config");
 const sanpham = db.define("sanpham", {
     ten: {
@@ -31,6 +33,20 @@ const sanpham = db.define("sanpham", {
 }, {
     timestamps: false,
     freezeTableName: true
+});
+
+//--------------------congdichvu------------
+nhomsanpham.hasMany(sanpham, {
+    foreignKey: "nhomsanpham_id"
+});
+sanpham.belongsTo(nhomsanpham, {
+    foreignKey: "nhomsanpham_id"
+});
+donvitinh.hasMany(sanpham, {
+    foreignKey: "donvitinh_id"
+});
+sanpham.belongsTo(donvitinh, {
+    foreignKey: "donvitinh_id"
 });
 
 

@@ -1,4 +1,6 @@
 const sanpham = require('../../database/models/sanpham');
+const nhomsanpham = require('../../database/models/nhomsanpham');
+const donvitinh = require('../../database/models/donvitinh');
 const { ENUM } = require('../../utils/index');
 const { Op } = require("sequelize");
 
@@ -89,7 +91,17 @@ module.exports = {
     // disable sanpham
     getAll: async() => {
         try {
-            return await sanpham.findAll();
+            return await sanpham.findAll({
+                include: [{
+                        model: donvitinh,
+                        trangthai: 1
+                    },
+                    {
+                        model: nhomsanpham,
+                        trangthai: 1
+                    }
+                ]
+            });
         } catch (error) {
             return error
         }
