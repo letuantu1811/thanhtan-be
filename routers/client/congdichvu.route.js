@@ -1,10 +1,9 @@
 const express = require("express");
 const router = express.Router();;
-const controller = require("../../src.web/controllers/nhomsanpham.controller");
+const controller = require("../../src.web/controllers/congdichvu.controller");
 const response = require('../../utils/api.res/response');
 
 router.get("/", async(req, res) => {
-    let body = req.body;
     try {
         const result = await controller.getAll();
         console.log(result);
@@ -15,7 +14,7 @@ router.get("/", async(req, res) => {
     }
 });
 
-// Creating appointment
+// Creating congdichvu
 router.post("/create", async(req, res) => {
     let body = req.body;
     try {
@@ -28,7 +27,7 @@ router.post("/create", async(req, res) => {
     }
 });
 
-// Getting many appointment
+// Getting many congdichvu
 router.post("/", async(req, res) => {
     try {
         const result = await controller.getMany(req.body);

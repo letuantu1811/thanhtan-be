@@ -6,7 +6,7 @@ module.exports = {
     // Creating sanpham
     create: async(res) => {
         try {
-            return await sanpham.create({
+            return await nhomsanpham.create({
                 ten: res.name,
                 nguoitao_id: res.user_id,
                 trangthai: res.state
@@ -52,7 +52,7 @@ module.exports = {
         let quyen = body.quyen;
         let nhomsanpham_id = body.nhomsanpham_id || "";
         try {
-            return await sanphamDTO.findAll({
+            return await nhomsanpham.findAll({
                 where: {
                     nhomsanpham_id: nhomsanpham_id,
                     state: quyen == "admin" ? "" : ENUM.ENABLE
@@ -70,12 +70,28 @@ module.exports = {
     // disable sanpham
     disable: async(id) => {
         try {
-            return await sanpham.update({
+            return await nhomsanpham.update({
                 state: ENUM.DISABLE
             }, {
                 where: {
                     id: id
                 }
+            })
+        } catch (error) {
+            return error
+        }
+    },
+    // get many san pham
+    getAll: async() => {
+        // let nhomsanpham_id = body.nhomsanpham_id || "";
+        try {
+            return await nhomsanpham.findAll({
+                where: {
+                    trangthai: ENUM.ENABLE
+                },
+                order: [
+                    ['ngaytao', 'DESC']
+                ]
             })
         } catch (error) {
             return error
