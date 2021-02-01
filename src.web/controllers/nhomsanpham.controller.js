@@ -1,6 +1,7 @@
 const nhomsanpham = require('../../database/models/nhomsanpham');
 const { ENUM } = require('../../utils/index');
 const { Op } = require("sequelize");
+const sanpham = require('../../database/models/sanpham');
 
 module.exports = {
     // Creating sanpham
@@ -46,22 +47,20 @@ module.exports = {
         }
     },
     // get many san pham
-    getMany: async(body) => {
-        let limit = body.limit;
-        let offset = body.offset;
-        let quyen = body.quyen;
-        let nhomsanpham_id = body.nhomsanpham_id || "";
+    getMany: async(id) => {
         try {
             return await nhomsanpham.findAll({
+                include: [{
+                    model: sanpham,
+                    trangthai: 1
+                }],
                 where: {
-                    nhomsanpham_id: nhomsanpham_id,
-                    state: quyen == "admin" ? "" : ENUM.ENABLE
+                    id: id,
+                    trangthai: ENUM.ENABLE
                 },
                 order: [
                     ['ngaytao', 'DESC']
-                ],
-                offset: offset,
-                limit: limit
+                ]
             })
         } catch (error) {
             return error

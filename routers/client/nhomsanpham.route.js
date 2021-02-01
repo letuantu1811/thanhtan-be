@@ -29,9 +29,9 @@ router.post("/create", async(req, res) => {
 });
 
 // Getting many appointment
-router.post("/", async(req, res) => {
+router.get("/products/:id", async(req, res) => {
     try {
-        const result = await controller.getMany(req.body);
+        const result = await controller.getMany(req.params.id);
         console.log(result);
         response.success(res, "success", result)
     } catch (err) {
