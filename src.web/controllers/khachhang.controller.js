@@ -95,7 +95,21 @@ module.exports = {
     // disable khachhang
     getAll: async() => {
         try {
-            return await khachhang.findAll();
+            return await khachhang.findAll({
+                include: [{
+                    model: giasuc,
+                    as: 'giasuc',
+                    where: {
+                        trangthai: 1
+                    }
+                }],
+                where: {
+                    trangthai: 1
+                },
+                order: [
+                    ['ngaytao', 'DESC']
+                ],
+            });
         } catch (error) {
             return error
         }
