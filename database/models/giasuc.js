@@ -10,6 +10,15 @@ const giasuc = db.define("giasuc", {
     ten: {
         type: Sequelize.STRING
     },
+    tuoi: {
+        type: Sequelize.INTEGER
+    },
+    trongluong: {
+        type: Sequelize.INTEGER
+    },
+    gioitinh: {
+        type: Sequelize.BOOLEAN
+    },
     nguoitao_id: {
         type: Sequelize.STRING
     },
