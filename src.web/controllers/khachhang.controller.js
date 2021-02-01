@@ -99,13 +99,9 @@ module.exports = {
                 include: [{
                     model: giasuc,
                     as: 'giasuc',
-                    where: {
-                        trangthai: 1
-                    }
-                }],
-                where: {
                     trangthai: 1
-                },
+                }],
+                trangthai: 1,
                 order: [
                     ['ngaytao', 'DESC']
                 ],
