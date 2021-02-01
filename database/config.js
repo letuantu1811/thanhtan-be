@@ -1,6 +1,6 @@
 const Sequelize = require("sequelize");
-module.exports = new Sequelize('qlthuy2', 'root', '12wqasxZ', {
-    host: 'localhost',
+module.exports = new Sequelize('qlthuy', 'manager', 'Zaq@123456', {
+    host: '34.126.105.244',
     // host: 'localhost',
     dialect: 'mysql',
     port: 3306,
