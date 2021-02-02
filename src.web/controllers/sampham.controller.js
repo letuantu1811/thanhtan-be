@@ -6,21 +6,24 @@ const { Op } = require("sequelize");
 
 module.exports = {
     // Creating sanpham
-    // create: async(res) => {
-    //     console.log(sanpham);
-    //     try {
-    //         return await sanpham.create({
-    //             name: res.name,
-    //             email: res.email,
-    //             category_id: res.category_id,
-    //             phone_number: res.phone_number,
-    //             state: ENUM.PENDING
-    //         })
-    //     } catch (error) {
-    //         return error
-    //     }
+    create: async(res) => {
+        console.log(sanpham);
+        try {
+            return await sanpham.create({
+                ten: res.ten,
+                nhomsanpham_id: res.nhomsanpham_id,
+                thuoc: res.thuoc,
+                nguoitao_id: res.nguoitao_id,
+                trangthai: res.trangthai,
+                donvitinh_id: res.donvitinh_id,
+                gianhap: res.gianhap,
+                soluong: res.soluong
+            })
+        } catch (error) {
+            return error
+        }
 
-    // },
+    },
     // Updating sanpham
     // update: async(res) => {
     //     console.log(sanpham);
