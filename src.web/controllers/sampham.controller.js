@@ -105,5 +105,19 @@ module.exports = {
         } catch (error) {
             return error
         }
+    },
+    getAllMedicines: async() => {
+        try {
+            return await sanpham.findAll({
+                include: [{
+                    model: donvitinh,
+                    trangthai: 1
+                }],
+                trangthai: 1,
+                thuoc: 1
+            });
+        } catch (error) {
+            return error
+        }
     }
 }

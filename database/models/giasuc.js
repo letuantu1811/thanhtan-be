@@ -16,6 +16,9 @@ const giasuc = db.define("giasuc", {
     trongluong: {
         type: Sequelize.INTEGER
     },
+    taikham: {
+        type: Sequelize.BOOLEAN
+    },
     gioitinh: {
         type: Sequelize.BOOLEAN
     },
