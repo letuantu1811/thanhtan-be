@@ -3,7 +3,7 @@ const app = express();
 require('dotenv').config()
 const bodyParser = require("body-parser");
 const session = require("express-session");
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 3001;
 const db = require("./database/config");
 const cors = require("cors");
 const initAPI = require('./routers/')
