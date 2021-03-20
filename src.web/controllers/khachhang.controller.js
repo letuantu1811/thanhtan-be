@@ -1,5 +1,6 @@
 const khachhang = require('../../database/models/khachhang');
 const giasuc = require('../../database/models/giasuc');
+const chungloai = require('../../database/models/chungloai');
 const { ENUM } = require('../../utils/index');
 const { Op, where } = require("sequelize");
 
@@ -99,9 +100,19 @@ module.exports = {
                 include: [{
                     model: giasuc,
                     as: 'giasuc',
-                    trangthai: 1
+                    where: {
+                        trangthai: 1
+                    },
+                    required: false,
+                    include: {
+                        model: chungloai,
+                        attributes: ['id', 'ten'],
+                        as: 'chungloai'
+                    }
                 }],
-                trangthai: 1,
+                where: {
+                    trangthai: 1
+                },
                 order: [
                     ['ngaytao', 'DESC']
                 ],

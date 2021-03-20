@@ -62,10 +62,10 @@ module.exports = {
         let quyen = body.quyen;
         let nhomsanpham_id = body.nhomsanpham_id || "";
         try {
-            return await sanphamDTO.findAll({
+            return await sanpham.findAll({
                 where: {
                     nhomsanpham_id: nhomsanpham_id,
-                    state: quyen == "admin" ? "" : ENUM.ENABLE
+                    trangthai: quyen == "admin" ? "" : ENUM.ENABLE
                 },
                 order: [
                     ['ngaytao', 'DESC']
@@ -81,7 +81,7 @@ module.exports = {
     disable: async(id) => {
         try {
             return await sanpham.update({
-                state: ENUM.DISABLE
+                trangthai: ENUM.DISABLE
             }, {
                 where: {
                     id: res.id
@@ -97,11 +97,15 @@ module.exports = {
             return await sanpham.findAll({
                 include: [{
                         model: donvitinh,
-                        trangthai: 1
+                        where: {
+                            trangthai: 1
+                        }
                     },
                     {
                         model: nhomsanpham,
-                        trangthai: 1
+                        where: {
+                            trangthai: 1
+                        }
                     }
                 ]
             });
@@ -114,9 +118,13 @@ module.exports = {
             return await sanpham.findAll({
                 include: [{
                     model: donvitinh,
-                    trangthai: 1
+                    where: {
+                        trangthai: 1
+                    }
                 }],
-                trangthai: 1,
+                where: {
+                    trangthai: 1
+                },
                 thuoc: 1
             });
         } catch (error) {

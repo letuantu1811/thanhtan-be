@@ -1,4 +1,7 @@
 const model = require('../../database/models/phieudieutri');
+const khachhang = require('../../database/models/khachhang');
+const giasuc = require('../../database/models/giasuc');
+const congdichvu = require('../../database/models/congdichvu');
 const { ENUM } = require('../../utils/index');
 // const { Op } = require("sequelize");
 
@@ -22,26 +25,14 @@ module.exports = {
         }
     },
 
-    // },
-    // Updating model
-    // update: async(res) => {
-    //     console.log(model);
-    //     try {
-    //         return await model.update({
-    //             name: res.name,
-    //             email: res.email,
-    //             category_id: res.category_id,
-    //             phone_number: res.phone_number
-    //         }, {
-    //             where: {
-    //                 id: res.id
-    //             }
-    //         })
-    //     } catch (error) {
-    //         return error
-    //     }
+    createHoSo: async(res) => {
+        try {
+            console.log(JSON.stringify(res));
+        } catch (error) {
+            return error
+        }
+    },
 
-    // },
     // get one model
     getOne: async(id) => {
         try {

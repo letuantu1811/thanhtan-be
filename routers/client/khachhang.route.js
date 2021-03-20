@@ -4,10 +4,8 @@ const controller = require("../../src.web/controllers/khachhang.controller");
 const response = require('../../utils/api.res/response');
 
 router.get("/", async(req, res) => {
-    let body = req.body;
     try {
         const result = await controller.getAll();
-        console.log(result);
         response.success(res, "success", result)
     } catch (err) {
         console.log(err.message);

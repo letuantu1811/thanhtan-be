@@ -1,5 +1,6 @@
 const Sequelize = require("sequelize");
 const db = require("../config");
+const chungloai = require("../models/chungloai");
 
 const giasuc = db.define("giasuc", {
     // id: {
@@ -43,6 +44,14 @@ const giasuc = db.define("giasuc", {
 }, {
     timestamps: false,
     freezeTableName: true
+});
+chungloai.hasMany(giasuc, {
+    foreignKey: "chungloai_id",
+    as: 'chungloai'
+});
+giasuc.belongsTo(chungloai, {
+    foreignKey: "chungloai_id",
+    as: 'chungloai'
 });
 
 module.exports = giasuc;
