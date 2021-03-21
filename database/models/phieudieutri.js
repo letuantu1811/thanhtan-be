@@ -47,6 +47,9 @@ const phieudieutri = db.define("phieudieutri", {
     },
     thanhtien: {
         type: Sequelize.DATE
+    },
+    noidung: {
+        type: Sequelize.STRING
     }
 }, {
     timestamps: false,
