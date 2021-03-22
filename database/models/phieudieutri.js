@@ -5,6 +5,7 @@ const phieudieutri_sanpham = require("../models/phieudieutri_sanpham");
 const congdichvu = require("../models/congdichvu");
 const Sanpham = require("../models/sanpham");
 const sanpham = require("../models/sanpham");
+const bacsi = require("../models/bacsi");
 
 const phieudieutri = db.define("phieudieutri", {
     // id: {
@@ -16,6 +17,9 @@ const phieudieutri = db.define("phieudieutri", {
         type: Sequelize.INTEGER
     },
     khachhang_id: {
+        type: Sequelize.INTEGER
+    },
+    bacsi_id: {
         type: Sequelize.INTEGER
     },
     trangthai: {
@@ -46,10 +50,10 @@ const phieudieutri = db.define("phieudieutri", {
         type: Sequelize.DATE
     },
     thanhtien: {
-        type: Sequelize.DATE
+        type: Sequelize.DECIMAL
     },
     noidung: {
-        type: Sequelize.STRING
+        type: Sequelize.TEXT
     }
 }, {
     timestamps: false,
@@ -72,5 +76,14 @@ phieudieutri.belongsToMany(sanpham, {
 sanpham.belongsToMany(phieudieutri, {
     through: "phieudieutri_sanpham",
     foreignKey: "sanpham_id"
+});
+
+bacsi.hasMany(phieudieutri, {
+    foreignKey: "bacsi_id",
+    as: 'bacsi'
+});
+phieudieutri.belongsTo(bacsi, {
+    foreignKey: "bacsi_id",
+    as: 'bacsi'
 });
 module.exports = phieudieutri;

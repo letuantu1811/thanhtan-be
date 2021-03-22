@@ -3,6 +3,10 @@ const db = require("../config");
 const giasuc = require("../models/giasuc");
 
 const khachhang = db.define("khachhang", {
+    id: {
+        type: Sequelize.INTEGER,
+        primaryKey: true
+    },
     ten: {
         type: Sequelize.STRING
     },
