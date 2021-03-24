@@ -3,11 +3,11 @@ const db = require("../config");
 const chungloai = require("../models/chungloai");
 
 const giasuc = db.define("giasuc", {
-    // id: {
-    //     type: Sequelize.INTEGER,
-    //     primarykey: true,
-    //     autoIncrement: true
-    // },
+    id: {
+        type: Sequelize.INTEGER,
+        primarykey: true,
+        autoIncrement: true
+    },
     ten: {
         type: Sequelize.STRING
     },

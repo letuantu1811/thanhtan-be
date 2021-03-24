@@ -5,7 +5,8 @@ const giasuc = require("../models/giasuc");
 const khachhang = db.define("khachhang", {
     id: {
         type: Sequelize.INTEGER,
-        primaryKey: true
+        primaryKey: true,
+        autoIncrement: true
     },
     ten: {
         type: Sequelize.STRING

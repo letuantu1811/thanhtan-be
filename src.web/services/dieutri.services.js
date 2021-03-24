@@ -124,11 +124,88 @@ module.exports = {
 
 
 
-    already: (body) => {
+    already: async(body) => {
+        console.log("already");
+        let res = body;
+        // update khach hang
+        await khachhang.update({
+            ten: res.khachhang.ten,
+            diachi: res.khachhang.diachi,
+            sodienthoai: res.khachhang.sodienthoai
+        }, {
+            where: {
+                id: res.khachhang.id
+            }
+        }).then(res => {
+            console.log(res + " update khach hang at taohoso");
+        });
 
+        //update thu cung
+        let gsID = await giasuc.create({
+            ten: res.thucung.ten,
+            trongluong: res.thucung.trongluong,
+            giong: res.thucung.giong,
+            tuoi: res.thucung.tuoi,
+            gioitinh: res.thucung.gioitinh,
+            chungloai_id: res.thucung.chungloai.id !== 0 ? res.thucung.chungloai.id : null,
+            khachhang_id: res.khachhang.id
+        }).then(res => {
+            console.log(res);
+            return res.dataValues.id;
+        });
+        res.thucung.id = gsID;
+        console.log(res);
+        let pdtID = await create_phieudieutri(res);
+
+
+
+        await create_phieudieutri_sanpham(pdtID, res.dsSP).then(async res => {
+            console.log(res + " tại create_phieudieutri_sanpham");
+        });
+        await create_phieudieutri_congdichvu(pdtID, res.dsCDV).then(res => {
+            console.log(res + " tại create_phieudieutri_congdichvu ");
+        });
     },
 
-    new: (body) => {
+    new: async(body) => {
+        console.log("already");
+        let res = body;
+        // update khach hang
+        let khID = await khachhang.create({
+            ten: res.khachhang.ten,
+            diachi: res.khachhang.diachi,
+            sodienthoai: res.khachhang.sodienthoai
+        }).then(res => {
+            console.log(res + " create khach hang at taohoso");
+            return res.dataValues.id;
+        });
+        console.log(khID);
+        //update thu cung
+        let gsID = await giasuc.create({
+            ten: res.thucung.ten,
+            trongluong: res.thucung.trongluong,
+            giong: res.thucung.giong,
+            tuoi: res.thucung.tuoi,
+            gioitinh: res.thucung.gioitinh,
+            chungloai_id: res.thucung.chungloai.id !== 0 ? res.thucung.chungloai.id : null,
+            khachhang_id: khID
+        }).then(res => {
+            console.log(res);
+            return res.dataValues.id;
+        });
+        res.thucung.id = gsID;
+        res.khachhang.id = khID;
+        console.log(res);
+        let pdtID = await create_phieudieutri(res);
+
+
+
+        await create_phieudieutri_sanpham(pdtID, res.dsSP).then(async res => {
+            console.log(res + " tại create_phieudieutri_sanpham");
+        });
+        await create_phieudieutri_congdichvu(pdtID, res.dsCDV).then(res => {
+            console.log(res + " tại create_phieudieutri_congdichvu ");
+        });
 
     },
 };

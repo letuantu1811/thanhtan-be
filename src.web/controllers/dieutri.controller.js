@@ -40,11 +40,11 @@ module.exports = {
                 // tồng tại khách hàng mà không tồn tại pet
                 status = "already";
             }
-            if (res.khachhang.id !== 0 && res.thucung.id === 0) {
+            if (res.khachhang.id === 0 && res.thucung.id === 0) {
                 // khách hàng mới
                 status = "new";
             }
-
+            console.log(status);
             switch (status) {
                 case "existed":
                     await dtServices.existed(res);
