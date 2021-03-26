@@ -1,13 +1,8 @@
 const model = require('../../database/models/phieudieutri');
-const khachhang = require('../../database/models/khachhang');
-const giasuc = require('../../database/models/giasuc');
-const congdichvu = require('../../database/models/congdichvu');
 const { ENUM } = require('../../utils/index');
-const phieudieutri = require('../../database/models/phieudieutri');
-const phieudieutri_congdichvu = require('../../database/models/phieudieutri_congdichvu');
-const phieudieutri_sanpham = require('../../database/models/phieudieutri_sanpham');
 const dtServices = require('../services/dieutri.services');
-// const { Op } = require("sequelize");
+const moment = require("moment");
+const sequelize = require("sequelize");
 
 module.exports = {
     // Creating model
@@ -111,9 +106,27 @@ module.exports = {
         }
     },
     // disable model
-    getAll: async() => {
+    getAllToday: async() => {
         try {
-            return await model.findAll();
+            let today = moment.utc().format('YYYY-MM-DD').toString().slice(0, 10);
+            console.log(today);
+            return await model.findAll({
+                where: sequelize.where(sequelize.fn('date', sequelize.col('ngaytao')), '=', today)
+            });
+        } catch (error) {
+            return error
+        }
+    },
+    getReExamToday: async() => {
+        try {
+            // let today = moment.tz('Asia/Saigon').format('YYYY-MM-DD').toString().slice(0, 10);
+            let today = moment.utc().format('YYYY-MM-DD').toString().slice(0, 10);
+            console.log(today);
+            return await model.findAll({
+                where: {
+                    where: sequelize.where(sequelize.fn('date', sequelize.col('ngaytaikham')), '=', today)
+                }
+            });
         } catch (error) {
             return error
         }

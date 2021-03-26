@@ -13,3 +13,17 @@ module.exports = new Sequelize('qlthuy', 'manager', 'Zaq@123456', {
         idle: 10000
     }
 });
+// module.exports = new Sequelize('qlthuy', 'root', '12wqasxZ', {
+//     host: 'localhost',
+//     // host: 'localhost',
+//     dialect: 'mysql',
+//     port: 3306,
+//     logging: false,
+//     timestamps: false,
+//     pool: {
+//         max: 5,
+//         min: 0,
+//         acquire: 30000,
+//         idle: 10000
+//     }
+// });

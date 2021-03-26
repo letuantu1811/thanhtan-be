@@ -31,7 +31,7 @@ const phieudieutri = db.define("phieudieutri", {
     trieuchung: {
         type: Sequelize.STRING
     },
-    chuandoan: {
+    chandoan: {
         type: Sequelize.STRING
     },
     ghichu: {

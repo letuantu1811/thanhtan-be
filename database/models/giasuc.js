@@ -5,7 +5,7 @@ const chungloai = require("../models/chungloai");
 const giasuc = db.define("giasuc", {
     id: {
         type: Sequelize.INTEGER,
-        primarykey: true,
+        primaryKey: true,
         autoIncrement: true
     },
     ten: {
