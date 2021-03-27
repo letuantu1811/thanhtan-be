@@ -1,6 +1,7 @@
 const model = require('../../database/models/phieudieutri');
 const { ENUM } = require('../../utils/index');
 const dtServices = require('../services/dieutri.services');
+const { tzSaiGon } = require('../../utils/saigontz');
 const moment = require("moment");
 const sequelize = require("sequelize");
 
@@ -108,7 +109,8 @@ module.exports = {
     // disable model
     getAllToday: async() => {
         try {
-            let today = moment.utc().format('YYYY-MM-DD').toString().slice(0, 10);
+
+            let today = tzSaiGon();
             console.log(today);
             return await model.findAll({
                 where: sequelize.where(sequelize.fn('date', sequelize.col('ngaytao')), '=', today)
@@ -119,8 +121,7 @@ module.exports = {
     },
     getReExamToday: async() => {
         try {
-            // let today = moment.tz('Asia/Saigon').format('YYYY-MM-DD').toString().slice(0, 10);
-            let today = moment.utc().format('YYYY-MM-DD').toString().slice(0, 10);
+            let today = tzSaiGon();
             console.log(today);
             return await model.findAll({
                 where: {

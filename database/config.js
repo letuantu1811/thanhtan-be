@@ -5,7 +5,7 @@ module.exports = new Sequelize('qlthuy', 'manager', 'Zaq@123456', {
     dialect: 'mysql',
     port: 3306,
     logging: false,
-    timestamps: false,
+    timezone: "+07:00",
     pool: {
         max: 5,
         min: 0,
