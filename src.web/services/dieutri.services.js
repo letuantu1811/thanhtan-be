@@ -101,7 +101,7 @@ module.exports = {
             giong: res.thucung.giong,
             tuoi: res.thucung.tuoi,
             gioitinh: res.thucung.gioitinh,
-            chungloai_id: res.thucung.chungloai.id
+            chungloai_id: res.thucung.chungloai.id === 0 ? null : res.thucung.chungloai.id
         }, {
             where: {
                 id: res.thucung.id

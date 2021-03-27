@@ -38,6 +38,18 @@ router.post("/create", async(req, res) => {
         response.error(res, "failed", 500)
     }
 });
+// Creating appointment
+router.post("/createMulti", async(req, res) => {
+    let body = req.body;
+    try {
+        const result = await controller.createMulti(body);
+        console.log(result);
+        response.success(res, "success", result)
+    } catch (err) {
+        console.log(err.message);
+        response.error(res, "failed", 500)
+    }
+});
 
 // Getting many appointment
 router.post("/", async(req, res) => {

@@ -22,7 +22,39 @@ module.exports = {
         } catch (error) {
             return error
         }
-
+    },
+    createMulti: async(listSP) => {
+        try {
+            let arr = [];
+            for (let index = 0; index < listSP.length; index++) {
+                const element = listSP[index];
+                let obj = {
+                    ten: "",
+                    nhomsanpham_id: 0,
+                    nguoitao_id: 0,
+                    trangthai: 1,
+                    donvitinh_id: 0,
+                    gianhap: 0,
+                    soluong: 0,
+                    gia: 0
+                }
+                obj = new Object();
+                obj.ten = res.ten;
+                obj.nhomsanpham_id = res.nhomsanpham_id;
+                obj.nguoitao_id = res.nguoitao_id;
+                obj.trangthai = res.trangthai;
+                obj.donvitinh_id = res.donvitinh_id;
+                obj.gianhap = res.gianhap;
+                obj.gia = res.giaban;
+                obj.soluong = res.soluong;
+                arr.push(obj)
+            }
+            return await sanpham.bulkCreate(arr).then(res => {
+                return res;
+            });
+        } catch (error) {
+            return error
+        }
     },
     // Updating sanpham
     // update: async(res) => {
