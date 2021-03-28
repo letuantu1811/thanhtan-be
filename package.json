@@ -22,6 +22,7 @@
         "jsonwebtoken": "^8.5.1",
         "mssql": "^6.3.1",
         "mysql2": "^2.2.5",
+        "path": "^0.12.7",
         "require-all": "^3.0.0",
         "sequelize": "^5.5.1"
     }

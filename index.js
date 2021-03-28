@@ -40,3 +40,14 @@ db.authenticate()
 
 // routes
 initAPI(app);
+app.use(express.static(__dirname + '/public'));
+app.use((req, res, next) => {
+    if (req.url === "/") {
+        app.get('/', function(req, res) {
+            res.render("index.html");
+        });
+
+    } else {
+        next(new ApiError(message.getMessage('status.notfound'), message.getMessage('http.notfound')));
+    }
+});
