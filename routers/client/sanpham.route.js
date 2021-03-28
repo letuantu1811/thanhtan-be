@@ -14,6 +14,28 @@ router.get("/", async(req, res) => {
         response.error(res, "failed", 500)
     }
 });
+router.get("/hide", async(req, res) => {
+    let body = req.body;
+    try {
+        const result = await controller.getAllHiddenProduct();
+        console.log(result);
+        response.success(res, "success", result)
+    } catch (err) {
+        console.log(err.message);
+        response.error(res, "failed", 500)
+    }
+});
+router.get("/inventory", async(req, res) => {
+    let body = req.body;
+    try {
+        const result = await controller.getInventory();
+        console.log(result);
+        response.success(res, "success", result)
+    } catch (err) {
+        console.log(err.message);
+        response.error(res, "failed", 500)
+    }
+});
 router.get("/medicines", async(req, res) => {
     let body = req.body;
     try {

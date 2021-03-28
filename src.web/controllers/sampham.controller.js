@@ -2,7 +2,8 @@ const sanpham = require('../../database/models/sanpham');
 const nhomsanpham = require('../../database/models/nhomsanpham');
 const donvitinh = require('../../database/models/donvitinh');
 const { ENUM } = require('../../utils/index');
-const { Op } = require("sequelize");
+const { Op, where } = require("sequelize");
+const sequelize = require("sequelize");
 
 module.exports = {
     // Creating sanpham
@@ -145,6 +146,27 @@ module.exports = {
             return error
         }
     },
+    // get hidden product
+    getAllHiddenProduct: async() => {
+        try {
+            return await sanpham.findAll({
+                include: [{
+                        attributes: ['id', 'ten'],
+                        model: donvitinh
+                    },
+                    {
+                        attributes: ['id', 'ten'],
+                        model: nhomsanpham
+                    }
+                ],
+                where: {
+                    trangthai: 1
+                }
+            })
+        } catch (error) {
+            return error
+        }
+    },
     getAllMedicines: async() => {
         try {
             return await sanpham.findAll({
@@ -158,6 +180,29 @@ module.exports = {
                     trangthai: 1
                 },
                 thuoc: 1
+            });
+        } catch (error) {
+            return error
+        }
+    },
+    getInventory: async() => {
+        try {
+            return await sanpham.findAll({
+                include: [{
+                        attributes: ['id', 'ten'],
+                        model: donvitinh
+                    },
+                    {
+                        attributes: ['id', 'ten'],
+                        model: nhomsanpham
+                    }
+                ],
+                where: {
+                    trangthai: 1,
+                    soluongtoithieu: {
+                        [Op.gte]: sequelize.col('soluong')
+                    }
+                }
             });
         } catch (error) {
             return error
