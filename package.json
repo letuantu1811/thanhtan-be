@@ -23,7 +23,6 @@
         "mssql": "^6.3.1",
         "mysql2": "^2.2.5",
         "require-all": "^3.0.0",
-        "sequelize": "^5.5.1",
-        "swagger-jsdoc": "^6.0.1"
+        "sequelize": "^5.5.1"
     }
 }
