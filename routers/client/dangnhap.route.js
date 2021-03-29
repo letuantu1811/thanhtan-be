@@ -20,9 +20,9 @@ router.get("/", async(req, res) => {
     try {
         const account = await Account.findOne({
             where: {
-                email: req.account.email
+                email: req.account.tendangnhap
             },
-            attributes: ["id", "email"]
+            attributes: ["id", "tendangnhap"]
         });
         res.json(account);
     } catch (err) {
@@ -38,17 +38,17 @@ router.get("/", async(req, res) => {
 router.post(
     "/login",
     async(req, res) => {
-        const { email = '', username = '', password } = req.body;
+        const { tendangnhap = '', matkhau } = req.body;
         // var passwordEncrypt = crypto.createHash('sha256').update(password).digest('base64');
-        console.log(password);
+        console.log(matkhau);
 
         try {
             console.log(req.body);
             let account = await Account.findOne({
                 // attributes: ['id', 'username', 'email', 'company_email', 'created_date', 'two_fa_status', 'is_first_sync', 'api_endpoint', 'last_sync_date'],
                 where: {
-                    [Op.or]: { email: email, tendangnhap: username },
-                    matkhau: password
+                    tendangnhap: tendangnhap,
+                    matkhau: matkhau
                 }
             });
 
@@ -60,9 +60,11 @@ router.post(
                         message: "Username or password is incorrect"
                     });
             }
+            console.log(account);
             const payload = {
                 account: {
-                    id: account.id
+                    id: account.id,
+                    role: account.quyen
                 }
             };
             jwt.sign(

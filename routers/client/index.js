@@ -13,7 +13,7 @@ let initClientAPI = (app, url) => {
     app.use(url + "products", sanpham);
     app.use(url + "categories", nhomsanpham);
     app.use(url + "customers", khachhang);
-    app.use(url + "users", dangnhap);
+    app.use(url + "auth", dangnhap);
     app.use(url + "examination", dieutri);
     app.use(url + "units", donvitinh);
     app.use(url + "serviceplus", congdichvu);

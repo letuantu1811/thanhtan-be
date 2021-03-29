@@ -13,6 +13,9 @@ const Thanhvien = db.define("thanhvien", {
     matkhau: {
         type: Sequelize.STRING
     },
+    quyen: {
+        type: Sequelize.STRING
+    },
     nguoitao_id: {
         type: Sequelize.STRING
     },

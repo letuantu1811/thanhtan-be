@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();;
 const controller = require("../../src.web/controllers/bacsi.controller");
 const response = require('../../utils/api.res/response');
+const auth = require("../../middlewares/auth.middleware");
 
 router.get("/", async(req, res) => {
     try {
