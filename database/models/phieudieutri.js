@@ -28,7 +28,7 @@ const phieudieutri = db.define("phieudieutri", {
     giasuc_id: {
         type: Sequelize.INTEGER
     },
-    triuchung: {
+    trieuchung: {
         type: Sequelize.STRING
     },
     chandoan: {
