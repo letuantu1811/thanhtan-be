@@ -6,6 +6,12 @@ const sanpham = db.define("sanpham", {
     ten: {
         type: Sequelize.STRING
     },
+    tenthaythe: {
+        type: Sequelize.STRING
+    },
+    nhacungcap: {
+        type: Sequelize.STRING
+    },
     nguoitao_id: {
         type: Sequelize.STRING
     },
