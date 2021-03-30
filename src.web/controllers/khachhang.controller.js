@@ -66,9 +66,6 @@ module.exports = {
                         trangthai: true
                     }
                 }],
-                where: {
-                    trangthai: quyen == "admin" ? "" : 1
-                },
                 order: [
                     ['ngaytao', 'DESC']
                 ],

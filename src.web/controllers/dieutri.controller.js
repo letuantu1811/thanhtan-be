@@ -119,6 +119,20 @@ module.exports = {
             return error
         }
     },
+    getAll: async() => {
+        try {
+
+            let today = tzSaiGon();
+            console.log(today);
+            return await model.findAll({
+                where: {
+                    trangthai: 1
+                }
+            });
+        } catch (error) {
+            return error
+        }
+    },
     getReExamToday: async() => {
         try {
             let today = tzSaiGon();

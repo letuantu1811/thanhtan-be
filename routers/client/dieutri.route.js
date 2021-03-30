@@ -52,9 +52,9 @@ router.post("/createHoSo", async(req, res) => {
 });
 
 // Getting many khachhang
-router.post("/", async(req, res) => {
+router.get("/all", async(req, res) => {
     try {
-        const result = await controller.getMany(req.body);
+        const result = await controller.getAll();
         console.log(result);
         response.success(res, "success", result)
     } catch (err) {
