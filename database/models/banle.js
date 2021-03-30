@@ -1,5 +1,6 @@
 const Sequelize = require("sequelize");
 const db = require("../database/config");
+const sanpham = require('./sanpham');
 
 const Banle = db.define("banle", {
     // id: {
@@ -37,6 +38,16 @@ const Banle = db.define("banle", {
 }, {
     timestamps: false,
     freezeTableName: true
+});
+
+//--------------------congdichvu------------
+Banle.belongsToMany(sanpham, {
+    through: "banle_sanpham",
+    foreignKey: "banle_id"
+});
+sanpham.belongsToMany(Banle, {
+    through: "banle_sanpham",
+    foreignKey: "sanpham_id"
 });
 
 module.exports = Banle;

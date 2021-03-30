@@ -7,6 +7,7 @@ const donvitinh = require('./donvitinh.route')
 const congdichvu = require('./congdichvu.route')
 const bacsi = require('./bacsi.route')
 const chungloai = require('./chungloai.route')
+const nhomkhachhang = require('./nhomkhachhang.route')
 
 let initClientAPI = (app, url) => {
     // insert routers ADMIN here
@@ -19,6 +20,7 @@ let initClientAPI = (app, url) => {
     app.use(url + "serviceplus", congdichvu);
     app.use(url + "doctors", bacsi);
     app.use(url + "species", chungloai);
+    app.use(url + "audience", nhomkhachhang);
 }
 
 module.exports = initClientAPI;

@@ -3,6 +3,7 @@ const giasuc = require('../../database/models/giasuc');
 const chungloai = require('../../database/models/chungloai');
 const { ENUM } = require('../../utils/index');
 const { Op, where } = require("sequelize");
+const Nhomkhachhang = require('../../database/models/nhomkhachhang');
 
 module.exports = {
     // Creating khachhang
@@ -106,10 +107,10 @@ module.exports = {
                         attributes: ['id', 'ten'],
                         as: 'chungloai'
                     }
+                }, {
+                    model: Nhomkhachhang,
+                    as: 'nhomkhachhang'
                 }],
-                where: {
-                    trangthai: 1
-                },
                 order: [
                     ['ngaytao', 'DESC']
                 ],

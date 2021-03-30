@@ -46,20 +46,15 @@ module.exports = {
         }
     },
     // get many san pham
-    getMany: async(body) => {
-        let limit = body.limit;
-        let offset = body.offset;
-        let quyen = body.quyen;
+    getMany: async() => {
         try {
             return await thanhvien.findAll({
                 where: {
-                    state: quyen == "admin" ? "" : ENUM.ENABLE
+                    trangthai: 1
                 },
                 order: [
                     ['ngaytao', 'DESC']
-                ],
-                offset: offset,
-                limit: limit
+                ]
             })
         } catch (error) {
             return error

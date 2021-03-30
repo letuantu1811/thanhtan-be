@@ -29,6 +29,9 @@ const khachhang = db.define("khachhang", {
     ghichu: {
         type: Sequelize.STRING
     },
+    nhomkhachhang_id: {
+        type: Sequelize.INTEGER
+    },
     ngaytao: {
         type: Sequelize.DATE
     },
