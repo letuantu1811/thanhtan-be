@@ -9,17 +9,52 @@ module.exports = {
     // Creating sanpham
     create: async(res) => {
         console.log(sanpham);
+        // try {
+        //     return await sanpham.create({
+        //         ten: res.ten,
+        //         nhomsanpham_id: res.nhomsanpham_id,
+        //         thuoc: res.thuoc,
+        //         nguoitao_id: res.nguoitao_id,
+        //         trangthai: res.trangthai,
+        //         donvitinh_id: res.donvitinh_id,
+        //         gianhap: res.gianhap,
+        //         soluong: res.soluong
+        //     })
+        // } catch (error) {
+        //     return error
+        // }
         try {
-            return await sanpham.create({
-                ten: res.ten,
-                nhomsanpham_id: res.nhomsanpham_id,
-                thuoc: res.thuoc,
-                nguoitao_id: res.nguoitao_id,
-                trangthai: res.trangthai,
-                donvitinh_id: res.donvitinh_id,
-                gianhap: res.gianhap,
-                soluong: res.soluong
-            })
+            if (res.thucung.length !== 0 || res.thucung.length !== '') {
+                let arr = [];
+                for (let index = 0; index < res.thucung.length; index++) {
+                    const element = res.thucung[index];
+                    let obj = {
+                        ten: "",
+                        tuoi: 0,
+                        trongluong: 0,
+                        khachhang_id: 0,
+                        taikham: 0,
+                        gioitinh: 0,
+                        nguoitao_id: 0,
+                        trangthai: 1,
+                        giong: "",
+                        chungloai_id: 0,
+                    }
+                    obj = new Object();
+                    obj.ten = element.ten;
+                    obj.tuoi = element.tuoi;
+                    obj.trongluong = element.trongluong;
+                    obj.khachhang_id = id;
+                    obj.taikham = element.taikham;
+                    obj.gioitinh = element.gioitinh;
+                    obj.nguoitao_id = element.nguoitao_id;
+                    obj.trangthai = element.trangthai;
+                    obj.giong = element.giong;
+                    obj.chungloai_id = element.chungloai_id;
+                    arr.push(obj)
+                    await giasuc.bulkCreate(arr);
+                }
+            }
         } catch (error) {
             return error
         }

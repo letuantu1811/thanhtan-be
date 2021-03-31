@@ -48,7 +48,7 @@ router.get("/medicines", async(req, res) => {
     }
 });
 
-// Creating appointment
+// Creating san pham
 router.post("/create", async(req, res) => {
     let body = req.body;
     try {
