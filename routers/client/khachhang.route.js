@@ -14,7 +14,7 @@ router.get("/", async(req, res) => {
 });
 
 // Creating khachhang
-router.post("/create", async(req, res) => {
+router.post("/", async(req, res) => {
     let body = req.body;
     try {
         const result = await controller.create(body);
@@ -27,15 +27,15 @@ router.post("/create", async(req, res) => {
 });
 
 // Getting many khachhang
-router.post("/", async(req, res) => {
-    try {
-        const result = await controller.getMany(req.body);
-        console.log(result);
-        response.success(res, "success", result)
-    } catch (err) {
-        console.log(err.message);
-        response.error(res, "failed", 500)
-    }
-});
+// router.post("/", async(req, res) => {
+//     try {
+//         const result = await controller.getMany(req.body);
+//         console.log(result);
+//         response.success(res, "success", result)
+//     } catch (err) {
+//         console.log(err.message);
+//         response.error(res, "failed", 500)
+//     }
+// });
 
 module.exports = router;

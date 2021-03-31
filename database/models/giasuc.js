@@ -11,6 +11,9 @@ const giasuc = db.define("giasuc", {
     ten: {
         type: Sequelize.STRING
     },
+    khachhang_id: {
+        type: Sequelize.INTEGER
+    },
     tuoi: {
         type: Sequelize.INTEGER
     },

@@ -7,19 +7,55 @@ const Nhomkhachhang = require('../../database/models/nhomkhachhang');
 
 module.exports = {
     // Creating khachhang
-    // create: async(res) => {
-    //     console.log(khachhang);
-    //     try {
-    //         return await khachhang.create({
-    //             name: res.name,
-    //             email: res.email,
-    //             category_id: res.category_id,
-    //             phone_number: res.phone_number,
-    //             state: ENUM.PENDING
-    //         })
-    //     } catch (error) {
-    //         return error
-    //     }
+    create: async(body) => {
+        let res = body;
+        try {
+            let id = await khachhang.create({
+                ten: res.ten,
+                nguoitao_id: res.nguoitao_id,
+                trangthai: 1,
+                diachi: res.diachi,
+                sodienthoai: res.sodienthoai,
+                ghichu: res.ghichu,
+                nhomkhachhang_id: res.nhomkhachhang_id
+            }).then(res => {
+                return res.dataValues.id;
+            });
+            if (res.thucung.length !== 0 || res.thucung.length !== '') {
+                let arr = [];
+                for (let index = 0; index < res.thucung.length; index++) {
+                    const element = res.thucung[index];
+                    let obj = {
+                        ten: "",
+                        tuoi: 0,
+                        trongluong: 0,
+                        khachhang_id: 0,
+                        taikham: 0,
+                        gioitinh: 0,
+                        nguoitao_id: 0,
+                        trangthai: 1,
+                        giong: "",
+                        chungloai_id: 0,
+                    }
+                    obj = new Object();
+                    obj.ten = element.ten;
+                    obj.tuoi = element.tuoi;
+                    obj.trongluong = element.trongluong;
+                    obj.khachhang_id = id;
+                    obj.taikham = element.taikham;
+                    obj.gioitinh = element.gioitinh;
+                    obj.nguoitao_id = element.nguoitao_id;
+                    obj.trangthai = element.trangthai;
+                    obj.giong = element.giong;
+                    obj.chungloai_id = element.chungloai_id;
+                    arr.push(obj)
+                    await giasuc.bulkCreate(arr);
+                }
+            }
+        } catch (error) {
+            return error
+        }
+    },
 
     // },
     // Updating khachhang
