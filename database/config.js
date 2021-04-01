@@ -18,8 +18,7 @@ module.exports = new Sequelize('tha81756_qlthuy', 'tha81756_qlthuy', 'Zaq@123456
     // host: 'localhost',
     dialect: 'mysql',
     port: 3306,
-    logging: false,
-    timezone: "+07:00",
+    logging: true,
     pool: {
         max: 5,
         min: 0,
