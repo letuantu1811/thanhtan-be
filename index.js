@@ -7,10 +7,17 @@ const PORT = process.env.PORT || 3001;
 const db = require("./database/config");
 const cors = require("cors");
 const initAPI = require('./routers/')
-
+const ApiError = require('./utils/api.res/api.error');
 app.listen(PORT, () => {
     console.log("Server is running on port " + PORT);
 });
+const {
+    message
+} = require('./utils//api.res')
+const {
+    errorConverter,
+    errorHandler
+} = require('./middlewares/error');
 app.use(
     cors({
         credentials: true,
@@ -46,8 +53,12 @@ app.use((req, res, next) => {
         app.get('/', function(req, res) {
             res.render("index.html");
         });
-
+        ``
     } else {
         next(new ApiError(message.getMessage('status.notfound'), message.getMessage('http.notfound')));
     }
 });
+app.use(errorConverter);
+
+// handle error
+app.use(errorHandler);

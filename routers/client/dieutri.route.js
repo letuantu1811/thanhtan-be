@@ -31,7 +31,7 @@ router.get("/reexam", async(req, res) => {
 router.post("/create", async(req, res) => {
     let body = req.body;
     try {
-        const result = await controller.create(body);
+        const result = await dieutri.create(body);
         console.log(result);
         response.success(res, "success", result)
     } catch (err) {
@@ -54,7 +54,7 @@ router.post("/createHoSo", async(req, res) => {
 // Getting many khachhang
 router.get("/all", async(req, res) => {
     try {
-        const result = await controller.getAll();
+        const result = await dieutri.getAll();
         console.log(result);
         response.success(res, "success", result)
     } catch (err) {
