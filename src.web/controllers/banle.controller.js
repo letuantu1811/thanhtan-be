@@ -82,11 +82,15 @@ module.exports = {
                 const element = body.listSP[index];
                 let obj = {
                     banle_id: 0,
-                    sanpham_id: 0
+                    sanpham_id: 0,
+                    soluong: 0,
+                    dongiaban: 0
                 }
                 obj = new Object();
                 obj.banle_id = banleID;
                 obj.sanpham_id = element.id;
+                obj.soluong = element.soluong;
+                obj.dongiaban = element.dongiaban;
                 arr.push(obj);
             }
             await BL_SP.bulkCreate(arr).then(res => {
