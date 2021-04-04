@@ -1,29 +1,27 @@
 const Sequelize = require("sequelize");
-const db = require("../database/config");
+const db = require("../config");
 const sanpham = require('./sanpham');
+const banle_sanpham = require('./banle_sanpham');
 
 const Banle = db.define("banle", {
-    // id: {
-    //     type: Sequelize.INTEGER,
-    //     primarykey: true,
-    //     autoIncrement: true
-    // },
-    ten: {
-        type: Sequelize.STRING
+    id: {
+        type: Sequelize.INTEGER,
+        primaryKey: true,
+        autoIncrement: true
     },
-    don_so: {
+    khachhang_id: {
         type: Sequelize.INTEGER
     },
     nguoitao_id: {
         type: Sequelize.INTEGER
     },
-    sanpham_id: {
+    ten: {
+        type: Sequelize.STRING
+    },
+    tongdonhang: {
         type: Sequelize.INTEGER
     },
-    donvitinh_id: {
-        type: Sequelize.INTEGER
-    },
-    so_luong: {
+    tylegiamgia: {
         type: Sequelize.INTEGER
     },
     trangthai: {
@@ -42,12 +40,14 @@ const Banle = db.define("banle", {
 
 //--------------------congdichvu------------
 Banle.belongsToMany(sanpham, {
-    through: "banle_sanpham",
-    foreignKey: "banle_id"
+    through: banle_sanpham,
+    foreignKey: "banle_id",
+    as: 'sanpham'
 });
 sanpham.belongsToMany(Banle, {
-    through: "banle_sanpham",
-    foreignKey: "sanpham_id"
+    through: banle_sanpham,
+    foreignKey: "sanpham_id",
+    as: 'sanpham'
 });
 
 module.exports = Banle;
