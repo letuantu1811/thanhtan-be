@@ -3,7 +3,7 @@ const nhomsanpham = require('../../database/models/nhomsanpham');
 const donvitinh = require('../../database/models/donvitinh');
 const { ENUM } = require('../../utils/index');
 const { Op, where } = require("sequelize");
-const sequelize = require("Sequelize");
+const sequelize = require("sequelize");
 
 module.exports = {
     // Creating sanpham
@@ -118,32 +118,32 @@ module.exports = {
                     obj.gia = Number.parseInt(res.gia.split(",").join(""));
                     obj.soluong = res.soluong;
                     // arrNew.push(obj)
-                    // await sanpham.sequelize.transaction().then(async t => {
-                    //     return await sanpham.update(obj, {
-                    //         where: {
-                    //             id: res.id
-                    //         }
-                    //     }, { transaction: t }).then(() => {
-                    //         return t.commit();
-                    //     }).catch(err => {
-                    //         console.log(err + " tại func thêm nhiều sản phẩm - row 129:sanpham.controller.js");
-                    //         t.rollback();
-                    //         throw Error(err);
-                    //     })
-                    // })
+                    await sanpham.sequelize.transaction().then(async t => {
+                        return await sanpham.update(obj, {
+                            where: {
+                                id: res.id
+                            }
+                        }, { transaction: t }).then(() => {
+                            return t.commit();
+                        }).catch(err => {
+                            console.log(err + " tại func thêm nhiều sản phẩm - row 129:sanpham.controller.js");
+                            t.rollback();
+                            throw Error(err);
+                        })
+                    })
                 }
             }
-            // if (arrNew.length > 0) {
-            //     return sanpham.sequelize.transaction().then(async t => {
-            //         return await sanpham.bulkCreate(arrNew, { transaction: t }).then(() => {
-            //             return t.commit();
-            //         }).catch(err => {
-            //             console.log(err + " tại func thêm nhiều sản phẩm - row 94:sanpham.controller.js");
-            //             t.rollback();
-            //             throw Error(err);
-            //         })
-            //     })
-            // }
+            if (arrNew.length > 0) {
+                return sanpham.sequelize.transaction().then(async t => {
+                    return await sanpham.bulkCreate(arrNew, { transaction: t }).then(() => {
+                        return t.commit();
+                    }).catch(err => {
+                        console.log(err + " tại func thêm nhiều sản phẩm - row 94:sanpham.controller.js");
+                        t.rollback();
+                        throw Error(err);
+                    })
+                })
+            }
             // return await sanpham.bulkCreate(arrUpdate).then(res => {
             //     return res;
             // });
