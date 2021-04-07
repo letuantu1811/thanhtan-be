@@ -24,6 +24,7 @@ router.post("/create", async(req, res) => {
         response.success(res, "success", result)
     } catch (err) {
         console.log(err.message);
+        console.log(err.message);
         response.error(res, "failed", 500)
     }
 });
