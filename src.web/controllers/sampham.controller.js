@@ -79,7 +79,7 @@ module.exports = {
             for (let index = 0; index < listSP.length; index++) {
 
                 const res = listSP[index];
-                if (res.id === "0" || res.id === 0) {
+                if (res.id === "0" || res.id === 0 || res.id === null) {
 
                     obj = new Object();
                     obj.ten = res.tenhanghoa;
@@ -92,31 +92,20 @@ module.exports = {
                     obj.donvitinh_id = Number.parseInt(res.donvitinh.id);
                     obj.gianhap = Number.parseInt(res.gianhap.split(",").join(""));
                     obj.gia = Number.parseInt(res.gia.split(",").join(""));
-                    obj.soluong = res.soluong;
+                    obj.soluong = res.soluong + Number.parseInt(res.soluongthem);
                     arrNew.push(obj);
                 } else {
-                    // let obj = {
-                    //     ten: "",
-                    //     nhomsanpham_id: 0,
-                    //     nguoitao_id: 0,
-                    //     trangthai: 1,
-                    //     donvitinh_id: 0,
-                    //     gianhap: 0,
-                    //     soluong: 0,
-                    //     gia: 0
-                    // }
                     obj = new Object();
                     obj.ten = res.tenhanghoa;
                     obj.tenthaythe = res.tenthaythe;
                     obj.nhomsanpham_id = Number.parseInt(res.nhomsanpham.id);
-                    // obj.nguoitao_id = res.nguoitao_id;
                     obj.trangthai = 1;
                     obj.nhacungcap = res.nhacungcap;
                     obj.soluongtoithieu = res.soluongtoithieu
                     obj.donvitinh_id = Number.parseInt(res.donvitinh.id);
                     obj.gianhap = Number.parseInt(res.gianhap.split(",").join(""));
                     obj.gia = Number.parseInt(res.gia.split(",").join(""));
-                    obj.soluong = res.soluong;
+                    obj.soluong = res.soluong + Number.parseInt(res.soluongthem);
                     // arrNew.push(obj)
                     await sanpham.sequelize.transaction().then(async t => {
                         return await sanpham.update(obj, {
@@ -144,11 +133,6 @@ module.exports = {
                     })
                 })
             }
-            // return await sanpham.bulkCreate(arrUpdate).then(res => {
-            //     return res;
-            // });
-
-            // return await sanpham.bulkUpdate()
         } catch (error) {
             throw Error(error);
         }
