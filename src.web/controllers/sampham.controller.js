@@ -3,7 +3,7 @@ const nhomsanpham = require('../../database/models/nhomsanpham');
 const donvitinh = require('../../database/models/donvitinh');
 const { ENUM } = require('../../utils/index');
 const { Op, where } = require("sequelize");
-const sequelize = require("sequelize");
+const sequelize = require("Sequelize");
 
 module.exports = {
     // Creating sanpham
@@ -61,35 +61,96 @@ module.exports = {
     },
     createMulti: async(listSP) => {
         try {
-            let arr = [];
-            for (let index = 0; index < listSP.length; index++) {
-                const element = listSP[index];
-                let obj = {
-                    ten: "",
-                    nhomsanpham_id: 0,
-                    nguoitao_id: 0,
-                    trangthai: 1,
-                    donvitinh_id: 0,
-                    gianhap: 0,
-                    soluong: 0,
-                    gia: 0
-                }
-                obj = new Object();
-                obj.ten = res.ten;
-                obj.nhomsanpham_id = res.nhomsanpham_id;
-                obj.nguoitao_id = res.nguoitao_id;
-                obj.trangthai = res.trangthai;
-                obj.donvitinh_id = res.donvitinh_id;
-                obj.gianhap = res.gianhap;
-                obj.gia = res.giaban;
-                obj.soluong = res.soluong;
-                arr.push(obj)
+            let arrUpdate = [];
+            let arrNew = [];
+            let obj = {
+                ten: "",
+                tenthaythe: "",
+                nhacungcap: "",
+                nhomsanpham_id: 0,
+                nguoitao_id: 1,
+                trangthai: 1,
+                donvitinh_id: 0,
+                gianhap: 0,
+                soluong: 0,
+                soluongtoithieu: 0,
+                gia: 0
             }
-            return await sanpham.bulkCreate(arr).then(res => {
-                return res;
-            });
+            for (let index = 0; index < listSP.length; index++) {
+
+                const res = listSP[index];
+                if (res.id === "0" || res.id === 0) {
+
+                    obj = new Object();
+                    obj.ten = res.tenhanghoa;
+                    obj.tenthaythe = res.tenthaythe;
+                    obj.nhomsanpham_id = Number.parseInt(res.nhomsanpham.id);
+                    obj.nguoitao_id = (res.nguoitao_id !== undefined && res.nguoitao_id !== 0) ? res.nguoitao_id : 1;
+                    obj.trangthai = 1;
+                    obj.nhacungcap = res.nhacungcap;
+                    obj.soluongtoithieu = res.soluongtoithieu
+                    obj.donvitinh_id = Number.parseInt(res.donvitinh.id);
+                    obj.gianhap = Number.parseInt(res.gianhap.split(",").join(""));
+                    obj.gia = Number.parseInt(res.gia.split(",").join(""));
+                    obj.soluong = res.soluong;
+                    arrNew.push(obj);
+                } else {
+                    // let obj = {
+                    //     ten: "",
+                    //     nhomsanpham_id: 0,
+                    //     nguoitao_id: 0,
+                    //     trangthai: 1,
+                    //     donvitinh_id: 0,
+                    //     gianhap: 0,
+                    //     soluong: 0,
+                    //     gia: 0
+                    // }
+                    obj = new Object();
+                    obj.ten = res.tenhanghoa;
+                    obj.tenthaythe = res.tenthaythe;
+                    obj.nhomsanpham_id = Number.parseInt(res.nhomsanpham.id);
+                    // obj.nguoitao_id = res.nguoitao_id;
+                    obj.trangthai = 1;
+                    obj.nhacungcap = res.nhacungcap;
+                    obj.soluongtoithieu = res.soluongtoithieu
+                    obj.donvitinh_id = Number.parseInt(res.donvitinh.id);
+                    obj.gianhap = Number.parseInt(res.gianhap.split(",").join(""));
+                    obj.gia = Number.parseInt(res.gia.split(",").join(""));
+                    obj.soluong = res.soluong;
+                    // arrNew.push(obj)
+                    await sanpham.sequelize.transaction().then(async t => {
+                        return await sanpham.update(obj, {
+                            where: {
+                                id: res.id
+                            }
+                        }, { transaction: t }).then(() => {
+                            return t.commit();
+                        }).catch(err => {
+                            console.log(err + " tại func thêm nhiều sản phẩm - row 129:sanpham.controller.js");
+                            t.rollback();
+                            throw Error(err);
+                        })
+                    })
+                }
+            }
+            if (arrNew.length > 0) {
+                return sanpham.sequelize.transaction().then(async t => {
+                    return await sanpham.bulkCreate(arrNew, { transaction: t }).then(() => {
+                        return t.commit();
+                    }).catch(err => {
+                        console.log(err + " tại func thêm nhiều sản phẩm - row 94:sanpham.controller.js");
+                        t.rollback();
+                        throw Error(err);
+                    })
+                })
+            }
+            // return await sanpham.bulkCreate(arrUpdate).then(res => {
+            //     return res;
+            // });
+
+            // return await sanpham.bulkUpdate()
         } catch (error) {
-            return error
+            throw Error(error);
         }
     },
     // Updating sanpham
@@ -132,8 +193,8 @@ module.exports = {
         try {
             return await sanpham.findAll({
                 where: {
-                    nhomsanpham_id: nhomsanpham_id,
-                    trangthai: quyen == "admin" ? "" : ENUM.ENABLE
+                    nhomsanpham_id: nhomsanpham_id
+                        // trangthai: quyen == "admin" ? "" : ENUM.ENABLE
                 },
                 order: [
                     ['ngaytao', 'DESC']
@@ -167,15 +228,21 @@ module.exports = {
                         model: donvitinh,
                         where: {
                             trangthai: 1
-                        }
+                        },
+                        require: false
                     },
                     {
                         model: nhomsanpham,
                         where: {
                             trangthai: 1
-                        }
+                        },
+                        require: false
                     }
+                ],
+                order: [
+                    ['ten', 'ASC']
                 ]
+
             });
         } catch (error) {
             return error

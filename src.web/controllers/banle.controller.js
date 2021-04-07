@@ -5,6 +5,7 @@ const { Op, where } = require("sequelize");
 const sanpham = require('../../database/models/sanpham');
 const Donvitinh = require('../../database/models/donvitinh');
 const BL_SP = require('../../database/models/banle_sanpham');
+const khachhang = require('../../database/models/khachhang');
 
 module.exports = {
     getOne: async(id) => {
@@ -52,12 +53,18 @@ module.exports = {
         try {
             return await model.findAll({
                 include: [{
-                    model: sanpham,
-                    as: 'sanpham',
-                    include: {
-                        model: Donvitinh
+                        model: sanpham,
+                        as: 'sanpham',
+                        include: {
+                            model: Donvitinh
+                        }
+                    },
+                    {
+                        model: khachhang,
+                        as: 'khachhang'
                     }
-                }]
+                ]
+
             });
         } catch (error) {
             return error

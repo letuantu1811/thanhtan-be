@@ -1,6 +1,7 @@
 const Sequelize = require("sequelize");
 const db = require("../config");
 const giasuc = require("../models/giasuc");
+const Banle = require("./banle");
 
 const khachhang = db.define("khachhang", {
     id: {
@@ -49,6 +50,15 @@ khachhang.hasMany(giasuc, {
 giasuc.belongsTo(khachhang, {
     foreignKey: "khachhang_id",
     as: 'giasuc'
+});
+
+khachhang.hasMany(Banle, {
+    foreignKey: "khachhang_id",
+    as: 'khachhang'
+});
+Banle.belongsTo(khachhang, {
+    foreignKey: "khachhang_id",
+    as: 'khachhang'
 });
 
 module.exports = khachhang;
