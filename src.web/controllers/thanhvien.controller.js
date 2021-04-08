@@ -1,6 +1,6 @@
 const thanhvien = require('../../database/models/thanhvien');
+const nhomthanhvien = require('../../database/models/nhomthanhvien');
 const { ENUM } = require('../../utils/index');
-const { Op } = require("sequelize");
 
 module.exports = {
     // Creating thanhvien
@@ -49,13 +49,18 @@ module.exports = {
     getMany: async() => {
         try {
             return await thanhvien.findAll({
-                where: {
-                    trangthai: 1
-                },
+                include: [{
+                    model: nhomthanhvien,
+                    as:'nhomthanhvien'
+                }],
+                    where: {
+                        trangthai: 1
+                    },
                 order: [
                     ['ngaytao', 'DESC']
                 ]
-            })
+            }
+            )
         } catch (error) {
             return error
         }
@@ -73,5 +78,14 @@ module.exports = {
         } catch (error) {
             return error
         }
-    }
+    },
+
+
+    getRole: async() => {
+        try {
+            return await nhomthanhvien.findAll()
+        } catch (error) {
+            return error
+        }
+    },
 }

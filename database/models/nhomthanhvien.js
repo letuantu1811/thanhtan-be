@@ -1,23 +1,10 @@
 const Sequelize = require("sequelize");
 const db = require("../config");
+const Thanhvien = require("./thanhvien");
 
 const Nhomthanhvien = db.define("nhomthanhvien", {
-    // id: {
-    //     type: Sequelize.INTEGER,
-    //     primarykey: true,
-    //     autoIncrement: true
-    // },
     ten: {
         type: Sequelize.STRING
-    },
-    nguoitao_id: {
-        type: Sequelize.STRING
-    },
-    trangthai: {
-        type: Sequelize.BOOLEAN
-    },
-    category_id: {
-        type: Sequelize.INTEGER
     },
     ngaytao: {
         type: Sequelize.DATE
@@ -28,6 +15,15 @@ const Nhomthanhvien = db.define("nhomthanhvien", {
 }, {
     timestamps: false,
     freezeTableName: true
+});
+
+Nhomthanhvien.hasMany(Thanhvien, {
+    foreignKey: "nhomthanhvien_id",
+    as: 'nhomthanhvien'
+});
+Thanhvien.belongsTo(Nhomthanhvien, {
+    foreignKey: "nhomthanhvien_id",
+    as: 'nhomthanhvien'
 });
 
 module.exports = Nhomthanhvien;

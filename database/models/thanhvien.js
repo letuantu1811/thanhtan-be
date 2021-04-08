@@ -2,11 +2,6 @@ const Sequelize = require("sequelize");
 const db = require("../config");
 
 const Thanhvien = db.define("thanhvien", {
-    // id: {
-    //     type: Sequelize.INTEGER,
-    //     primarykey: true,
-    //     autoIncrement: true
-    // },
     tendangnhap: {
         type: Sequelize.STRING
     },
@@ -18,6 +13,9 @@ const Thanhvien = db.define("thanhvien", {
     },
     nguoitao_id: {
         type: Sequelize.STRING
+    },
+    nhomthanhvien_id: {
+        type: Sequelize.INTEGER
     },
     trangthai: {
         type: Sequelize.BOOLEAN
