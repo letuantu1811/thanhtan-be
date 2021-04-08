@@ -8,11 +8,11 @@ const sanpham = require("../models/sanpham");
 const bacsi = require("../models/bacsi");
 
 const phieudieutri = db.define("phieudieutri", {
-    // id: {
-    //     type: Sequelize.INTEGER,
-    //     primarykey: true,
-    //     autoIncrement: true
-    // },
+    id: {
+        type: Sequelize.INTEGER,
+        primaryKey: true,
+        autoIncrement: true
+    },
     nguoitao_id: {
         type: Sequelize.INTEGER
     },

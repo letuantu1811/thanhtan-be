@@ -6,30 +6,47 @@ module.exports = {
     // Creating thanhvien
     create: async(res) => {
         try {
-            return await thanhvien.create({
-                ten: res.name,
-                nguoitao_id: res.user_id,
-                trangthai: res.state
+            return thanhvien.sequelize.transaction().then(async (t) =>{
+                return await thanhvien.create({
+                    nguoitao_id: res.nguoitao_id,
+                    tendangnhap: res.tendangnhap,
+                    matkhau: res.matkhau,
+                    nhomthanhvien_id: res.nhomthanhvien_id,
+                    trangthai: ENUM.ENABLE,
+                    email: res.email
+                }, {transaction: t}).then((res) => {
+                    t.commit();
+                }).catch((err) => {
+                    t.rollback();
+                    throw new Error();
+                })
             })
         } catch (error) {
-            return error
+            throw new Error(error);
         }
 
     },
     // Updating thanhvien
     update: async(res) => {
         try {
-            return await nhomthanhvien.update({
-                ten: res.name,
-                trangthai: res.state,
-                nguoitao_id: res.user_id
-            }, {
-                where: {
-                    id: res.id
-                }
+            return thanhvien.sequelize.transaction().then(async (t) =>{
+                return await thanhvien.update({
+                    matkhau: res.matkhau,
+                    nhomthanhvien_id: res.nhomthanhvien_id,
+                    email: res.email
+                }, {
+                    where: {
+                        id: res.id
+                    }
+                }, {transaction: t}).then(() => {
+                    t.commit();
+                }).catch((err) => {
+                    t.rollback();
+                    throw new Error(err);
+                })
             })
         } catch (error) {
-            return error
+            throw new Error(error);
         }
 
     },
@@ -42,7 +59,7 @@ module.exports = {
                 }
             })
         } catch (error) {
-            return error
+            throw new Error(error);
         }
     },
     // get many san pham
@@ -62,21 +79,28 @@ module.exports = {
             }
             )
         } catch (error) {
-            return error
+            throw new Error(error);
         }
     },
     // disable thanhvien
     disable: async(id) => {
         try {
-            return await thanhvien.update({
-                state: ENUM.DISABLE
-            }, {
-                where: {
-                    id: id
-                }
+            return thanhvien.sequelize.transaction().then(async t =>{
+                return await thanhvien.update({
+                    trangthai: ENUM.DISABLE
+                }, {
+                    where: {
+                        id: id
+                    }
+                },{transaction: t}).then(() => {
+                    t.commit();
+                }).catch((err) => {
+                    t.rollback();
+                    throw new Error(err);
+                })
             })
         } catch (error) {
-            return error
+            throw new Error(error);
         }
     },
 
@@ -85,7 +109,7 @@ module.exports = {
         try {
             return await nhomthanhvien.findAll()
         } catch (error) {
-            return error
+            throw new Error(error);
         }
     },
 }

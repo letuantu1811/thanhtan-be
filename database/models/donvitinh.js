@@ -2,6 +2,11 @@ const Sequelize = require("sequelize");
 const db = require("../config");
 
 const Donvitinh = db.define("donvitinh", {
+    id: {
+        type: Sequelize.INTEGER,
+        primaryKey: true,
+        autoIncrement: true
+    },
     ten: {
         type: Sequelize.STRING
     },

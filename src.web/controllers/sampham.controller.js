@@ -106,7 +106,6 @@ module.exports = {
                     obj.gianhap = Number.parseInt(res.gianhap.split(",").join(""));
                     obj.gia = Number.parseInt(res.gia.split(",").join(""));
                     obj.soluong = res.soluong + Number.parseInt(res.soluongthem);
-                    // arrNew.push(obj)
                     await sanpham.sequelize.transaction().then(async t => {
                         return await sanpham.update(obj, {
                             where: {

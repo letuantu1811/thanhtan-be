@@ -2,11 +2,11 @@ const Sequelize = require("sequelize");
 const db = require("../config");
 
 const Bacsi = db.define("bacsi", {
-    // id: {
-    //     type: Sequelize.INTEGER,
-    //     primarykey: true,
-    //     autoIncrement: true
-    // },
+    id: {
+        type: Sequelize.INTEGER,
+        primaryKey: true,
+        autoIncrement: true
+    },
     ten: {
         type: Sequelize.STRING
     },

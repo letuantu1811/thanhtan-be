@@ -3,6 +3,11 @@ const db = require("../config");
 const Thanhvien = require("./thanhvien");
 
 const Nhomthanhvien = db.define("nhomthanhvien", {
+    id: {
+        type: Sequelize.INTEGER,
+        primaryKey: true,
+        autoIncrement: true
+    },
     ten: {
         type: Sequelize.STRING
     },

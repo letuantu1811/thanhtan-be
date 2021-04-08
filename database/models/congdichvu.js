@@ -2,6 +2,11 @@ const Sequelize = require("sequelize");
 const db = require("../config");
 
 const Congdichvu = db.define("congdichvu", {
+    id: {
+        type: Sequelize.INTEGER,
+        primaryKey: true,
+        autoIncrement: true
+    },
     ten: {
         type: Sequelize.STRING
     },

@@ -28,7 +28,7 @@ router.get("/roles", async(req, res) => {
 });
 
 // Creating thanhvien
-router.post("/create", async(req, res) => {
+router.post("/", async(req, res) => {
     let body = req.body;
     try {
         const result = await controller.create(body);
@@ -40,10 +40,23 @@ router.post("/create", async(req, res) => {
     }
 });
 
-// Getting many thanhvien
-router.post("/", async(req, res) => {
+
+router.delete("/:id", async(req, res) => {
+    let id = req.params.id;
     try {
-        const result = await controller.getMany(req.body);
+        const result = await controller.disable(id);
+        console.log(result);
+        response.success(res, "success", result)
+    } catch (err) {
+        console.log(err.message);
+        response.error(res, "failed", 500)
+    }
+});
+
+router.put("/", async(req, res) => {
+    let data = req.body;
+    try {
+        const result = await controller.update(data);
         console.log(result);
         response.success(res, "success", result)
     } catch (err) {
