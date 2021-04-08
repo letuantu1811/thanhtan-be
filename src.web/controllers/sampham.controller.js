@@ -136,25 +136,7 @@ module.exports = {
             throw Error(error);
         }
     },
-    // Updating sanpham
-    // update: async(res) => {
-    //     console.log(sanpham);
-    //     try {
-    //         return await sanpham.update({
-    //             name: res.name,
-    //             email: res.email,
-    //             category_id: res.category_id,
-    //             phone_number: res.phone_number
-    //         }, {
-    //             where: {
-    //                 id: res.id
-    //             }
-    //         })
-    //     } catch (error) {
-    //         return error
-    //     }
 
-    // },
     // get one sanpham
     getOne: async(id) => {
         try {
