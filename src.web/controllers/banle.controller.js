@@ -6,6 +6,7 @@ const sanpham = require('../../database/models/sanpham');
 const Donvitinh = require('../../database/models/donvitinh');
 const BL_SP = require('../../database/models/banle_sanpham');
 const khachhang = require('../../database/models/khachhang');
+const Thanhvien = require('../../database/models/thanhvien');
 
 module.exports = {
     getOne: async(id) => {
@@ -62,6 +63,11 @@ module.exports = {
                     {
                         model: khachhang,
                         as: 'khachhang'
+                    },
+                    {
+                        attributes: ['id', 'tendangnhap'],
+                        model: Thanhvien,
+                        as: 'nguoiban'
                     }
                 ]
 

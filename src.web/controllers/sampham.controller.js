@@ -174,15 +174,22 @@ module.exports = {
     // disable sanpham
     disable: async(id) => {
         try {
-            return await sanpham.update({
-                trangthai: ENUM.DISABLE
-            }, {
-                where: {
-                    id: res.id
-                }
+            return sanpham.sequelize.transaction().then(async t => {
+                return await sanpham.update({
+                    trangthai: ENUM.DISABLE
+                }, {
+                    where: {
+                        id: id
+                    }
+                }, { transaction: t }).then(() => {
+                    t.commit();
+                }).catch((err) => {
+                    t.rollback();
+                    throw new Error(err);
+                })
             })
         } catch (error) {
-            return error
+            throw new Error(err);
         }
     },
     // disable sanpham
@@ -204,6 +211,9 @@ module.exports = {
                         require: false
                     }
                 ],
+                where: {
+                    trangthai: 1
+                },
                 order: [
                     ['ten', 'ASC']
                 ]
@@ -241,12 +251,12 @@ module.exports = {
                     model: donvitinh,
                     where: {
                         trangthai: 1
-                    }
+                    },
+                    require: true
                 }],
                 where: {
-                    trangthai: 1
-                },
-                thuoc: 1
+                    trangthai: true
+                }
             });
         } catch (error) {
             return error

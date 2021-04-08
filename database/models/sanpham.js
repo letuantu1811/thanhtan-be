@@ -46,6 +46,9 @@ const sanpham = db.define("sanpham", {
     },
     ngaysua: {
         type: Sequelize.DATE
+    },
+    an: {
+        type: Sequelize.BOOLEAN
     }
 }, {
     timestamps: false,

@@ -1,5 +1,7 @@
 const Sequelize = require("sequelize");
 const db = require("../config");
+const Banle = require("./banle");
+const khachhang = require("./khachhang");
 
 const Thanhvien = db.define("thanhvien", {
     id: {
@@ -33,10 +35,22 @@ const Thanhvien = db.define("thanhvien", {
     },
     ngaysua: {
         type: Sequelize.DATE
+    },
+    config: {
+        type: Sequelize.INTEGER
     }
 }, {
     timestamps: false,
     freezeTableName: true
+});
+
+Thanhvien.hasMany(Thanhvien, {
+    foreignKey: "nguoitao_id",
+    as: 'nguoiban'
+});
+Banle.belongsTo(Thanhvien, {
+    foreignKey: "nguoitao_id",
+    as: 'nguoiban'
 });
 
 module.exports = Thanhvien;

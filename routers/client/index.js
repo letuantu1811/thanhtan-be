@@ -10,6 +10,7 @@ const chungloai = require('./chungloai.route')
 const nhomkhachhang = require('./nhomkhachhang.route')
 const banle = require('./banle.route')
 const thanhvien = require('./thanhvien.route')
+const setting = require('./setting.route')
 
 let initClientAPI = (app, url) => {
     // insert routers ADMIN here
@@ -25,6 +26,7 @@ let initClientAPI = (app, url) => {
     app.use(url + "audience", nhomkhachhang);
     app.use(url + "orders", banle);
     app.use(url + "staffs", thanhvien);
+    app.use(url + "config", setting);
 }
 
 module.exports = initClientAPI;
