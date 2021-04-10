@@ -284,5 +284,36 @@ module.exports = {
         } catch (error) {
             return error
         }
+    },
+
+    // disable sanpham
+    update: async(body) => {
+        let data = body;
+        try {
+            return sanpham.sequelize.transaction().then(async t => {
+                return await sanpham.update({
+                    ten: data.tenhanghoa,
+                    tenthaythe: data.tenthaythe,
+                    nhacungcap: data.nhacungcap,
+                    nhomsanpham_id: data.nhomsanpham_id,
+                    donvitinh_id: data.donvitinh_id,
+                    gia: data.gia,
+                    gianhap: data.gianhap,
+                    soluongtoithieu: data.soluongtoithieu,
+                    soluong: data.soluong
+                }, {
+                    where: {
+                        id: data.id
+                    }
+                }, { transaction: t }).then(() => {
+                    t.commit();
+                }).catch((err) => {
+                    t.rollback();
+                    throw new Error(err);
+                })
+            })
+        } catch (error) {
+            throw new Error(err);
+        }
     }
 }

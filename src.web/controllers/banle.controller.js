@@ -65,7 +65,7 @@ module.exports = {
                         as: 'khachhang'
                     },
                     {
-                        attributes: {exclude: ['matkhau']},
+                        attributes: { exclude: ['matkhau'] },
                         model: Thanhvien,
                         as: 'nguoiban'
                     }
@@ -81,7 +81,6 @@ module.exports = {
         try {
             let banleID = await model.create({
                 ten: body.ten,
-                khachhang_id: body.khachhang_id,
                 nguoitao_id: body.nguoitao_id,
                 trangthai: 1,
                 tylegiamgia: body.tylegiamgia,

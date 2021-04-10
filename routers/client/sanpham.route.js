@@ -96,4 +96,16 @@ router.delete("/:id", async(req, res) => {
     }
 });
 
+router.put("/", async(req, res) => {
+    let data = req.body;
+    try {
+        const result = await controller.update(data);
+        console.log(result);
+        response.success(res, "success", result)
+    } catch (err) {
+        console.log(err.message);
+        response.error(res, "failed", 500)
+    }
+});
+
 module.exports = router;

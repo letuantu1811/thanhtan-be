@@ -9,9 +9,6 @@ const Banle = db.define("banle", {
         primaryKey: true,
         autoIncrement: true
     },
-    khachhang_id: {
-        type: Sequelize.INTEGER
-    },
     nguoitao_id: {
         type: Sequelize.INTEGER
     },
