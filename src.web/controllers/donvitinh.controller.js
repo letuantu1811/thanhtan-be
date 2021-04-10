@@ -80,7 +80,11 @@ module.exports = {
     // disable donvitinh
     getAll: async() => {
         try {
-            return await donvitinh.findAll();
+            return await donvitinh.findAll({
+                where: {
+                    trangthai: 1
+                }
+            });
         } catch (error) {
             return error
         }

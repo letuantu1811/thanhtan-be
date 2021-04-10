@@ -68,7 +68,11 @@ module.exports = {
     // disable congdichvu
     getAll: async() => {
         try {
-            return await chungloai.findAll();
+            return await chungloai.findAll({
+                where: {
+                    trangthai: 1
+                }
+            });
         } catch (error) {
             return error
         }

@@ -80,7 +80,11 @@ module.exports = {
     // disable congdichvu
     getAll: async() => {
         try {
-            return await congdichvu.findAll();
+            return await congdichvu.findAll({
+                where: {
+                    trangthai: 1
+                }
+            });
         } catch (error) {
             return error
         }
