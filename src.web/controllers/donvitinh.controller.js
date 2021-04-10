@@ -5,40 +5,34 @@ const { Op, where } = require("sequelize");
 
 module.exports = {
     // Creating donvitinh
-    // create: async(res) => {
-    //     console.log(donvitinh);
-    //     try {
-    //         return await donvitinh.create({
-    //             name: res.name,
-    //             email: res.email,
-    //             category_id: res.category_id,
-    //             phone_number: res.phone_number,
-    //             state: ENUM.PENDING
-    //         })
-    //     } catch (error) {
-    //         return error
-    //     }
+    create: async(res) => {
+        console.log(donvitinh);
+        try {
+            return await donvitinh.create({
+                ten: res.ten,
+                trangthai: 1
+            })
+        } catch (error) {
+            return error
+        }
 
-    // },
+    },
     // Updating donvitinh
-    // update: async(res) => {
-    //     console.log(donvitinh);
-    //     try {
-    //         return await donvitinh.update({
-    //             name: res.name,
-    //             email: res.email,
-    //             category_id: res.category_id,
-    //             phone_number: res.phone_number
-    //         }, {
-    //             where: {
-    //                 id: res.id
-    //             }
-    //         })
-    //     } catch (error) {
-    //         return error
-    //     }
-
-    // },
+    update: async(res) => {
+        console.log(donvitinh);
+        try {
+            return await donvitinh.update({
+                ten: res.ten,
+                trangthai: res.trangthai,
+            }, {
+                where: {
+                    id: res.id
+                }
+            })
+        } catch (error) {
+            return error
+        }
+    },
     // get one donvitinh
     getOne: async(id) => {
         try {

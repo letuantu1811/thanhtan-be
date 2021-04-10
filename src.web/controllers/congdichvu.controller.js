@@ -5,40 +5,37 @@ const { Op, where } = require("sequelize");
 
 module.exports = {
     // Creating congdichvu
-    // create: async(res) => {
-    //     console.log(congdichvu);
-    //     try {
-    //         return await congdichvu.create({
-    //             name: res.name,
-    //             email: res.email,
-    //             category_id: res.category_id,
-    //             phone_number: res.phone_number,
-    //             state: ENUM.PENDING
-    //         })
-    //     } catch (error) {
-    //         return error
-    //     }
+    create: async(res) => {
+        console.log(congdichvu);
+        try {
+            return await congdichvu.create({
+                ten: res.ten,
+                gia: res.gia,
+                trangthai: 1
+            })
+        } catch (error) {
+            return error
+        }
 
-    // },
+    },
     // Updating congdichvu
-    // update: async(res) => {
-    //     console.log(congdichvu);
-    //     try {
-    //         return await congdichvu.update({
-    //             name: res.name,
-    //             email: res.email,
-    //             category_id: res.category_id,
-    //             phone_number: res.phone_number
-    //         }, {
-    //             where: {
-    //                 id: res.id
-    //             }
-    //         })
-    //     } catch (error) {
-    //         return error
-    //     }
+    update: async(res) => {
+        console.log(congdichvu);
+        try {
+            return await congdichvu.update({
+                name: res.ten,
+                gia: res.gia,
+                trangthai: res.trangthai
+            }, {
+                where: {
+                    id: res.id
+                }
+            })
+        } catch (error) {
+            return error
+        }
 
-    // },
+    },
     // get one congdichvu
     getOne: async(id) => {
         try {
@@ -53,14 +50,11 @@ module.exports = {
     },
     // get many congdichvu
     getMany: async(body) => {
-        let limit = body.limit;
-        let offset = body.offset;
-        let quyen = body.quyen;
         try {
             return await congdichvu.findAll({
-                where: {
-                    trangthai: quyen == "admin" ? "" : 1
-                },
+                // where: {
+                // trangthai: quyen == "admin" ? "" : 1
+                // },
                 order: [
                     ['ngaytao', 'DESC']
                 ]

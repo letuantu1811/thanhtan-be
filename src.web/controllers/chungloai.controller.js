@@ -4,6 +4,27 @@ const { ENUM } = require('../../utils/index');
 const { Op, where } = require("sequelize");
 
 module.exports = {
+    create: async(body) => {
+        let data = body;
+        try {
+            return await chungloai.create({
+                ten: data.ten,
+                trangthai: 1
+            })
+        } catch (error) {
+            return error
+        }
+    },
+
+    update: async(body) => {
+        let data = body;
+        try {
+            return await chungloai.update({ ten: data.ten, trangthai: data.trangthai }, { where: { id: data.id } })
+        } catch (error) {
+            return error
+        }
+    },
+
     getOne: async(id) => {
         try {
             return await chungloai.findOne({

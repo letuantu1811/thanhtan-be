@@ -15,7 +15,7 @@ router.get("/", async(req, res) => {
 });
 
 // Creating chungloai
-router.post("/create", async(req, res) => {
+router.post("/", async(req, res) => {
     let body = req.body;
     try {
         const result = await controller.create(body);
@@ -27,10 +27,11 @@ router.post("/create", async(req, res) => {
     }
 });
 
-// Getting many chungloai
-router.post("/", async(req, res) => {
+// update chungloai
+router.put("/", async(req, res) => {
+    let body = req.body;
     try {
-        const result = await controller.getMany(req.body);
+        const result = await controller.update(body);
         console.log(result);
         response.success(res, "success", result)
     } catch (err) {
@@ -38,5 +39,17 @@ router.post("/", async(req, res) => {
         response.error(res, "failed", 500)
     }
 });
+
+// Getting many chungloai
+// router.post("/", async(req, res) => {
+//     try {
+//         const result = await controller.getMany(req.body);
+//         console.log(result);
+//         response.success(res, "success", result)
+//     } catch (err) {
+//         console.log(err.message);
+//         response.error(res, "failed", 500)
+//     }
+// });
 
 module.exports = router;
