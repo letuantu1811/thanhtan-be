@@ -65,7 +65,7 @@ module.exports = {
                         as: 'khachhang'
                     },
                     {
-                        attributes: ['id', 'tendangnhap'],
+                        attributes: {exclude: ['matkhau']},
                         model: Thanhvien,
                         as: 'nguoiban'
                     }
