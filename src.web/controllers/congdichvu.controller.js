@@ -67,7 +67,7 @@ module.exports = {
     disable: async(id) => {
         try {
             return await congdichvu.update({
-                state: ENUM.DISABLE
+                trangthai: ENUM.DISABLE
             }, {
                 where: {
                     id: id

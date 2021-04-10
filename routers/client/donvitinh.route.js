@@ -50,5 +50,16 @@ router.post("/", async(req, res) => {
         response.error(res, "failed", 500)
     }
 });
+router.delete("/:id", async(req, res) => {
+    let id = req.params.id
+    try {
+        const result = await controller.disable(id);
+        console.log(result);
+        response.success(res, "success", result)
+    } catch (err) {
+        console.log(err.message);
+        response.error(res, "failed", 500)
+    }
+});
 
 module.exports = router;
