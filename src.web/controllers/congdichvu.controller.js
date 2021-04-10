@@ -23,7 +23,7 @@ module.exports = {
         console.log(congdichvu);
         try {
             return await congdichvu.update({
-                name: res.ten,
+                ten: res.ten,
                 gia: res.gia,
                 trangthai: res.trangthai
             }, {

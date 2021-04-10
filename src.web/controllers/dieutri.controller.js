@@ -133,6 +133,7 @@ module.exports = {
             return error
         }
     },
+
     getReExamToday: async() => {
         try {
             let today = tzSaiGon();
@@ -142,6 +143,30 @@ module.exports = {
                     where: sequelize.where(sequelize.fn('date', sequelize.col('ngaytaikham')), '=', today)
                 }
             });
+        } catch (error) {
+            return error
+        }
+    },
+
+    getNotification: async() => {
+        try {
+            let today = tzSaiGon();
+            console.log(today);
+            let reExamCount = await model.count({
+                where: {
+                    where: sequelize.where(sequelize.fn('date', sequelize.col('ngaytaikham')), '=', today)
+                }
+            });
+            let examTodayCount = await model.count({
+                where: {
+                    where: sequelize.where(sequelize.fn('date', sequelize.col('ngaytao')), '=', today)
+                }
+            });
+            let body = {
+                countDTtoday: examTodayCount,
+                countTDTtody: reExamCount
+            }
+            return body;
         } catch (error) {
             return error
         }
