@@ -91,9 +91,6 @@ module.exports = {
     },
     // get many khach hang
     getMany: async(body) => {
-        let limit = body.limit;
-        let offset = body.offset;
-        let quyen = body.quyen;
         try {
             return await khachhang.findAll({
                 include: [{
@@ -105,9 +102,7 @@ module.exports = {
                 }],
                 order: [
                     ['ngaytao', 'DESC']
-                ],
-                offset: offset,
-                limit: limit
+                ]
             })
         } catch (error) {
             return error
@@ -117,7 +112,7 @@ module.exports = {
     disable: async(id) => {
         try {
             return await khachhang.update({
-                state: ENUM.DISABLE
+                trangthai: 0
             }, {
                 where: {
                     id: id
@@ -150,9 +145,53 @@ module.exports = {
                 order: [
                     ['ngaytao', 'DESC']
                 ],
+                where: { trangthai: true }
             });
         } catch (error) {
             return error
+        }
+    },
+
+    createNewCustomer: async(body) => {
+        let res = body;
+        try {
+            return await khachhang.create({
+                ten: res.ten,
+                nguoitao_id: res.nguoitao_id,
+                trangthai: 1,
+                diachi: res.diachi,
+                sodienthoai: res.sodienthoai,
+                ghichu: res.ghichu,
+                nhomkhachhang_id: res.nhomkhachhang_id,
+                email: res.email
+            }).then(res => {
+                return res.dataValues.id;
+            });
+        } catch (error) {
+            throw new Error();
+        }
+    },
+
+    updateCustomer: async(body) => {
+        let res = body;
+        try {
+            return await khachhang.update({
+                ten: res.ten,
+                trangthai: 1,
+                diachi: res.diachi,
+                sodienthoai: res.sodienthoai,
+                ghichu: res.ghichu,
+                nhomkhachhang_id: res.nhomkhachhang_id,
+                email: res.email
+            }, {
+                where: {
+                    id: res.id
+                }
+            }).then(res => {
+                return res;
+            });
+        } catch (error) {
+            throw new Error();
         }
     }
 }

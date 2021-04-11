@@ -26,6 +26,43 @@ router.post("/", async(req, res) => {
     }
 });
 
+// Creating khachhang
+router.post("/new", async(req, res) => {
+    let body = req.body;
+    try {
+        const result = await controller.createNewCustomer(body);
+        console.log(result);
+        response.success(res, "success", result)
+    } catch (err) {
+        console.log(err.message);
+        response.error(res, "failed", 500)
+    }
+});
+// Updating khachhang
+router.put("/", async(req, res) => {
+    let body = req.body;
+    try {
+        const result = await controller.updateCustomer(body);
+        console.log(result);
+        response.success(res, "success", result)
+    } catch (err) {
+        console.log(err.message);
+        response.error(res, "failed", 500)
+    }
+});
+// Delete khachhang
+router.delete("/:id", async(req, res) => {
+    let id = req.params.id;
+    try {
+        const result = await controller.disable(id);
+        console.log(result);
+        response.success(res, "success", result)
+    } catch (err) {
+        console.log(err.message);
+        response.error(res, "failed", 500)
+    }
+});
+
 // Getting many khachhang
 // router.post("/", async(req, res) => {
 //     try {
