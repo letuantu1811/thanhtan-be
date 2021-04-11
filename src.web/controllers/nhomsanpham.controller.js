@@ -8,9 +8,9 @@ module.exports = {
     create: async(res) => {
         try {
             return await nhomsanpham.create({
-                ten: res.name,
-                nguoitao_id: res.user_id,
-                trangthai: res.state
+                ten: res.ten,
+                nguoitao_id: 1,
+                trangthai: 1
             })
         } catch (error) {
             return error
@@ -21,9 +21,9 @@ module.exports = {
     update: async(res) => {
         try {
             return await nhomsanpham.update({
-                ten: res.name,
-                trangthai: res.state,
-                nguoitao_id: res.user_id
+                ten: res.te,
+                trangthai: 1,
+                nguoitao_id: 1
             }, {
                 where: {
                     id: res.id
@@ -70,7 +70,7 @@ module.exports = {
     disable: async(id) => {
         try {
             return await nhomsanpham.update({
-                state: ENUM.DISABLE
+                trangthai: 0
             }, {
                 where: {
                     id: id

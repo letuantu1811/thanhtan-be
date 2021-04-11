@@ -16,10 +16,32 @@ router.get("/", async(req, res) => {
 });
 
 // Creating appointment
-router.post("/create", async(req, res) => {
+router.post("/", async(req, res) => {
     let body = req.body;
     try {
         const result = await controller.create(body);
+        console.log(result);
+        response.success(res, "success", result)
+    } catch (err) {
+        console.log(err.message);
+        response.error(res, "failed", 500)
+    }
+});
+router.put("/", async(req, res) => {
+    let body = req.body;
+    try {
+        const result = await controller.update(body);
+        console.log(result);
+        response.success(res, "success", result)
+    } catch (err) {
+        console.log(err.message);
+        response.error(res, "failed", 500)
+    }
+});
+router.delete("/:id", async(req, res) => {
+    let body = req.params.id;
+    try {
+        const result = await controller.disable(body);
         console.log(result);
         response.success(res, "success", result)
     } catch (err) {
