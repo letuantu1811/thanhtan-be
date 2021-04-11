@@ -4,6 +4,7 @@ const dtServices = require('../services/dieutri.services');
 const { tzSaiGon } = require('../../utils/saigontz');
 const moment = require("moment");
 const sequelize = require("sequelize");
+const Thanhvien = require('../../database/models/thanhvien');
 
 module.exports = {
     // Creating model
@@ -119,12 +120,22 @@ module.exports = {
             return error
         }
     },
-    getAll: async() => {
+    getAll: async(role) => {
+        let obj = {
+            limit: null
+        }
+        if (role.toUpperCase() === "USER") {
+            let config = await Thanhvien.findOne({
+                attributes: ['config'],
+                where: { id: 1 }
+            })
+            obj.limit = config.config;
+        }
         try {
-
             let today = tzSaiGon();
             console.log(today);
             return await model.findAll({
+                ...obj,
                 where: {
                     trangthai: 1
                 }

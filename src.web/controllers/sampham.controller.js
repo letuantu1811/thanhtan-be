@@ -244,7 +244,12 @@ module.exports = {
             return error
         }
     },
-    getAllMedicines: async() => {
+
+    getAllMedicines: async(role) => {
+        let obj = {};
+        if (role.toUpperCase() !== "ADMIN") {
+            obj = { an: 0 }
+        }
         try {
             return await sanpham.findAll({
                 include: [{
@@ -255,13 +260,15 @@ module.exports = {
                     require: true
                 }],
                 where: {
-                    trangthai: true
+                    trangthai: true,
+                    ...obj
                 }
             });
         } catch (error) {
             return error
         }
     },
+
     getInventory: async() => {
         try {
             return await sanpham.findAll({

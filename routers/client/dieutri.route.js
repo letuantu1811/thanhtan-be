@@ -66,9 +66,9 @@ router.post("/createHoSo", async(req, res) => {
 
 // Getting many khachhang
 router.get("/all", async(req, res) => {
+    let role = req.header("quyen");
     try {
-        const result = await dieutri.getAll();
-        console.log(result);
+        const result = await dieutri.getAll(role);
         response.success(res, "success", result)
     } catch (err) {
         console.log(err.message);
