@@ -7,7 +7,7 @@ const auth = require("../../middlewares/auth.middleware");
 router.get("/", async(req, res) => {
     try {
         const result = await controller.getAll();
-        console.log(result);
+        
         response.success(res, "success", result)
     } catch (err) {
         console.log(err.message);
@@ -20,7 +20,7 @@ router.post("/create", async(req, res) => {
     let body = req.body;
     try {
         const result = await controller.create(body);
-        console.log(result);
+        
         response.success(res, "success", result)
     } catch (err) {
         console.log(err.message);
@@ -32,7 +32,7 @@ router.post("/create", async(req, res) => {
 router.post("/", async(req, res) => {
     try {
         const result = await controller.getMany(req.body);
-        console.log(result);
+        
         response.success(res, "success", result)
     } catch (err) {
         console.log(err.message);

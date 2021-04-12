@@ -57,6 +57,9 @@ module.exports = {
         try {
             return await bacsi.findAll({
                 attributes: ['id', ['tendangnhap', 'ten']],
+                where: {
+                    trangthai: true
+                }
             });
         } catch (error) {
             return error

@@ -193,7 +193,11 @@ module.exports = {
         }
     },
     // disable sanpham
-    getAll: async() => {
+    getAll: async(quyen) => {
+        let obj = {};
+        if (quyen.toUpperCase() !== "ADMIN") {
+            obj = { an: 0 }
+        }
         try {
             return await sanpham.findAll({
                 include: [{
@@ -212,7 +216,8 @@ module.exports = {
                     }
                 ],
                 where: {
-                    trangthai: 1
+                    trangthai: true,
+                    ...obj
                 },
                 order: [
                     ['ten', 'ASC']

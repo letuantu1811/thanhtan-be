@@ -5,10 +5,10 @@ const response = require('../../utils/api.res/response');
 const thanhvien = require('../../database/models/thanhvien');
 
 router.get("/", async(req, res) => {
-    let body = req.body;
+    let quyen = req.header("quyen");
     try {
-        const result = await controller.getAll();
-        console.log(result);
+        const result = await controller.getAll(quyen);
+        // 
         response.success(res, "success", result)
     } catch (err) {
         console.log(err.message);
@@ -18,7 +18,7 @@ router.get("/", async(req, res) => {
 // router.get("/hide", async(req, res) => {
 //     try {
 //         const result = await controller.getAllHiddenProduct();
-//         console.log(result);
+//         
 //         response.success(res, "success", result)
 //     } catch (err) {
 //         console.log(err.message);
@@ -28,7 +28,7 @@ router.get("/", async(req, res) => {
 router.get("/inventory", async(req, res) => {
     try {
         const result = await controller.getInventory();
-        console.log(result);
+        
         response.success(res, "success", result)
     } catch (err) {
         console.log(err.message);
@@ -54,7 +54,7 @@ router.post("/create", async(req, res) => {
     let body = req.body;
     try {
         const result = await controller.create(body);
-        console.log(result);
+        
         response.success(res, "success", result)
     } catch (err) {
         console.log(err.message);
@@ -66,7 +66,7 @@ router.post("/createMulti", async(req, res) => {
     let body = req.body;
     try {
         const result = await controller.createMulti(body);
-        console.log(result);
+        
         response.success(res, "success", result)
     } catch (err) {
         response.error(res, err, 500)
@@ -77,7 +77,7 @@ router.post("/createMulti", async(req, res) => {
 router.post("/", async(req, res) => {
     try {
         const result = await controller.getMany(req.body);
-        console.log(result);
+        
         response.success(res, "success", result)
     } catch (err) {
         console.log(err.message);
@@ -89,7 +89,7 @@ router.delete("/:id", async(req, res) => {
     let id = req.params.id;
     try {
         const result = await controller.disable(id);
-        console.log(result);
+        
         response.success(res, "success", result)
     } catch (err) {
         console.log(err.message);
@@ -101,7 +101,7 @@ router.put("/", async(req, res) => {
     let data = req.body;
     try {
         const result = await controller.update(data);
-        console.log(result);
+        
         response.success(res, "success", result)
     } catch (err) {
         console.log(err.message);

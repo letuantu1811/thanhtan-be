@@ -6,7 +6,7 @@ const response = require('../../utils/api.res/response');
 router.get("/", async(req, res) => {
     try {
         const result = await controller.getAll();
-        console.log(result);
+        
         response.success(res, "success", result)
     } catch (err) {
         console.log(err.message);
@@ -19,7 +19,7 @@ router.post("/", async(req, res) => {
     let body = req.body;
     try {
         const result = await controller.create(body);
-        console.log(result);
+        
         response.success(res, "success", result)
     } catch (err) {
         console.log(err.message);
@@ -31,7 +31,7 @@ router.put("/", async(req, res) => {
     let body = req.body;
     try {
         const result = await controller.update(body);
-        console.log(result);
+        
         response.success(res, "success", result)
     } catch (err) {
         console.log(err.message);
@@ -43,7 +43,7 @@ router.put("/", async(req, res) => {
 // router.post("/", async(req, res) => {
 //     try {
 //         const result = await controller.getMany(req.body);
-//         console.log(result);
+//         
 //         response.success(res, "success", result)
 //     } catch (err) {
 //         console.log(err.message);
@@ -54,7 +54,7 @@ router.delete("/:id", async(req, res) => {
     let id = req.params.id
     try {
         const result = await controller.disable(id);
-        console.log(result);
+        
         response.success(res, "success", result)
     } catch (err) {
         console.log(err.message);

@@ -24,7 +24,7 @@ router.get("/", async(req, res) => {
                 an: 1
             }
         })
-        console.log(result);
+        
         response.success(res, "success", result)
     } catch (err) {
         console.log(err.message);
@@ -39,7 +39,7 @@ router.get("/shows", async(req, res) => {
                 an: 0
             }
         })
-        console.log(result);
+        
         response.success(res, "success", result)
     } catch (err) {
         console.log(err.message);
@@ -61,7 +61,7 @@ router.get("/totalExam", async(req, res) => {
             tongphieudieutri: tongphieudieutri,
             sohienthi: sohienthi.config
         }
-        console.log(result);
+        
         response.success(res, "success", result)
     } catch (err) {
         console.log(err.message);
@@ -80,7 +80,7 @@ router.put("/:id", async(req, res) => {
                 id: id
             },
         });
-        console.log(result);
+        
         response.success(res, "success", result)
     } catch (err) {
         console.log(err.message);
@@ -98,7 +98,7 @@ router.put("/show/:id", async(req, res) => {
                 id: id
             },
         });
-        console.log(result);
+        
         response.success(res, "success", result)
     } catch (err) {
         console.log(err.message);
@@ -116,7 +116,7 @@ router.post("/:count", async(req, res) => {
                 id: 1
             },
         });
-        console.log(result);
+        
         response.success(res, "success", result)
     } catch (err) {
         console.log(err.message);

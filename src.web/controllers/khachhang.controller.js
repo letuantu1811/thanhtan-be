@@ -193,5 +193,71 @@ module.exports = {
         } catch (error) {
             throw new Error();
         }
-    }
+    },
+
+
+    createNewPet: async(body) => {
+        let res = body;
+        try {
+            if (res.thucung.length !== 0 || res.thucung.length !== '') {
+                let arr = [];
+                for (let index = 0; index < res.thucung.length; index++) {
+                    
+                    const element = res.thucung[index];
+                    if(element.id === 0){
+                        let obj = {
+                            ten: "",
+                            tuoi: 0,
+                            trongluong: 0,
+                            khachhang_id: 0,
+                            taikham: 0,
+                            gioitinh: 0,
+                            nguoitao_id: 0,
+                            trangthai: 1,
+                            giong: "",
+                            chungloai_id: 0,
+                        }
+                        obj = new Object();
+                        obj.ten = element.ten;
+                        obj.tuoi = element.tuoi;
+                        obj.trongluong = element.trongluong;
+                        obj.khachhang_id = res.id;
+                        obj.gioitinh = element.gioitinh === "true" ? true : false;
+                        obj.nguoitao_id = element.nguoitao_id;
+                        obj.trangthai = element.trangthai;
+                        obj.giong = element.giong;
+                        obj.chungloai_id = element.chungloai_id;
+                        arr.push(obj)
+                    } 
+                }
+                // return await giasuc.sequelize.transaction().bulkCreate(arr);
+
+                return sangiasucpham.sequelize.transaction().then(async t => {
+                    return await giasuc.bulkCreate(arr, { transaction: t }).then(() => {
+                        t.commit();
+                    }).catch((err) => {
+                        t.rollback();
+                        throw new Error(err);
+                    })
+                })
+            }
+        } catch (error) {
+            throw new Error();
+        }
+    },
+
+        // disable khachhang
+        disablePet: async(id) => {
+            try {
+                return await giasuc.update({
+                    trangthai: 0
+                }, {
+                    where: {
+                        id: id
+                    }
+                })
+            } catch (error) {
+                return error
+            }
+        },
 }
