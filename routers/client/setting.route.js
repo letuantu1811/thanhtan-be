@@ -21,10 +21,11 @@ router.get("/", async(req, res) => {
                 }
             ],
             where: {
+                trangthai: true,
                 an: 1
             }
         })
-        
+
         response.success(res, "success", result)
     } catch (err) {
         console.log(err.message);
@@ -36,10 +37,11 @@ router.get("/shows", async(req, res) => {
         const result = await sanpham.findAll({
             attributes: ['id', 'ten', 'tenthaythe', 'an'],
             where: {
+                trangthai: true,
                 an: 0
             }
         })
-        
+
         response.success(res, "success", result)
     } catch (err) {
         console.log(err.message);
@@ -61,7 +63,7 @@ router.get("/totalExam", async(req, res) => {
             tongphieudieutri: tongphieudieutri,
             sohienthi: sohienthi.config
         }
-        
+
         response.success(res, "success", result)
     } catch (err) {
         console.log(err.message);
@@ -80,7 +82,7 @@ router.put("/:id", async(req, res) => {
                 id: id
             },
         });
-        
+
         response.success(res, "success", result)
     } catch (err) {
         console.log(err.message);
@@ -98,7 +100,7 @@ router.put("/show/:id", async(req, res) => {
                 id: id
             },
         });
-        
+
         response.success(res, "success", result)
     } catch (err) {
         console.log(err.message);
@@ -116,7 +118,7 @@ router.post("/:count", async(req, res) => {
                 id: 1
             },
         });
-        
+
         response.success(res, "success", result)
     } catch (err) {
         console.log(err.message);
