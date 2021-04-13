@@ -103,6 +103,12 @@ module.exports = {
                 obj.sanpham_id = element.id;
                 obj.soluong = element.soluong;
                 obj.dongiaban = element.dongiaban;
+                let soluongconlai = Number.parseInt(element.soluongcon) - Number.parseInt(element.soluong);
+                await sanpham.update({ soluong: soluongconlai < 0 ? 0 : soluongconlai }, {
+                    where: {
+                        id: element.id
+                    }
+                });
                 arr.push(obj);
             }
             await BL_SP.bulkCreate(arr).then(res => {
