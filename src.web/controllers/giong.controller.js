@@ -2,6 +2,7 @@ const giong = require('../../database/models/giong');
 // const giasuc = require('../../database/models/giasuc');
 const { ENUM } = require('../../utils/index');
 const { Op, where } = require("sequelize");
+const Chungloai = require('../../database/models/chungloai');
 
 module.exports = {
     create: async(body) => {
@@ -9,19 +10,23 @@ module.exports = {
         try {
             return await giong.create({
                 ten: data.ten,
+                chungloai_id: res.chungloai_id,
                 trangthai: 1
             })
         } catch (error) {
-            return error
+            throw new Error()
         }
     },
 
     update: async(body) => {
         let data = body;
         try {
-            return await giong.update({ ten: data.ten, trangthai: data.trangthai }, { where: { id: data.id } })
+            return await giong.update({
+                ten: data.ten,
+                chungloai_id: res.chungloai_id
+            }, { where: { id: data.id } })
         } catch (error) {
-            return error
+            throw new Error()
         }
     },
 
@@ -33,7 +38,7 @@ module.exports = {
                 }
             })
         } catch (error) {
-            return error
+            throw new Error()
         }
     },
     // get many congdichvu
@@ -48,7 +53,7 @@ module.exports = {
                 ]
             })
         } catch (error) {
-            return error
+            throw new Error()
         }
     },
     // disable congdichvu
@@ -62,19 +67,27 @@ module.exports = {
                 }
             })
         } catch (error) {
-            return error
+            throw new Error()
         }
     },
     // disable congdichvu
     getAll: async() => {
         try {
             return await giong.findAll({
+                include: [{
+                    model: Chungloai,
+                    where: {
+                        trangthai: 1
+                    },
+                    required: false
+                }]
+            }, {
                 where: {
                     trangthai: 1
                 }
             });
         } catch (error) {
-            return error
+            throw new Error()
         }
     }
 }
