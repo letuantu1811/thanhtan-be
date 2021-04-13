@@ -21,7 +21,7 @@ module.exports = {
     update: async(res) => {
         try {
             return await nhomsanpham.update({
-                ten: res.te,
+                ten: res.ten,
                 trangthai: 1,
                 nguoitao_id: 1
             }, {
@@ -30,7 +30,7 @@ module.exports = {
                 }
             })
         } catch (error) {
-            return error
+            throw new Error();
         }
 
     },
