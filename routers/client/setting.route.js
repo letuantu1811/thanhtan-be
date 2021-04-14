@@ -72,9 +72,9 @@ router.get("/totalExam", async(req, res) => {
 
 // thêm vào list ẩn
 router.put("/:id", async(req, res) => {
-    let id = req.params.id;
+    let id = Number.parseInt(req.params.id);
     try {
-        let an = await sanpham.findOne({ id });
+        let an = await sanpham.findOne({ where: {id: id}});
         console.log(an.get({ plain: 'text' }));
         if (an.dataValues.an) {
             an = false;
