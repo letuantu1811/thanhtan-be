@@ -10,10 +10,11 @@ module.exports = {
         try {
             return await giong.create({
                 ten: data.ten,
-                chungloai_id: res.chungloai_id,
+                chungloai_id: data.chungloai_id,
                 trangthai: 1
             })
         } catch (error) {
+            console.log(error);
             throw new Error()
         }
     },
