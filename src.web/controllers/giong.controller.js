@@ -24,7 +24,7 @@ module.exports = {
         try {
             return await giong.update({
                 ten: data.ten,
-                chungloai_id: res.chungloai_id
+                chungloai_id: data.chungloai_id
             }, { where: { id: data.id } })
         } catch (error) {
             throw new Error()
