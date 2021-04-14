@@ -202,17 +202,11 @@ module.exports = {
             return await sanpham.findAll({
                 include: [{
                         model: donvitinh,
-                        where: {
-                            trangthai: 1
-                        },
-                        require: false
+                        require: true
                     },
                     {
                         model: nhomsanpham,
-                        where: {
-                            trangthai: 1
-                        },
-                        require: false
+                        require: true
                     }
                 ],
                 where: {

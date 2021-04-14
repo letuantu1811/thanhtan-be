@@ -21,8 +21,7 @@ router.get("/", async(req, res) => {
                 }
             ],
             where: {
-                trangthai: true,
-                an: 1
+                trangthai: true
             }
         })
 
@@ -75,8 +74,16 @@ router.get("/totalExam", async(req, res) => {
 router.put("/:id", async(req, res) => {
     let id = req.params.id;
     try {
+        let an = await sanpham.findOne({ id });
+        console.log(an.get({ plain: 'text' }));
+        if (an.dataValues.an) {
+            an = false;
+        } else {
+            an = true;
+        }
+        console.log(an);
         const result = await sanpham.update({
-            an: 1
+            an: an
         }, {
             where: {
                 id: id
