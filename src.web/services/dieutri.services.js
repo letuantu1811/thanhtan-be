@@ -98,10 +98,11 @@ module.exports = {
         await giasuc.update({
             ten: res.thucung.ten,
             trongluong: res.thucung.trongluong,
-            giong: res.thucung.giong,
+            dacdiem: res.thucung.dacdiem,
             tuoi: res.thucung.tuoi,
             gioitinh: res.thucung.gioitinh,
-            chungloai_id: res.thucung.chungloai.id === 0 ? null : res.thucung.chungloai.id
+            chungloai_id: res.thucung.chungloai.id === 0 ? null : res.thucung.chungloai.id,
+            giong_id: res.thucung.giong.id === 0 ? null : res.thucung.giong.id
         }, {
             where: {
                 id: res.thucung.id
@@ -144,10 +145,11 @@ module.exports = {
         let gsID = await giasuc.create({
             ten: res.thucung.ten,
             trongluong: res.thucung.trongluong,
-            giong: res.thucung.giong,
+            dacdiem: res.thucung.dacdiem,
             tuoi: res.thucung.tuoi,
             gioitinh: res.thucung.gioitinh,
             chungloai_id: res.thucung.chungloai.id !== 0 ? res.thucung.chungloai.id : null,
+            giong_id: res.thucung.giong.id === 0 ? null : res.thucung.giong.id,
             khachhang_id: res.khachhang.id
         }).then(res => {
             console.log(res);
@@ -184,10 +186,11 @@ module.exports = {
         let gsID = await giasuc.create({
             ten: res.thucung.ten,
             trongluong: res.thucung.trongluong,
-            giong: res.thucung.giong,
+            dacdiem: res.thucung.dacdiem,
             tuoi: res.thucung.tuoi,
             gioitinh: res.thucung.gioitinh,
             chungloai_id: res.thucung.chungloai.id !== 0 ? res.thucung.chungloai.id : null,
+            giong_id: res.thucung.giong.id === 0 ? null : res.thucung.giong.id,
             khachhang_id: khID
         }).then(res => {
             console.log(res);

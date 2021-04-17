@@ -4,6 +4,7 @@ const donvitinh = require('../../database/models/donvitinh');
 const { ENUM } = require('../../utils/index');
 const { Op, where } = require("sequelize");
 const sequelize = require("sequelize");
+const { localDate } = require('../../utils/localDate');
 
 module.exports = {
     // Creating sanpham
@@ -30,6 +31,7 @@ module.exports = {
                     const element = res.thucung[index];
                     let obj = {
                         ten: "",
+                        ngaytao: "",
                         tuoi: 0,
                         trongluong: 0,
                         khachhang_id: 0,
@@ -37,10 +39,11 @@ module.exports = {
                         gioitinh: 0,
                         nguoitao_id: 0,
                         trangthai: 1,
-                        giong: "",
+                        dacdiem: "",
                         chungloai_id: 0,
                     }
                     obj = new Object();
+                    obj.ngaytao = localDate(new Date());
                     obj.ten = element.ten;
                     obj.tuoi = element.tuoi;
                     obj.trongluong = element.trongluong;
@@ -49,7 +52,7 @@ module.exports = {
                     obj.gioitinh = element.gioitinh;
                     obj.nguoitao_id = element.nguoitao_id;
                     obj.trangthai = element.trangthai;
-                    obj.giong = element.giong;
+                    obj.dacdiem = element.dacdiem;
                     obj.chungloai_id = element.chungloai_id;
                     arr.push(obj)
                     await giasuc.bulkCreate(arr);
@@ -74,7 +77,8 @@ module.exports = {
                 gianhap: 0,
                 soluong: 0,
                 soluongtoithieu: 0,
-                gia: 0
+                gia: 0,
+                ngaytao: ""
             }
             for (let index = 0; index < listSP.length; index++) {
 
@@ -82,6 +86,7 @@ module.exports = {
                 if (res.id === "0" || res.id === 0 || res.id === null) {
 
                     obj = new Object();
+                    obj.ngaytao = localDate(new Date());
                     obj.ten = res.tenhanghoa;
                     obj.tenthaythe = res.tenthaythe;
                     obj.nhomsanpham_id = Number.parseInt(res.nhomsanpham.id);
@@ -96,6 +101,7 @@ module.exports = {
                     arrNew.push(obj);
                 } else {
                     obj = new Object();
+                    obj.ngaytao = localDate(new Date());
                     obj.ten = res.tenhanghoa;
                     obj.tenthaythe = res.tenthaythe;
                     obj.nhomsanpham_id = Number.parseInt(res.nhomsanpham.id);

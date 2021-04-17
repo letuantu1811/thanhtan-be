@@ -5,6 +5,7 @@ const { tzSaiGon } = require('../../utils/saigontz');
 const moment = require("moment");
 const sequelize = require("sequelize");
 const Thanhvien = require('../../database/models/thanhvien');
+const { localDate } = require('../../utils/localDate');
 
 module.exports = {
     // Creating model
@@ -12,6 +13,7 @@ module.exports = {
         console.log(model);
         try {
             return await model.create({
+                ngaytao: localDate(new Date()),
                 khachhang_id: res.guest_id,
                 nguoitao_id: res.user_id,
                 trieuchung: res.description,

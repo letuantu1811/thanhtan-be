@@ -1,20 +1,22 @@
 const thanhvien = require('../../database/models/thanhvien');
 const nhomthanhvien = require('../../database/models/nhomthanhvien');
 const { ENUM } = require('../../utils/index');
+const { localDate } = require('../../utils/localDate');
 
 module.exports = {
     // Creating thanhvien
     create: async(res) => {
         try {
-            return thanhvien.sequelize.transaction().then(async (t) =>{
+            return thanhvien.sequelize.transaction().then(async(t) => {
                 return await thanhvien.create({
+                    ngaytao: localDate(new Date()),
                     nguoitao_id: res.nguoitao_id,
                     tendangnhap: res.tendangnhap,
                     matkhau: res.matkhau,
                     nhomthanhvien_id: res.nhomthanhvien_id,
                     trangthai: ENUM.ENABLE,
                     email: res.email
-                }, {transaction: t}).then((res) => {
+                }, { transaction: t }).then((res) => {
                     t.commit();
                 }).catch((err) => {
                     t.rollback();
@@ -29,7 +31,7 @@ module.exports = {
     // Updating thanhvien
     update: async(res) => {
         try {
-            return thanhvien.sequelize.transaction().then(async (t) =>{
+            return thanhvien.sequelize.transaction().then(async(t) => {
                 return await thanhvien.update({
                     matkhau: res.matkhau,
                     nhomthanhvien_id: res.nhomthanhvien_id,
@@ -38,7 +40,7 @@ module.exports = {
                     where: {
                         id: res.id
                     }
-                }, {transaction: t}).then(() => {
+                }, { transaction: t }).then(() => {
                     t.commit();
                 }).catch((err) => {
                     t.rollback();
@@ -68,16 +70,15 @@ module.exports = {
             return await thanhvien.findAll({
                 include: [{
                     model: nhomthanhvien,
-                    as:'nhomthanhvien'
+                    as: 'nhomthanhvien'
                 }],
-                    where: {
-                        trangthai: 1
-                    },
+                where: {
+                    trangthai: 1
+                },
                 order: [
                     ['ngaytao', 'DESC']
                 ]
-            }
-            )
+            })
         } catch (error) {
             throw new Error(error);
         }
@@ -85,14 +86,14 @@ module.exports = {
     // disable thanhvien
     disable: async(id) => {
         try {
-            return thanhvien.sequelize.transaction().then(async t =>{
+            return thanhvien.sequelize.transaction().then(async t => {
                 return await thanhvien.update({
                     trangthai: ENUM.DISABLE
                 }, {
                     where: {
                         id: id
                     }
-                },{transaction: t}).then(() => {
+                }, { transaction: t }).then(() => {
                     t.commit();
                 }).catch((err) => {
                     t.rollback();

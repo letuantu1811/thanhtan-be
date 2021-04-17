@@ -2,6 +2,7 @@ const congdichvu = require('../../database/models/congdichvu');
 // const giasuc = require('../../database/models/giasuc');
 const { ENUM } = require('../../utils/index');
 const { Op, where } = require("sequelize");
+const { localDate } = require('../../utils/localDate');
 
 module.exports = {
     // Creating congdichvu
@@ -9,6 +10,7 @@ module.exports = {
         console.log(congdichvu);
         try {
             return await congdichvu.create({
+                ngaytao: localDate(new Date()),
                 ten: res.ten,
                 gia: res.gia,
                 trangthai: 1

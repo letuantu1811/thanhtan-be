@@ -7,6 +7,7 @@ const Donvitinh = require('../../database/models/donvitinh');
 const BL_SP = require('../../database/models/banle_sanpham');
 const khachhang = require('../../database/models/khachhang');
 const Thanhvien = require('../../database/models/thanhvien');
+const { localDate } = require('../../utils/localDate');
 
 module.exports = {
     getOne: async(id) => {
@@ -80,6 +81,7 @@ module.exports = {
     createOrders: async(body) => {
         try {
             let banleID = await model.create({
+                ngaytao: localDate(new Date()),
                 ten: body.ten,
                 nguoitao_id: body.nguoitao_id,
                 trangthai: 1,

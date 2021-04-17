@@ -1,12 +1,14 @@
 const { ENUM } = require('../../utils/index');
 const { Op } = require("sequelize");
 const nhomkhachhang = require('../../database/models/nhomkhachhang');
+const { localDate } = require('../../utils/localDate');
 
 module.exports = {
     // Creating sanpham
     create: async(res) => {
         try {
             return await nhomkhachhang.create({
+                ngaytao: localDate(new Date()),
                 ten: res.ten,
                 tylegiamgia: res.tylegiamgia
             })

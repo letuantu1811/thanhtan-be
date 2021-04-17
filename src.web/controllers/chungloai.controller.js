@@ -2,12 +2,14 @@ const chungloai = require('../../database/models/chungloai');
 // const giasuc = require('../../database/models/giasuc');
 const { ENUM } = require('../../utils/index');
 const { Op, where } = require("sequelize");
+const { localDate } = require('../../utils/localDate');
 
 module.exports = {
     create: async(body) => {
         let data = body;
         try {
             return await chungloai.create({
+                ngaytao: localDate(new Date()),
                 ten: data.ten,
                 trangthai: 1
             })

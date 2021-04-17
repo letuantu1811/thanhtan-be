@@ -4,6 +4,8 @@ const chungloai = require('../../database/models/chungloai');
 const { ENUM } = require('../../utils/index');
 const { Op, where } = require("sequelize");
 const Nhomkhachhang = require('../../database/models/nhomkhachhang');
+const Giong = require('../../database/models/giong');
+const { localDate } = require('../../utils/localDate');
 
 module.exports = {
     // Creating khachhang
@@ -11,6 +13,7 @@ module.exports = {
         let res = body;
         try {
             let id = await khachhang.create({
+                ngaytao: localDate(new Date()),
                 ten: res.ten,
                 nguoitao_id: res.nguoitao_id,
                 trangthai: 1,
@@ -34,7 +37,7 @@ module.exports = {
                         gioitinh: 0,
                         nguoitao_id: 0,
                         trangthai: 1,
-                        giong: "",
+                        dacdiem: "",
                         chungloai_id: 0,
                     }
                     obj = new Object();
@@ -46,7 +49,7 @@ module.exports = {
                     obj.gioitinh = element.gioitinh;
                     obj.nguoitao_id = element.nguoitao_id;
                     obj.trangthai = element.trangthai;
-                    obj.giong = element.giong;
+                    obj.dacdiem = element.dacdiem;
                     obj.chungloai_id = element.chungloai_id;
                     arr.push(obj)
                     await giasuc.bulkCreate(arr);
@@ -137,6 +140,15 @@ module.exports = {
                         model: chungloai,
                         attributes: ['id', 'ten'],
                         as: 'chungloai'
+                    },
+                    include: {
+                        model: Giong,
+                        attributes: ['id', 'ten'],
+                        as: 'giong',
+                        include: {
+                            attributes: ['id', 'ten'],
+                            model: chungloai
+                        }
                     }
                 }, {
                     model: Nhomkhachhang,
@@ -202,9 +214,9 @@ module.exports = {
             if (res.thucung.length !== 0 || res.thucung.length !== '') {
                 let arr = [];
                 for (let index = 0; index < res.thucung.length; index++) {
-                    
+
                     const element = res.thucung[index];
-                    if(element.id === 0){
+                    if (element.id === 0) {
                         let obj = {
                             ten: "",
                             tuoi: 0,
@@ -214,7 +226,7 @@ module.exports = {
                             gioitinh: 0,
                             nguoitao_id: 0,
                             trangthai: 1,
-                            giong: "",
+                            dacdiem: "",
                             chungloai_id: 0,
                         }
                         obj = new Object();
@@ -225,10 +237,10 @@ module.exports = {
                         obj.gioitinh = element.gioitinh === "true" ? true : false;
                         obj.nguoitao_id = element.nguoitao_id;
                         obj.trangthai = element.trangthai;
-                        obj.giong = element.giong;
+                        obj.dacdiem = element.dacdiem;
                         obj.chungloai_id = element.chungloai_id;
                         arr.push(obj)
-                    } 
+                    }
                 }
                 // return await giasuc.sequelize.transaction().bulkCreate(arr);
 
@@ -246,18 +258,18 @@ module.exports = {
         }
     },
 
-        // disable khachhang
-        disablePet: async(id) => {
-            try {
-                return await giasuc.update({
-                    trangthai: 0
-                }, {
-                    where: {
-                        id: id
-                    }
-                })
-            } catch (error) {
-                return error
-            }
-        },
+    // disable khachhang
+    disablePet: async(id) => {
+        try {
+            return await giasuc.update({
+                trangthai: 0
+            }, {
+                where: {
+                    id: id
+                }
+            })
+        } catch (error) {
+            return error
+        }
+    },
 }

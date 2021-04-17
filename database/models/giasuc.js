@@ -1,6 +1,7 @@
 const Sequelize = require("sequelize");
 const db = require("../config");
 const chungloai = require("../models/chungloai");
+const Giong = require("./giong");
 
 const giasuc = db.define("giasuc", {
     id: {
@@ -32,8 +33,11 @@ const giasuc = db.define("giasuc", {
     trangthai: {
         type: Sequelize.BOOLEAN
     },
-    giong: {
+    dacdiem: {
         type: Sequelize.STRING
+    },
+    giong_id: {
+        type: Sequelize.INTEGER
     },
     chungloai_id: {
         type: Sequelize.INTEGER
@@ -55,6 +59,15 @@ chungloai.hasMany(giasuc, {
 giasuc.belongsTo(chungloai, {
     foreignKey: "chungloai_id",
     as: 'chungloai'
+});
+
+Giong.hasMany(giasuc, {
+    foreignKey: "giong_id",
+    as: 'giong'
+});
+giasuc.belongsTo(Giong, {
+    foreignKey: "giong_id",
+    as: 'giong'
 });
 
 module.exports = giasuc;

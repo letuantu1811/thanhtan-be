@@ -2,6 +2,7 @@ const donvitinh = require('../../database/models/donvitinh');
 // const giasuc = require('../../database/models/giasuc');
 const { ENUM } = require('../../utils/index');
 const { Op, where } = require("sequelize");
+const { localDate } = require('../../utils/localDate');
 
 module.exports = {
     // Creating donvitinh
@@ -9,6 +10,7 @@ module.exports = {
         console.log(donvitinh);
         try {
             return await donvitinh.create({
+                ngaytao: localDate(new Date()),
                 ten: res.ten,
                 trangthai: 1
             })
