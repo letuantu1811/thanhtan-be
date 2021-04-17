@@ -59,9 +59,10 @@ module.exports = {
     },
     // disable congdichvu
     disable: async(id) => {
+        console.log(id);
         try {
             return await giong.update({
-                trangthai: ENUM.DISABLE
+                trangthai: 0
             }, {
                 where: {
                     id: id
@@ -76,13 +77,8 @@ module.exports = {
         try {
             return await giong.findAll({
                 include: [{
-                    model: Chungloai,
-                    where: {
-                        trangthai: 1
-                    },
-                    required: false
-                }]
-            }, {
+                    model: Chungloai
+                }],
                 where: {
                     trangthai: 1
                 }
