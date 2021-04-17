@@ -327,5 +327,74 @@ module.exports = {
         } catch (error) {
             throw new Error(err);
         }
-    }
+    },
+
+    importData: async(listSP) => {
+        try {
+            let arrUpdate = [];
+            let arrNew = [];
+            let donvitinhArr = await donvitinh.findAll();
+            // console.log(donvitinhArr);
+            let nhomthuocArr = await nhomsanpham.findAll();
+
+            let obj = {
+                ten: "",
+                tenthaythe: "",
+                nhacungcap: "",
+                nhomsanpham_id: 0,
+                nguoitao_id: 1,
+                trangthai: 1,
+                donvitinh_id: 0,
+                gianhap: 0,
+                soluong: 0,
+                soluongtoithieu: 0,
+                gia: 0,
+                ngaytao: ""
+            }
+            for (let index = 0; index < listSP.length; index++) {
+                let res = listSP[index];
+                let donvitinhid = donvitinhArr.filter(item => item.ten === res.DonViTinh.TenDonViTinh);
+                let nhomthuocid = nhomthuocArr.filter(item => item.ten === res.NhomThuoc.TenNhomThuoc);
+                // console.log(nhomthuocid[0].dataValues.id);
+                // console.log(donvitinhid[0].dataValues.id);
+                let ntid = 24;
+                let dvtid = 56;
+                if (nhomthuocid[0]) {
+                    if (nhomthuocid[0].dataValues.id) {
+                        ntid = nhomthuocid[0].dataValues.id;
+                    }
+                }
+                if (donvitinhid[0]) {
+                    if (donvitinhid[0].dataValues.id) {
+                        dvtid = donvitinhid[0].dataValues.id;
+                    }
+                }
+                obj = new Object();
+                obj.ngaytao = localDate(new Date());
+                obj.ten = res.TenThuoc;
+                obj.tenthaythe = res.TenThuocKhac || res.TenThuoc;
+                obj.nhomsanpham_id = ntid
+                obj.trangthai = 1;
+                obj.soluongtoithieu = res.SLTonToiThieu
+                obj.donvitinh_id = dvtid;
+                obj.gianhap = res.DonGiaNhap;
+                obj.gia = res.DonGiaBan;
+                obj.soluong = 100;
+                arrNew.push(obj);
+            }
+            if (arrNew.length > 0) {
+                return sanpham.sequelize.transaction().then(async t => {
+                    return await sanpham.bulkCreate(arrNew, { transaction: t }).then(() => {
+                        return t.commit();
+                    }).catch(err => {
+                        console.log(err + " tại func thêm nhiều sản phẩm - row 94:sanpham.controller.js");
+                        t.rollback();
+                        throw Error(err);
+                    })
+                })
+            }
+        } catch (error) {
+            throw Error(error);
+        }
+    },
 }

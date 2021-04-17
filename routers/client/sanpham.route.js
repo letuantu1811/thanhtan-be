@@ -109,5 +109,16 @@ router.put("/", async(req, res) => {
         response.error(res, "failed", 500)
     }
 });
+router.post("/import", async(req, res) => {
+    let data = req.body;
+    try {
+        const result = await controller.importData(data);
+
+        response.success(res, "success", result)
+    } catch (err) {
+        console.log(err.message);
+        response.error(res, "failed", 500)
+    }
+});
 
 module.exports = router;
