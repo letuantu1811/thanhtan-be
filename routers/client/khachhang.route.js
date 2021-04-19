@@ -18,7 +18,7 @@ router.post("/", async(req, res) => {
     let body = req.body;
     try {
         const result = await controller.create(body);
-        
+
         response.success(res, "success", result)
     } catch (err) {
         console.log(err.message);
@@ -31,7 +31,7 @@ router.post("/new", async(req, res) => {
     let body = req.body;
     try {
         const result = await controller.createNewCustomer(body);
-        
+
         response.success(res, "success", result)
     } catch (err) {
         console.log(err.message);
@@ -43,7 +43,7 @@ router.put("/", async(req, res) => {
     let body = req.body;
     try {
         const result = await controller.updateCustomer(body);
-        
+
         response.success(res, "success", result)
     } catch (err) {
         console.log(err.message);
@@ -55,7 +55,7 @@ router.delete("/:id", async(req, res) => {
     let id = req.params.id;
     try {
         const result = await controller.disable(id);
-        
+
         response.success(res, "success", result)
     } catch (err) {
         console.log(err.message);
@@ -67,7 +67,7 @@ router.delete("/:id", async(req, res) => {
 router.post("/newpet", async(req, res) => {
     try {
         const result = await controller.createNewPet(req.body);
-        
+
         response.success(res, "success", result)
     } catch (err) {
         console.log(err.message);
@@ -80,7 +80,32 @@ router.delete("/pet/:id", async(req, res) => {
     let id = req.params.id;
     try {
         const result = await controller.disablePet(id);
-        
+
+        response.success(res, "success", result)
+    } catch (err) {
+        console.log(err.message);
+        response.error(res, "failed", 500)
+    }
+});
+
+router.post("/import", async(req, res) => {
+    let data = req.body;
+    try {
+        console.log("Ádasd");
+        const result = await controller.import(data);
+
+        response.success(res, "success", result)
+    } catch (err) {
+        console.log(err.message);
+        response.error(res, "failed", 500)
+    }
+});
+router.post("/importPet", async(req, res) => {
+    let data = req.body;
+    try {
+        console.log("Ádasd");
+        const result = await controller.importPet(data);
+
         response.success(res, "success", result)
     } catch (err) {
         console.log(err.message);

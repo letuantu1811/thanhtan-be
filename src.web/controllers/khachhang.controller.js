@@ -105,7 +105,8 @@ module.exports = {
                 }],
                 order: [
                     ['ngaytao', 'DESC']
-                ]
+                ],
+                limit: 500
             })
         } catch (error) {
             return error
@@ -157,7 +158,8 @@ module.exports = {
                 order: [
                     ['ngaytao', 'DESC']
                 ],
-                where: { trangthai: true }
+                where: { trangthai: true },
+                limit: 10
             });
         } catch (error) {
             return error
@@ -270,6 +272,148 @@ module.exports = {
             })
         } catch (error) {
             return error
+        }
+    },
+
+
+    import: async(data) => {
+        // console.log(data);
+        try {
+            let khachhangObj = {
+                    ngaytao: localDate(new Date()),
+                    ten: "",
+                    nguoitao_id: 1,
+                    trangthai: 1,
+                    diachi: "",
+                    sodienthoai: "",
+                    ghichu: "",
+                    nhomkhachhang_id: 3,
+                    ngaytao: "",
+                    ngaysua: ""
+                }
+                // let thucungObj = {
+                //     ten: "",
+                //     tuoi: 0,
+                //     trongluong: 0,
+                //     khachhang_id: 0,
+                //     taikham: 0,
+                //     gioitinh: 0,
+                //     nguoitao_id: 0,
+                //     trangthai: 1,
+                //     dacdiem: "",
+                //     chungloai_id: 0,
+                // }
+            let list = [];
+            for (let index = 0; index < data.length; index++) {
+                const element = data[index];
+                khachhangObj = new Object();
+                khachhangObj.ten = element.TenChu;
+                khachhangObj.nguoitao_id = 1;
+                khachhangObj.nhomkhachhang_id = 1
+                khachhangObj.diachi = element.DiaChi;
+                khachhangObj.sodienthoai = element.DienThoai;
+                khachhangObj.trangthai = 1;
+                khachhangObj.ngaytao = element.NgayPhatSinh;
+                khachhangObj.ngaysua = element.NgaySuaDoi;
+                list.push(khachhangObj);
+            }
+            return khachhang.sequelize.transaction().then(async t => {
+                return await khachhang.bulkCreate(list, { transaction: t }).then(() => {
+                    t.commit();
+                }).catch((err) => {
+                    console.log(err);
+                    t.rollback();
+                    throw new Error(err);
+                })
+            })
+        } catch (error) {
+            console.log(error);
+            throw new Error();
+        }
+    },
+    importPet: async(data) => {
+        try {
+            let thucungObj = {
+                ten: "",
+                tuoi: 0,
+                trongluong: 0,
+                khachhang_id: 0,
+                taikham: 0,
+                gioitinh: 0,
+                nguoitao_id: 0,
+                trangthai: 1,
+                dacdiem: "",
+                giong_id: 76,
+                ngaysua: "",
+                trangthai: 1,
+                phieudieutriid: "",
+            }
+            let list = [];
+            for (let index = 0; index < data.length; index++) {
+                const element = data[index];
+                let khID = 7570;
+                let giong = 76;
+                let kh = await khachhang.findOne({
+                        where: {
+                            sodienthoai: element.DienThoai
+                        }
+                    })
+                    // console.log(kh.dataValues.get({ plain: 'text' }) + " id khác hàng");
+                if (element.Giong !== null) {
+                    let gi = await Giong.findOne({
+                        where: {
+                            ten: element.Giong.TenGiong
+                        }
+                    })
+                    if (gi) {
+                        if (gi.dataValues) {
+                            if (gi.dataValues.id)
+                                giong = gi.dataValues.id
+                        }
+                    }
+                }
+                console.log(kh.dataValues + " id khác hàng");
+                if (kh) {
+                    if (kh.dataValues) {
+                        if (kh.dataValues.id)
+                            khID = kh.dataValues.id
+                    }
+                }
+                thucungObj = new Object();
+                thucungObj.khachhang_id = khID;
+                thucungObj.ten = element.TenGiaSuc;
+                if (element.thongtin.length > 0) {
+                    thucungObj.tuoi = element.thongtin[0].Tuoi
+                    thucungObj.trongluong = element.thongtin[0].TrongLuong
+                    for (let a = 0; a < element.thongtin.length; a++) {
+                        let value = element.thongtin[a].PhieuDieuTriId
+                        thucungObj.phieudieutriid += " " + value
+                    }
+                } else {
+                    thucungObj.tuoi = 1
+                    thucungObj.trongluong = 1
+                    thucungObj.phieudieutriid = ""
+                }
+                thucungObj.gioitinh = element.GioiTinh;
+                thucungObj.nguoitao_id = 1;
+                thucungObj.trangthai = element.Xoa;
+                thucungObj.giong_id = giong;
+                thucungObj.ngaytao = element.NgayPhatSinh;
+                thucungObj.ngaysua = element.NgaySuaDoi;
+                list.push(thucungObj);
+            }
+            return giasuc.sequelize.transaction().then(async t => {
+                await giasuc.bulkCreate(list, { transaction: t }).then(() => {
+                    t.commit();
+                }).catch((err) => {
+                    console.log(err);
+                    t.rollback();
+                    throw new Error(err);
+                })
+            })
+        } catch (error) {
+            console.log(error);
+            throw new Error();
         }
     },
 }

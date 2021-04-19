@@ -16,6 +16,9 @@ const PDT_SP = db.define("phieudieutri_sanpham", {
     gia: {
         type: Sequelize.DOUBLE
     },
+    soluongban: {
+        type: Sequelize.DOUBLE
+    },
     ngaytao: {
         type: Sequelize.DATE
     }
