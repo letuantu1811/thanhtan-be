@@ -158,8 +158,7 @@ module.exports = {
                 order: [
                     ['ngaytao', 'DESC']
                 ],
-                where: { trangthai: true },
-                limit: 10
+                where: { trangthai: true }
             });
         } catch (error) {
             return error
