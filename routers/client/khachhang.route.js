@@ -113,4 +113,18 @@ router.post("/importPet", async(req, res) => {
     }
 });
 
+
+router.get("/filter", async(req, res) => {
+    // let data = req.body;
+    try {
+        console.log("Ádasd");
+        const result = await controller.locKH();
+
+        response.success(res, "success", result)
+    } catch (err) {
+        console.log(err.message);
+        response.error(res, "failed", 500)
+    }
+});
+
 module.exports = router;

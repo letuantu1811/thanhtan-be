@@ -74,6 +74,8 @@ module.exports = {
                 nguoitao_id: 1,
                 trangthai: 1,
                 donvitinh_id: 0,
+                donviquydoi_id: 0,
+                giatriquydoi: 0,
                 gianhap: 0,
                 soluong: 0,
                 soluongtoithieu: 0,
@@ -95,6 +97,8 @@ module.exports = {
                     obj.nhacungcap = res.nhacungcap;
                     obj.soluongtoithieu = res.soluongtoithieu
                     obj.donvitinh_id = Number.parseInt(res.donvitinh.id);
+                    obj.donviquydoi_id = Number.parseInt(res.donviquydoi_id);
+                    obj.giatriquydoi = Number.parseInt(res.giatriquydoi);
                     obj.gianhap = Number.parseInt(res.gianhap.split(",").join(""));
                     obj.gia = Number.parseInt(res.gia.split(",").join(""));
                     obj.soluong = res.soluong + Number.parseInt(res.soluongthem);
@@ -109,6 +113,8 @@ module.exports = {
                     obj.nhacungcap = res.nhacungcap;
                     obj.soluongtoithieu = res.soluongtoithieu
                     obj.donvitinh_id = Number.parseInt(res.donvitinh.id);
+                    obj.donviquydoi_id = Number.parseInt(res.donviquydoi.id);
+                    obj.giatriquydoi = Number.parseInt(res.giatriquydoi);
                     obj.gianhap = Number.parseInt(res.gianhap.split(",").join(""));
                     obj.gia = Number.parseInt(res.gia.split(",").join(""));
                     obj.soluong = res.soluong + Number.parseInt(res.soluongthem);
@@ -139,7 +145,9 @@ module.exports = {
                 })
             }
         } catch (error) {
+            console.log(error);
             throw Error(error);
+
         }
     },
 

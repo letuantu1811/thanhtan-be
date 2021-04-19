@@ -29,6 +29,12 @@ const sanpham = db.define("sanpham", {
     donvitinh_id: {
         type: Sequelize.INTEGER
     },
+    donviquydoi_id: {
+        type: Sequelize.INTEGER
+    },
+    giatriquydoi: {
+        type: Sequelize.INTEGER
+    },
     gia: {
         type: Sequelize.DOUBLE
     },
@@ -68,6 +74,12 @@ donvitinh.hasMany(sanpham, {
 sanpham.belongsTo(donvitinh, {
     foreignKey: "donvitinh_id"
 });
+// donvitinh.hasMany(sanpham, {
+//     foreignKey: "donviquydoi_id"
+// });
+// sanpham.belongsTo(donvitinh, {
+//     foreignKey: "donviquydoi_id"
+// });
 
 
 

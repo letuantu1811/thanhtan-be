@@ -415,4 +415,33 @@ module.exports = {
             throw new Error();
         }
     },
+
+    locKH: async() => {
+        try {
+            let a = await khachhang.findAll({
+                include: [{
+                    model: giasuc,
+                    as: 'giasuc'
+                }]
+            });
+            let arr = [];
+            for (let index = 0; index < a.length; index++) {
+                const element = a[index];
+                if (element.dataValues.giasuc.length < 1) {
+                    console.log(element.dataValues.id);
+                    arr.push(element.dataValues.id);
+                }
+
+            }
+            console.log(arr);
+            console.log(arr.length);
+            // await khachhang.destroy({
+            //     where: { id: arr }
+            // });
+            // return res.dataValues.id;
+            // });
+        } catch (error) {
+            throw new Error();
+        }
+    },
 }
