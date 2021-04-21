@@ -216,6 +216,12 @@ module.exports = {
             return await sanpham.findAll({
                 include: [{
                         model: donvitinh,
+                        as: 'donvitinh',
+                        require: true
+                    },
+                    {
+                        model: donvitinh,
+                        as: 'donviquydoi',
                         require: true
                     },
                     {
@@ -316,6 +322,8 @@ module.exports = {
                     tenthaythe: data.tenthaythe,
                     nhacungcap: data.nhacungcap,
                     nhomsanpham_id: data.nhomsanpham_id,
+                    donviquydoi_id: data.donviquydoi_id,
+                    giatriquydoi: data.giatriquydoi,
                     donvitinh_id: data.donvitinh_id,
                     gia: data.gia,
                     gianhap: data.gianhap,
@@ -353,20 +361,24 @@ module.exports = {
                 nguoitao_id: 1,
                 trangthai: 1,
                 donvitinh_id: 0,
+                donviquydoi_id: 0,
                 gianhap: 0,
                 soluong: 0,
                 soluongtoithieu: 0,
+                giatriquydoi: 1,
                 gia: 0,
                 ngaytao: ""
             }
             for (let index = 0; index < listSP.length; index++) {
                 let res = listSP[index];
-                let donvitinhid = donvitinhArr.filter(item => item.ten === res.DonViTinh.TenDonViTinh);
-                let nhomthuocid = nhomthuocArr.filter(item => item.ten === res.NhomThuoc.TenNhomThuoc);
+                let donviquydoiid = donvitinhArr.filter(item => item.ten.toUpperCase() === res.DonViTinhQuyDoi.TenDonViTinh.toUpperCase());
+                let donvitinhid = donvitinhArr.filter(item => item.ten.toUpperCase() === res.DonViTinh.TenDonViTinh.toUpperCase());
+                let nhomthuocid = nhomthuocArr.filter(item => item.ten.toUpperCase() === res.NhomThuoc.TenNhomThuoc.toUpperCase());
                 // console.log(nhomthuocid[0].dataValues.id);
                 // console.log(donvitinhid[0].dataValues.id);
                 let ntid = 24;
                 let dvtid = 56;
+                let dvqdid = 56;
                 if (nhomthuocid[0]) {
                     if (nhomthuocid[0].dataValues.id) {
                         ntid = nhomthuocid[0].dataValues.id;
@@ -377,15 +389,24 @@ module.exports = {
                         dvtid = donvitinhid[0].dataValues.id;
                     }
                 }
+                if (donviquydoiid[0]) {
+                    if (donviquydoiid[0].dataValues.id) {
+                        dvqdid = donviquydoiid[0].dataValues.id;
+                    }
+                }
                 obj = new Object();
                 obj.ngaytao = localDate(new Date());
                 obj.ten = res.TenThuoc;
                 obj.tenthaythe = res.TenThuocKhac || res.TenThuoc;
                 obj.nhomsanpham_id = ntid
-                obj.trangthai = 1;
+                obj.trangthai = res.Xoa ? 0 : 1;
                 obj.soluongtoithieu = res.SLTonToiThieu
                 obj.donvitinh_id = dvtid;
+                obj.donviquydoi_id = dvqdid;
+                obj.giatriquydoi = Number.parseInt(res.GiaTriQuyDoi) || 1;
                 obj.gianhap = res.DonGiaNhap;
+                obj.ngaytao = res.NgayPhatSinh;
+                obj.ngaysua = res.NgaySuaDoi;
                 obj.gia = res.DonGiaBan;
                 obj.soluong = 100;
                 arrNew.push(obj);

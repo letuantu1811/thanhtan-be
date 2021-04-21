@@ -69,10 +69,20 @@ sanpham.belongsTo(nhomsanpham, {
     foreignKey: "nhomsanpham_id"
 });
 donvitinh.hasMany(sanpham, {
-    foreignKey: "donvitinh_id"
+    foreignKey: "donvitinh_id",
+    as: 'donvitinh'
 });
 sanpham.belongsTo(donvitinh, {
-    foreignKey: "donvitinh_id"
+    foreignKey: "donvitinh_id",
+    as: 'donvitinh'
+});
+donvitinh.hasMany(sanpham, {
+    foreignKey: "donviquydoi_id",
+    as: 'donviquydoi'
+});
+sanpham.belongsTo(donvitinh, {
+    foreignKey: "donviquydoi_id",
+    as: 'donviquydoi'
 });
 // donvitinh.hasMany(sanpham, {
 //     foreignKey: "donviquydoi_id"

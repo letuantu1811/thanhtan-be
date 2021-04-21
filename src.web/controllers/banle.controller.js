@@ -58,7 +58,8 @@ module.exports = {
                         model: sanpham,
                         as: 'sanpham',
                         include: {
-                            model: Donvitinh
+                            model: Donvitinh,
+                            as: "donvitinh"
                         }
                     },
                     {
@@ -74,7 +75,8 @@ module.exports = {
 
             });
         } catch (error) {
-            return error
+            console.log(error);
+            throw new Error();
         }
     },
     // disable congdichvu
