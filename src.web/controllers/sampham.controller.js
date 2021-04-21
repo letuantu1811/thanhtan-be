@@ -293,7 +293,8 @@ module.exports = {
             return await sanpham.findAll({
                 include: [{
                         attributes: ['id', 'ten'],
-                        model: donvitinh
+                        model: donvitinh,
+                        as: 'donvitinh'
                     },
                     {
                         attributes: ['id', 'ten'],

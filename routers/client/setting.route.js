@@ -13,7 +13,8 @@ router.get("/", async(req, res) => {
         const result = await sanpham.findAll({
             include: [{
                     attributes: ['id', 'ten'],
-                    model: Donvitinh
+                    model: Donvitinh,
+                    as: 'donvitinh'
                 },
                 {
                     attributes: ['id', 'ten'],
@@ -74,7 +75,7 @@ router.get("/totalExam", async(req, res) => {
 router.put("/:id", async(req, res) => {
     let id = Number.parseInt(req.params.id);
     try {
-        let an = await sanpham.findOne({ where: {id: id}});
+        let an = await sanpham.findOne({ where: { id: id } });
         console.log(an.get({ plain: 'text' }));
         if (an.dataValues.an) {
             an = false;
