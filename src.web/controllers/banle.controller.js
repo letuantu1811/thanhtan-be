@@ -94,6 +94,9 @@ module.exports = {
             })
             console.log(banleID);
             let arr = [];
+            if (body.listSP.length < 1) {
+                throw new Error()
+            }
             for (let index = 0; index < body.listSP.length; index++) {
                 const element = body.listSP[index];
                 let obj = {
