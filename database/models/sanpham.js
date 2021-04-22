@@ -44,6 +44,9 @@ const sanpham = db.define("sanpham", {
     soluong: {
         type: Sequelize.INTEGER
     },
+    soluongquydoiton: {
+        type: Sequelize.INTEGER
+    },
     soluongtoithieu: {
         type: Sequelize.INTEGER
     },

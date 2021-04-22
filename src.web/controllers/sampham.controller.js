@@ -329,7 +329,8 @@ module.exports = {
                     gia: data.gia,
                     gianhap: data.gianhap,
                     soluongtoithieu: data.soluongtoithieu,
-                    soluong: data.soluong
+                    soluong: data.soluong,
+                    soluongquydoiton: data.soluongquydoiton
                 }, {
                     where: {
                         id: data.id

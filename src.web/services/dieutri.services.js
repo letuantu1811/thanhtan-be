@@ -4,6 +4,7 @@ const nhomsanpham = require("./../../database/models/nhomsanpham");
 const phieudieutri_congdichvu = require("./../../database/models/phieudieutri_congdichvu");
 const phieudieutri_sanpham = require("./../../database/models/phieudieutri_sanpham");
 const phieudieutri = require("./../../database/models/phieudieutri");
+const { localDate } = require("../../utils/localDate");
 // {
 //     "khachhang": {
 //         "id": 1,
@@ -150,7 +151,8 @@ module.exports = {
             gioitinh: res.thucung.gioitinh,
             chungloai_id: res.thucung.chungloai.id !== 0 ? res.thucung.chungloai.id : null,
             giong_id: res.thucung.giong.id === 0 ? null : res.thucung.giong.id,
-            khachhang_id: res.khachhang.id
+            khachhang_id: res.khachhang.id,
+            ngaytao: localDate(new Date()),
         }).then(res => {
             console.log(res);
             return res.dataValues.id;
@@ -176,7 +178,8 @@ module.exports = {
         let khID = await khachhang.create({
             ten: res.khachhang.ten,
             diachi: res.khachhang.diachi,
-            sodienthoai: res.khachhang.sodienthoai
+            sodienthoai: res.khachhang.sodienthoai,
+            ngaytao: localDate(new Date())
         }).then(res => {
             console.log(res + " create khach hang at taohoso");
             return res.dataValues.id;
@@ -191,7 +194,8 @@ module.exports = {
             gioitinh: res.thucung.gioitinh,
             chungloai_id: res.thucung.chungloai.id !== 0 ? res.thucung.chungloai.id : null,
             giong_id: res.thucung.giong.id === 0 ? null : res.thucung.giong.id,
-            khachhang_id: khID
+            khachhang_id: khID,
+            ngaytao: localDate(new Date())
         }).then(res => {
             console.log(res);
             return res.dataValues.id;
@@ -215,7 +219,7 @@ module.exports = {
 
 async function create_phieudieutri(body) {
     return await phieudieutri.create({
-        triuchung: body.triuchung,
+        trieuchung: body.trieuchung,
         chandoan: body.chandoan,
         ghichu: body.ghichu,
         thanhtien: body.thanhtien,
@@ -223,7 +227,8 @@ async function create_phieudieutri(body) {
         khachhang_id: body.khachhang.id,
         giasuc_id: body.thucung.id,
         bacsi_id: body.bacsiID,
-        noidung: JSON.stringify(body)
+        noidung: JSON.stringify(body),
+        ngaytao: localDate(new Date()),
     }).then(async res => {
         return res.dataValues.id;
     })

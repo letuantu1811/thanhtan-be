@@ -6,6 +6,9 @@ const moment = require("moment");
 const sequelize = require("sequelize");
 const Thanhvien = require('../../database/models/thanhvien');
 const { localDate } = require('../../utils/localDate');
+const giasuc = require('../../database/models/giasuc');
+const phieudieutri = require('../../database/models/phieudieutri');
+const khachhang = require('../../database/models/khachhang');
 
 module.exports = {
     // Creating model
@@ -75,6 +78,7 @@ module.exports = {
             return error
         }
     },
+
     // get many san pham
     getMany: async(body) => {
         let limit = body.limit;
@@ -95,6 +99,7 @@ module.exports = {
             return error
         }
     },
+
     // disable model
     disable: async(id) => {
         try {
@@ -109,6 +114,7 @@ module.exports = {
             return error
         }
     },
+
     // disable model
     getAllToday: async() => {
         try {
@@ -122,6 +128,7 @@ module.exports = {
             return error
         }
     },
+
     getAll: async(role) => {
         let obj = {
             limit: null
@@ -137,13 +144,20 @@ module.exports = {
             let today = tzSaiGon();
             console.log(today);
             return await model.findAll({
+                include: [{
+                    model: giasuc
+                }],
                 ...obj,
                 where: {
                     trangthai: 1
-                }
+                },
+                order: [
+                    ['ngaytao', 'DESC']
+                ]
             });
         } catch (error) {
-            return error
+            console.log(error);
+            throw new Error()
         }
     },
 
@@ -183,5 +197,67 @@ module.exports = {
         } catch (error) {
             return error
         }
-    }
+    },
+
+    importEXAM: async(res) => {
+        console.log(model);
+        try {
+            let arr = [];
+            let obj = {
+                mapping_id: "",
+                khachhang_id: 0,
+                nguoitao_id: 0,
+                ngaytao: "",
+                ngaysua: "",
+                trangthai: 1,
+                trieuchung: "",
+                ghichu: "",
+                ngaytaikham: 1,
+                dataikham: 0,
+                tylegiamgia: 0,
+                thanhtien: 0,
+                giasuc_id: 1,
+                noidung: "",
+                bacsi_id: 1,
+                chandoan: ""
+            };
+            for (let index = 0; index < res.length; index++) {
+                const item = res[index];
+                let kh = await khachhang.findOne({
+                    where: {
+                        sodienthoai: item.thongtin.DienThoai
+                    }
+                })
+                let name = {};
+                if (kh) {
+                    // let name = await giasuc.findOne({ where: { ten: item.thongtin.TenGiaSuc, khachhang_id: kh.dataValues.id } });
+                    name = await giasuc.findOne({ where: { ten: item.thongtin.TenGiaSuc, khachhang_id: kh.dataValues.id } });
+                } else {
+                    name = await giasuc.findOne({ where: { ten: item.thongtin.TenGiaSuc } });
+
+                }
+                // console.log(name);
+                if (name !== null) {
+                    obj = new Object();
+                    obj.khachhang_id = name.dataValues.id;
+                    obj.nguoitao_id = 1;
+                    obj.ngaytao = item.NgayPhatSinh;
+                    obj.ngaysua = item.NgaySuaDoi;
+                    obj.trangthai = item.Xoa ? 0 : 1;
+                    obj.trieuchung = item.TrieuChung;
+                    obj.chandoan = item.ChanDoan;
+                    obj.ghichu = item.GhiChu;
+                    obj.ngaytaikham = item.NgayTaiKham;
+                    obj.dataikham = item.DaTaiKham;
+                    obj.tylegiamgia = item.TyLeGiamGia;
+                    obj.mapping_id = item.PhieuDieuTriId;
+                    arr.push(obj);
+                }
+            }
+            await phieudieutri.bulkCreate(arr);
+        } catch (error) {
+            console.log(error);
+            throw new Error()
+        }
+    },
 }

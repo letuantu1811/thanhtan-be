@@ -9,7 +9,7 @@ const response = require('../../utils/api.res/response');
 router.get("/notification", async(req, res) => {
     try {
         const result = await dieutri.getNotification();
-        
+
         response.success(res, "success", result)
     } catch (err) {
         console.log(err.message);
@@ -21,7 +21,7 @@ router.get("/", async(req, res) => {
     let body = req.body;
     try {
         const result = await dieutri.getAllToday();
-        
+
         response.success(res, "success", result)
     } catch (err) {
         console.log(err.message);
@@ -32,7 +32,7 @@ router.get("/reexam", async(req, res) => {
     let body = req.body;
     try {
         const result = await dieutri.getReExamToday();
-        
+
         response.success(res, "success", result)
     } catch (err) {
         console.log(err.message);
@@ -45,7 +45,7 @@ router.post("/create", async(req, res) => {
     let body = req.body;
     try {
         const result = await dieutri.create(body);
-        
+
         response.success(res, "success", result)
     } catch (err) {
         console.log(err.message);
@@ -57,6 +57,16 @@ router.post("/createHoSo", async(req, res) => {
     let body = req.body;
     try {
         const result = await dieutri.createHoSo(body);
+        response.success(res, "success", result)
+    } catch (err) {
+        console.log(err.message);
+        response.error(res, "failed", 500)
+    }
+});
+router.post("/importEXAM", async(req, res) => {
+    let body = req.body;
+    try {
+        const result = await dieutri.importEXAM(body);
         response.success(res, "success", result)
     } catch (err) {
         console.log(err.message);

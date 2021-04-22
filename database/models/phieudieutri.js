@@ -6,6 +6,7 @@ const congdichvu = require("../models/congdichvu");
 const Sanpham = require("../models/sanpham");
 const sanpham = require("../models/sanpham");
 const bacsi = require("../models/bacsi");
+const giasuc = require("./giasuc");
 
 const phieudieutri = db.define("phieudieutri", {
     id: {
@@ -54,6 +55,9 @@ const phieudieutri = db.define("phieudieutri", {
     },
     noidung: {
         type: Sequelize.TEXT
+    },
+    mapping_id: {
+        type: Sequelize.TEXT
     }
 }, {
     timestamps: false,
@@ -85,5 +89,11 @@ bacsi.hasMany(phieudieutri, {
 phieudieutri.belongsTo(bacsi, {
     foreignKey: "bacsi_id",
     as: 'bacsi'
+});
+giasuc.hasMany(phieudieutri, {
+    foreignKey: "giasuc_id"
+});
+phieudieutri.belongsTo(giasuc, {
+    foreignKey: "giasuc_id"
 });
 module.exports = phieudieutri;
