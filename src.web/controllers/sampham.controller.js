@@ -10,20 +10,6 @@ module.exports = {
     // Creating sanpham
     create: async(res) => {
         console.log(sanpham);
-        // try {
-        //     return await sanpham.create({
-        //         ten: res.ten,
-        //         nhomsanpham_id: res.nhomsanpham_id,
-        //         thuoc: res.thuoc,
-        //         nguoitao_id: res.nguoitao_id,
-        //         trangthai: res.trangthai,
-        //         donvitinh_id: res.donvitinh_id,
-        //         gianhap: res.gianhap,
-        //         soluong: res.soluong
-        //     })
-        // } catch (error) {
-        //     return error
-        // }
         try {
             if (res.thucung.length !== 0 || res.thucung.length !== '') {
                 let arr = [];
@@ -62,6 +48,7 @@ module.exports = {
             return error
         }
     },
+
     createMulti: async(listSP) => {
         try {
             let arrUpdate = [];
@@ -83,10 +70,8 @@ module.exports = {
                 ngaytao: ""
             }
             for (let index = 0; index < listSP.length; index++) {
-
                 const res = listSP[index];
                 if (res.id === "0" || res.id === 0 || res.id === null) {
-
                     obj = new Object();
                     obj.ngaytao = localDate(new Date());
                     obj.ten = res.tenhanghoa;
@@ -313,7 +298,7 @@ module.exports = {
         }
     },
 
-    // disable sanpham
+    // update sanpham
     update: async(body) => {
         let data = body;
         try {
@@ -426,6 +411,40 @@ module.exports = {
             }
         } catch (error) {
             throw Error(error);
+        }
+    },
+
+    // create sanpham
+    createOne: async(body) => {
+        let data = body;
+        try {
+            return sanpham.sequelize.transaction().then(async t => {
+                return await sanpham.create({
+                    ten: data.tenhanghoa,
+                    tenthaythe: data.tenthaythe,
+                    nhacungcap: data.nhacungcap,
+                    nhomsanpham_id: data.nhomsanpham_id,
+                    donviquydoi_id: data.donviquydoi_id,
+                    giatriquydoi: data.giatriquydoi,
+                    donvitinh_id: data.donvitinh_id,
+                    gia: data.gia,
+                    gianhap: data.gianhap,
+                    soluongtoithieu: data.soluongtoithieu,
+                    soluong: data.soluong,
+                    soluongquydoiton: data.soluongquydoiton
+                }, {
+                    where: {
+                        id: data.id
+                    }
+                }, { transaction: t }).then(() => {
+                    t.commit();
+                }).catch((err) => {
+                    t.rollback();
+                    throw new Error(err);
+                })
+            })
+        } catch (error) {
+            throw new Error(err);
         }
     },
 }

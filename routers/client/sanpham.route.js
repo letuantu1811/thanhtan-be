@@ -121,4 +121,16 @@ router.post("/import", async(req, res) => {
     }
 });
 
+// Creating san pham
+router.post("/createOne", async(req, res) => {
+    let body = req.body;
+    try {
+        const result = await controller.createOne(body);
+        response.success(res, "success", result)
+    } catch (err) {
+        console.log(err.message);
+        response.error(res, "failed", 500)
+    }
+});
+
 module.exports = router;
