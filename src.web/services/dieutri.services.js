@@ -127,48 +127,54 @@ module.exports = {
 
 
     already: async(body) => {
-        console.log("already");
-        let res = body;
-        // update khach hang
-        await khachhang.update({
-            ten: res.khachhang.ten,
-            diachi: res.khachhang.diachi,
-            sodienthoai: res.khachhang.sodienthoai
-        }, {
-            where: {
-                id: res.khachhang.id
-            }
-        }).then(res => {
-            console.log(res + " update khach hang at taohoso");
-        });
+        try {
 
-        //update thu cung
-        let gsID = await giasuc.create({
-            ten: res.thucung.ten,
-            trongluong: res.thucung.trongluong,
-            dacdiem: res.thucung.dacdiem,
-            tuoi: res.thucung.tuoi,
-            gioitinh: res.thucung.gioitinh,
-            chungloai_id: res.thucung.chungloai.id !== 0 ? res.thucung.chungloai.id : null,
-            giong_id: res.thucung.giong.id === 0 ? null : res.thucung.giong.id,
-            khachhang_id: res.khachhang.id,
-            ngaytao: localDate(new Date()),
-        }).then(res => {
+            console.log("already");
+            let res = body;
+            // update khach hang
+            await khachhang.update({
+                ten: res.khachhang.ten,
+                diachi: res.khachhang.diachi,
+                sodienthoai: res.khachhang.sodienthoai
+            }, {
+                where: {
+                    id: res.khachhang.id
+                }
+            }).then(res => {
+                console.log(res + " update khach hang at taohoso");
+            });
+
+            //update thu cung
+            let gsID = await giasuc.create({
+                ten: res.thucung.ten,
+                trongluong: res.thucung.trongluong,
+                dacdiem: res.thucung.dacdiem,
+                tuoi: res.thucung.tuoi,
+                gioitinh: res.thucung.gioitinh,
+                chungloai_id: res.thucung.chungloai.id !== 0 ? res.thucung.chungloai.id : null,
+                giong_id: res.thucung.giong.id === 0 ? null : res.thucung.giong.id,
+                khachhang_id: res.khachhang.id,
+                ngaytao: localDate(new Date()),
+            }).then(res => {
+                console.log(res);
+                return res.dataValues.id;
+            });
+            res.thucung.id = gsID;
             console.log(res);
-            return res.dataValues.id;
-        });
-        res.thucung.id = gsID;
-        console.log(res);
-        let pdtID = await create_phieudieutri(res);
+            let pdtID = await create_phieudieutri(res);
 
 
 
-        await create_phieudieutri_sanpham(pdtID, res.dsSP).then(async res => {
-            console.log(res + " tại create_phieudieutri_sanpham");
-        });
-        await create_phieudieutri_congdichvu(pdtID, res.dsCDV).then(res => {
-            console.log(res + " tại create_phieudieutri_congdichvu ");
-        });
+            await create_phieudieutri_sanpham(pdtID, res.dsSP).then(async res => {
+                console.log(res + " tại create_phieudieutri_sanpham");
+            });
+            await create_phieudieutri_congdichvu(pdtID, res.dsCDV).then(res => {
+                console.log(res + " tại create_phieudieutri_congdichvu ");
+            });
+        } catch (error) {
+            log.error(error)
+            throw new Error()
+        }
     },
 
     new: async(body) => {
@@ -241,11 +247,13 @@ async function create_phieudieutri_sanpham(pdtID, listSP) {
             const element = listSP[index];
             let obj = {
                 phieudieutri_id: 0,
-                sanpham_id: 0
+                sanpham_id: 0,
+                ngaytao: localDate(new Date())
             }
             obj = new Object();
             obj.phieudieutri_id = pdtID;
             obj.sanpham_id = element.id;
+            obj.ngaytao = localDate(new Date());
             arr.push(obj)
         }
 
@@ -262,11 +270,13 @@ async function create_phieudieutri_congdichvu(pdtID, listCDV) {
             const element = listCDV[index];
             let obj = {
                 phieudieutri_id: 0,
-                congdichvu_id: 0
+                congdichvu_id: 0,
+                ngaytao: localDate(new Date())
             }
             obj = new Object();
             obj.phieudieutri_id = pdtID;
             obj.congdichvu_id = element.id;
+            obj.ngaytao = localDate(new Date());
             arr.push(obj)
         }
         await phieudieutri_congdichvu.bulkCreate(arr);

@@ -57,6 +57,7 @@ router.post("/createHoSo", async(req, res) => {
     let body = req.body;
     try {
         const result = await dieutri.createHoSo(body);
+        console.log(result);
         response.success(res, "success", result)
     } catch (err) {
         console.log(err.message);
@@ -67,6 +68,16 @@ router.post("/importEXAM", async(req, res) => {
     let body = req.body;
     try {
         const result = await dieutri.importEXAM(body);
+        response.success(res, "success", result)
+    } catch (err) {
+        console.log(err.message);
+        response.error(res, "failed", 500)
+    }
+});
+router.post("/importSP", async(req, res) => {
+    let body = req.body;
+    try {
+        const result = await dieutri.importServicePlus(body);
         response.success(res, "success", result)
     } catch (err) {
         console.log(err.message);

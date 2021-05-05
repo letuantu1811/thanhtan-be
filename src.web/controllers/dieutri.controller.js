@@ -8,7 +8,10 @@ const Thanhvien = require('../../database/models/thanhvien');
 const { localDate } = require('../../utils/localDate');
 const giasuc = require('../../database/models/giasuc');
 const phieudieutri = require('../../database/models/phieudieutri');
+const phieudieutri_congdichvu = require('../../database/models/phieudieutri_congdichvu');
 const khachhang = require('../../database/models/khachhang');
+const Congdichvu = require('../../database/models/congdichvu');
+const sanpham = require('../../database/models/sanpham');
 
 module.exports = {
     // Creating model
@@ -62,7 +65,7 @@ module.exports = {
             }
         } catch (error) {
             console.log(error);
-            return error
+            throw new Error();
         }
     },
 
@@ -260,4 +263,115 @@ module.exports = {
             throw new Error()
         }
     },
+
+    importServicePlus: async(res) => {
+        try {
+            let obj = {
+                phieudieutri_id: 0,
+                congdichvu_id: 0,
+                gia: 0,
+                ngaytao: ""
+            }
+            let arr = [];
+            // ``
+            for (let index = 0; index < res.length; index++) {
+                const element = res[index];
+                let pdtID = await phieudieutri.findOne({
+                    attributes: ['id'],
+                    where: {
+                        mapping_id: element.PhieuDieuTriId
+                    }
+                })
+                for (let index2 = 0; index2 < element.congdichvu.length; index2++) {
+                    const cdv = element.congdichvu[index2];
+                    let cdvID = await Congdichvu.findOne({
+                        attributes: ['id', 'gia'],
+                        where: {
+                            ten: cdv.TenCongDichVu
+                        }
+                    })
+                    obj = new Object();
+                    if (cdvID !== null && pdtID !== null) {
+                        obj.phieudieutri_id = pdtID.id !== null ? pdtID.id : ''
+                        obj.congdichvu_id = cdvID.id !== null ? cdvID.id : ''
+                        obj.ngaytao = element.NgayDieuTri
+                        obj.gia = cdvID.gia
+                        if (obj.phieudieutri_id !== '' || obj.congdichvu_id !== '')
+                            arr.push(obj);
+                    }
+                }
+
+            }
+            if (arr.length > 0) {
+                return phieudieutri_congdichvu.sequelize.transaction().then(async t => {
+                    return await phieudieutri_congdichvu.bulkCreate(arr, { transaction: t }).then(() => {
+                        return t.commit();
+                    }).catch(err => {
+                        console.log(err + " tại func thêm phieudieutri_congdichv");
+                        t.rollback();
+                        throw Error(err);
+                    })
+                })
+            }
+            // console.log(arr);
+        } catch (error) {
+            console.log(error);
+            throw new Error();
+        }
+    },
+    importProducts: async(res) => {
+        try {
+            let obj = {
+                phieudieutri_id: 0,
+                sanpham_id: 0,
+                gia: 0,
+                ngaytao: ""
+            }
+            let arr = [];
+            // ``
+            for (let index = 0; index < res.length; index++) {
+                const element = res[index];
+                let pdtID = await phieudieutri.findOne({
+                    attributes: ['id'],
+                    where: {
+                        mapping_id: element.PhieuDieuTriId
+                    }
+                })
+                for (let index2 = 0; index2 < element.sanpham.length; index2++) {
+                    const cdv = element.sanpham[index2];
+                    let spID = await sanpham.findOne({
+                        attributes: ['id', 'gia'],
+                        where: {
+                            ten: cdv.TenThuoc
+                        }
+                    })
+                    obj = new Object();
+                    if (spID !== null && pdtID !== null) {
+                        obj.phieudieutri_id = pdtID.id !== null ? pdtID.id : ''
+                        obj.sanpham_id = spID.id !== null ? spID.id : ''
+                        obj.ngaytao = element.NgayPhatSinh
+                        obj.gia = spID.gia
+                        if (obj.phieudieutri_id !== '' || obj.sanpham_id !== '')
+                            arr.push(obj);
+                    }
+                }
+
+            }
+            if (arr.length > 0) {
+                return phieudieutri_sanpham.sequelize.transaction().then(async t => {
+                    return await phieudieutri_sanpham.bulkCreate(arr, { transaction: t }).then(() => {
+                        return t.commit();
+                    }).catch(err => {
+                        console.log(err + " tại func thêm phieudieutri_sanpham");
+                        t.rollback();
+                        throw Error(err);
+                    })
+                })
+            }
+            // console.log(arr);
+        } catch (error) {
+            console.log(error);
+            throw new Error();
+        }
+    }
 }

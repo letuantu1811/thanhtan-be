@@ -14,7 +14,7 @@ const PDT_CDV = db.define("phieudieutri_congdichvu", {
         type: Sequelize.INTEGER
     },
     gia: {
-        type: Sequelize.DOUBLE
+        type: Sequelize.STRING
     },
     ngaytao: {
         type: Sequelize.DATE
