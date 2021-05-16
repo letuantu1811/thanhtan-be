@@ -12,6 +12,7 @@ module.exports = {
                     ngaytao: localDate(new Date()),
                     nguoitao_id: res.nguoitao_id,
                     tendangnhap: res.tendangnhap,
+                    tendaydu: res.tendaydu,
                     matkhau: res.matkhau,
                     nhomthanhvien_id: res.nhomthanhvien_id,
                     trangthai: ENUM.ENABLE,
@@ -35,7 +36,8 @@ module.exports = {
                 return await thanhvien.update({
                     matkhau: res.matkhau,
                     nhomthanhvien_id: res.nhomthanhvien_id,
-                    email: res.email
+                    email: res.email,
+                    tendaydu: res.tendaydu
                 }, {
                     where: {
                         id: res.id
