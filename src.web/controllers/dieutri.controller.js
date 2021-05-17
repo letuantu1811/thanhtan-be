@@ -125,8 +125,13 @@ module.exports = {
             let today = tzSaiGon();
             console.log(today);
             return await model.findAll({
-                where: sequelize.where(sequelize.fn('date', sequelize.col('ngaytao')), '=', today)
-            });
+                    where: sequelize.where(sequelize.fn('date', sequelize.col('ngaytao')), '=', today),
+                    order: [
+                        ['ngaytao', 'DESC']
+                    ]
+                }
+
+            );
         } catch (error) {
             return error
         }
@@ -171,7 +176,12 @@ module.exports = {
             return await model.findAll({
                 where: {
                     where: sequelize.where(sequelize.fn('date', sequelize.col('ngaytaikham')), '=', today)
-                }
+
+
+                },
+                order: [
+                    ['ngaytao', 'DESC']
+                ]
             });
         } catch (error) {
             return error

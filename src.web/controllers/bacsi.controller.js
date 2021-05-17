@@ -24,7 +24,7 @@ module.exports = {
         try {
             return await bacsi.findAll({
                 attributes: {
-                    include: ['id', ['tendangnhap', 'ten']],
+                    include: ['id', ['tendangnhap', 'ten'], 'tendaydu'],
                     exclude: ['matkhau']
                 },
                 where: {
@@ -56,7 +56,7 @@ module.exports = {
     getAll: async() => {
         try {
             return await bacsi.findAll({
-                attributes: ['id', ['tendangnhap', 'ten']],
+                attributes: ['id', ['tendangnhap', 'ten'], 'tendaydu'],
                 where: {
                     trangthai: true
                 }

@@ -58,6 +58,9 @@ const phieudieutri = db.define("phieudieutri", {
     },
     mapping_id: {
         type: Sequelize.TEXT
+    },
+    sophieudieutri: {
+        type: Sequelize.INTEGER
     }
 }, {
     timestamps: false,
