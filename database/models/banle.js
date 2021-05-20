@@ -24,6 +24,9 @@ const Banle = db.define("banle", {
     trangthai: {
         type: Sequelize.BOOLEAN
     },
+    ghichu: {
+        type: Sequelize.STRING
+    },
     ngaytao: {
         type: Sequelize.DATE
     },

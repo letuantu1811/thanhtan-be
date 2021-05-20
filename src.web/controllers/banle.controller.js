@@ -55,22 +55,22 @@ module.exports = {
         try {
             return await model.findAll({
                 include: [{
-                        model: sanpham,
-                        as: 'sanpham',
-                        include: {
-                            model: Donvitinh,
-                            as: "donvitinh"
-                        }
-                    },
-                    {
-                        model: khachhang,
-                        as: 'khachhang'
-                    },
-                    {
-                        attributes: { exclude: ['matkhau'] },
-                        model: Thanhvien,
-                        as: 'nguoiban'
+                    model: sanpham,
+                    as: 'sanpham',
+                    include: {
+                        model: Donvitinh,
+                        as: "donvitinh"
                     }
+                }, {
+                    model: khachhang,
+                    as: 'khachhang'
+                }, {
+                    attributes: { exclude: ['matkhau'] },
+                    model: Thanhvien,
+                    as: 'nguoiban'
+                }],
+                order: [
+                    ['ngaytao', 'DESC']
                 ]
 
             });
@@ -85,6 +85,7 @@ module.exports = {
             let banleID = await model.create({
                 ngaytao: localDate(new Date()),
                 ten: body.ten,
+                ghichu: body.ghichu,
                 nguoitao_id: body.nguoitao_id,
                 trangthai: 1,
                 tylegiamgia: body.tylegiamgia,
