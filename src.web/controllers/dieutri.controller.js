@@ -175,7 +175,8 @@ module.exports = {
             console.log(today);
             return await model.findAll({
                 where: {
-                    where: sequelize.where(sequelize.fn('date', sequelize.col('ngaytaikham')), '=', today)
+                    where: sequelize.where(sequelize.fn('date', sequelize.col('ngaytaikham')), '=', today),
+                    dataikham: null
 
 
                 },
@@ -194,7 +195,8 @@ module.exports = {
             console.log(today);
             let reExamCount = await model.count({
                 where: {
-                    where: sequelize.where(sequelize.fn('date', sequelize.col('ngaytaikham')), '=', today)
+                    where: sequelize.where(sequelize.fn('date', sequelize.col('ngaytaikham')), '=', today),
+                    dataikham: null
                 }
             });
             let examTodayCount = await model.count({

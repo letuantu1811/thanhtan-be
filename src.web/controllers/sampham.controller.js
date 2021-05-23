@@ -76,7 +76,7 @@ module.exports = {
                     obj.ngaytao = localDate(new Date());
                     obj.ten = res.tenhanghoa;
                     obj.tenthaythe = res.tenthaythe;
-                    obj.nhomsanpham_id = Number.parseInt(res.nhomsanpham.id);
+                    obj.nhomsanpham_id = Number.parseInt(res.nhomsanpham.id) === 0 ? 27 : Number.parseInt(res.nhomsanpham.id);
                     obj.nguoitao_id = (res.nguoitao_id !== undefined && res.nguoitao_id !== 0) ? res.nguoitao_id : 1;
                     obj.trangthai = 1;
                     obj.nhacungcap = res.nhacungcap;
@@ -93,7 +93,7 @@ module.exports = {
                     obj.ngaytao = localDate(new Date());
                     obj.ten = res.tenhanghoa;
                     obj.tenthaythe = res.tenthaythe;
-                    obj.nhomsanpham_id = Number.parseInt(res.nhomsanpham.id);
+                    obj.nhomsanpham_id = Number.parseInt(res.nhomsanpham.id) === 0 ? 27 : Number.parseInt(res.nhomsanpham.id);
                     obj.trangthai = 1;
                     obj.nhacungcap = res.nhacungcap;
                     obj.soluongtoithieu = res.soluongtoithieu

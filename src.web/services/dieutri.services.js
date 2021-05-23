@@ -226,6 +226,7 @@ module.exports = {
 async function create_phieudieutri(body) {
     return await phieudieutri.create({
         sophieudieutri: body.sophieudieutri,
+        dataikham: body.taikham ? 1 : null,
         trieuchung: body.trieuchung,
         chandoan: body.chandoan,
         ghichu: body.ghichu,
