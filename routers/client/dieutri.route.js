@@ -110,6 +110,56 @@ router.get("/all", async(req, res) => {
     }
 });
 
+// Getting many exam by pet id
+router.get("/examByPetId", async(req, res) => {
+    try {
+        let id = req.query.id
+        let phieudieutriid = req.query.phieudieutriid
+        console.log(phieudieutriid + "123");
+        const result = await dieutri.getAllExamByPetId(id, phieudieutriid);
+        response.success(res, "success", result)
+    } catch (err) {
+        console.log(err.message);
+        response.error(res, "failed", 500)
+    }
+});
+
+// Update many exam by pet id
+router.put("/updateHSBA", async(req, res) => {
+    let data = req.body;
+    try {
+        const result = await dieutri.updateHSBA(data);
+        response.success(res, "success", result)
+    } catch (err) {
+        console.log(err.message);
+        response.error(res, "failed", 500)
+    }
+});
+
+// Update pet by pet id
+router.put("/updatePet", async(req, res) => {
+    let data = req.body;
+    try {
+        const result = await dieutri.updatePet(data);
+        response.success(res, "success", result)
+    } catch (err) {
+        console.log(err.message);
+        response.error(res, "failed", 500)
+    }
+});
+
+// delete pet by pet id
+router.delete("/deletePet", async(req, res) => {
+    let data = req.query.id;
+    try {
+        const result = await dieutri.deletePet(data);
+        response.success(res, "success", result)
+    } catch (err) {
+        console.log(err.message);
+        response.error(res, "failed", 500)
+    }
+});
+
 
 
 module.exports = router;

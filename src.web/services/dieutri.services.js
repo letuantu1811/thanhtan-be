@@ -236,7 +236,8 @@ async function create_phieudieutri(body) {
         giasuc_id: body.thucung.id,
         bacsi_id: body.bacsiID,
         noidung: JSON.stringify(body),
-        ngaytao: localDate(new Date()),
+        // ngaytao: localDate(new Date()),
+        ngaytao: body.ngaykham
     }).then(async res => {
         return res.dataValues.id;
     })
