@@ -126,11 +126,14 @@ module.exports = {
       let today = tzSaiGon();
       console.log(today);
       return await model.findAll({
-        where: sequelize.where(
-          sequelize.fn("date", sequelize.col("ngaytao")),
-          "=",
-          today
-        ),
+        where: {
+          where: sequelize.where(
+            sequelize.fn("date", sequelize.col("ngaytao")),
+            "=",
+            today
+          ),
+          trangthai: 1
+        },
         order: [["ngaytao", "DESC"]],
       });
     } catch (error) {
@@ -211,6 +214,7 @@ module.exports = {
             "=",
             today
           ),
+          trangthai: 1
         },
       });
       let body = {
@@ -439,7 +443,8 @@ module.exports = {
           },
           {
             model: sanpham,
-          },{ model: giasuc }
+          },
+          { model: giasuc },
         ],
         where: {
           trangthai: 1,
@@ -454,44 +459,76 @@ module.exports = {
   },
 
   updateHSBA: async (data) => {
-      try {
-        await model.update({
-              noidung: JSON.stringify(data),
-              trieuchung: data.trieuchung,
-              chandoan: data.chandoan,
-              ngaytao: data.ngaykham,
-              ngaytaikham: data.ngaytaikham,
-              thanhtien: data.thanhtien
-          }, { where: {
-              id : data.id
-          }})
-      } catch (error) {
-          throw new Error();
-      }
+    try {
+      await model.update(
+        {
+          noidung: JSON.stringify(data),
+          trieuchung: data.trieuchung,
+          chandoan: data.chandoan,
+          ghichu: data.ghichu,
+          ngaytao: data.ngaykham,
+          ngaytaikham: data.ngaytaikham,
+        },
+        {
+          where: {
+            id: data.id,
+          },
+        }
+      );
+    } catch (error) {
+      throw new Error();
+    }
   },
 
   updatePet: async (data) => {
-      try {
-        await giasuc.update({
-              ten: data.ten,
-              tuoi: data.tuoi
-          }, { where: {
-              id : data.id
-          }})
-      } catch (error) {
-          throw new Error();
-      }
+    try {
+      await giasuc.update(
+        {
+          ten: data.ten,
+          tuoi: data.tuoi,
+        },
+        {
+          where: {
+            id: data.id,
+          },
+        }
+      );
+    } catch (error) {
+      throw new Error();
+    }
   },
 
   deletePet: async (id) => {
-      try {
-        await giasuc.update({
-              trangthai: 0
-          }, { where: {
-              id : id
-          }})
-      } catch (error) {
-          throw new Error();
-      }
-  }
+    try {
+      await giasuc.update(
+        {
+          trangthai: 0,
+        },
+        {
+          where: {
+            id: id,
+          },
+        }
+      );
+    } catch (error) {
+      throw new Error();
+    }
+  },
+
+  deleteDT: async (id) => {
+    try {
+      await phieudieutri.update(
+        {
+          trangthai: 0,
+        },
+        {
+          where: {
+            id: id,
+          },
+        }
+      );
+    } catch (error) {
+      throw new Error();
+    }
+  },
 };

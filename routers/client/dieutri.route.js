@@ -159,6 +159,17 @@ router.delete("/deletePet", async(req, res) => {
         response.error(res, "failed", 500)
     }
 });
+// deleteDT by pet id
+router.delete("/deleteDT", async(req, res) => {
+    let data = req.query.id;
+    try {
+        const result = await dieutri.deleteDT(data);
+        response.success(res, "success", result)
+    } catch (err) {
+        console.log(err.message);
+        response.error(res, "failed", 500)
+    }
+});
 
 
 
