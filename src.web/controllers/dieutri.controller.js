@@ -183,8 +183,8 @@ module.exports = {
             sequelize.fn("date", sequelize.col("ngaytaikham")),
             "=",
             today
-          ),
-          dataikham: null,
+          )
+          // dataikham: null,
         },
         order: [["ngaytao", "DESC"]],
       });
@@ -203,8 +203,8 @@ module.exports = {
             sequelize.fn("date", sequelize.col("ngaytaikham")),
             "=",
             today
-          ),
-          dataikham: null,
+          )
+          // dataikham: null,
         },
       });
       let examTodayCount = await model.count({
