@@ -126,13 +126,16 @@ module.exports = {
       let today = tzSaiGon();
       console.log(today);
       return await model.findAll({
+        include: {
+          model: giasuc,
+        },
         where: {
           where: sequelize.where(
-            sequelize.fn("date", sequelize.col("ngaytao")),
+            sequelize.fn("date", sequelize.col("phieudieutri.ngaytao")),
             "=",
             today
           ),
-          trangthai: 1
+          trangthai: 1,
         },
         order: [["ngaytao", "DESC"]],
       });
@@ -183,7 +186,7 @@ module.exports = {
             sequelize.fn("date", sequelize.col("ngaytaikham")),
             "=",
             today
-          )
+          ),
           // dataikham: null,
         },
         order: [["ngaytao", "DESC"]],
@@ -203,7 +206,7 @@ module.exports = {
             sequelize.fn("date", sequelize.col("ngaytaikham")),
             "=",
             today
-          )
+          ),
           // dataikham: null,
         },
       });
@@ -214,7 +217,7 @@ module.exports = {
             "=",
             today
           ),
-          trangthai: 1
+          trangthai: 1,
         },
       });
       let body = {
