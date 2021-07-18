@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();;
 const controller = require("../../src.web/controllers/khachhang.controller");
 const dieutri = require("../../src.web/controllers/dieutri.controller");
+const truyxuatbenhan = require("../../src.web/controllers/truyxuatbenhan.controller");
 const response = require('../../utils/api.res/response');
 
 
@@ -170,7 +171,16 @@ router.delete("/deleteDT", async(req, res) => {
         response.error(res, "failed", 500)
     }
 });
-
+// Getting many exam by pet id
+router.get("/getExaminationWithRabisin", async(req, res) => {
+    try {
+        const result = await truyxuatbenhan.getExaminationWithRabisin();
+        response.success(res, "success", result)
+    } catch (err) {
+        console.log(err.message);
+        response.error(res, "failed", 500)
+    }
+});
 
 
 module.exports = router;
