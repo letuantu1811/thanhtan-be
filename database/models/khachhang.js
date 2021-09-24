@@ -49,7 +49,7 @@ khachhang.hasMany(giasuc, {
 });
 giasuc.belongsTo(khachhang, {
     foreignKey: "khachhang_id",
-    as: 'giasuc'
+    as: 'khachhang'
 });
 
 khachhang.hasMany(Banle, {

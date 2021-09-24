@@ -13,6 +13,8 @@ const khachhang = require("../../database/models/khachhang");
 const Congdichvu = require("../../database/models/congdichvu");
 const sanpham = require("../../database/models/sanpham");
 const { Op, where } = require("sequelize");
+const Giong = require("../../database/models/giong");
+const Chungloai = require("../../database/models/chungloai");
 
 module.exports = {
   // Creating model
@@ -531,6 +533,48 @@ module.exports = {
         }
       );
     } catch (error) {
+      throw new Error();
+    }
+  },
+
+  getPetExamination: async (role) => {
+    let obj = {
+      limit: null,
+    };
+    // if (role.toUpperCase() === "USER") {
+    //   let config = await Thanhvien.findOne({
+    //     attributes: ["config"],
+    //     where: { id: 1 },
+    //   });
+    //   obj.limit = config.config;
+    // }
+    try {
+      let today = tzSaiGon();
+      console.log(today);
+      return await giasuc.findAll({
+        include: [
+          {
+            model: khachhang,
+            require: true,
+            as: "khachhang"
+          },
+          {
+            model: phieudieutri,
+          },
+          {
+            model: Giong,
+            as: "giong",
+            include: { model: Chungloai, as: "chungloai"}
+          }
+        ],
+        ...obj,
+        where: {
+          trangthai: 1,
+        },
+        order: [["ngaytao", "DESC"]],
+      });
+    } catch (error) {
+      console.log(error);
       throw new Error();
     }
   },
