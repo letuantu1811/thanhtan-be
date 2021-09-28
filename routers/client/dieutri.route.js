@@ -182,6 +182,18 @@ router.get("/getExaminationWithRabisin", async(req, res) => {
     }
 });
 
+// Getting many exam by pet id
+router.get("/getExaminationWithMedicin/:id", async(req, res) => {
+    let id = req.params.id;
+    try {
+        const result = await truyxuatbenhan.getExaminationWithMedicinName(id);
+        response.success(res, "success", result)
+    } catch (err) {
+        console.log(err.message);
+        response.error(res, "failed", 500)
+    }
+});
+
 //get pets examination
 router.get("/getPetExamination", async(req, res) => {
     let role = req.header("quyen");

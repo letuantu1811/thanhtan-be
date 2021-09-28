@@ -32,5 +32,37 @@ module.exports = {
           console.log(error);
           throw new Error();
         }
+      },
+      getExaminationWithMedicinName: async (id) => {
+        let object = {
+        }
+        if(id !== 'null'){
+          object = {
+            where: {
+              id: id
+            },
+          }
+        }
+        try {
+          return await phieudieutri.findAll({
+            include: [
+              {
+                model: giasuc,
+              },
+              {
+                  model: sanpham,
+                  ...object,
+                  require: true
+              }
+            ],
+            where: {
+              trangthai: 1,
+            },
+            order: [["ngaytao", "DESC"]],
+          });
+        } catch (error) {
+          console.log(error);
+          throw new Error();
+        }
       }
 }
