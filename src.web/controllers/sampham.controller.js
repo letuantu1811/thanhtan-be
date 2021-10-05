@@ -432,12 +432,9 @@ module.exports = {
                     soluongtoithieu: data.soluongtoithieu,
                     soluong: data.soluong,
                     soluongquydoiton: data.soluongquydoiton
-                }, {
-                    where: {
-                        id: data.id
-                    }
-                }, { transaction: t }).then(() => {
+                }, { transaction: t }).then((x) => {
                     t.commit();
+                    return x.id;
                 }).catch((err) => {
                     t.rollback();
                     throw new Error(err);

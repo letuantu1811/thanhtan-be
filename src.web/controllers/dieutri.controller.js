@@ -578,4 +578,18 @@ module.exports = {
       throw new Error();
     }
   },
+
+    // get medical history 
+  getPetMedicalHistory: async (id) => {
+    try {
+      return await model.findAll({
+        attributes:["trieuchung", "ghichu"],
+        where: {
+          id: id,
+        },
+      });
+    } catch (error) {
+      return error;
+    }
+  },
 };

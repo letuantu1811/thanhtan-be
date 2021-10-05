@@ -207,4 +207,17 @@ router.get("/getPetExamination", async(req, res) => {
 });
 
 
+//get pets examination
+router.get("/getPetMedicalHistory/:id", async(req, res) => {
+    let petID = req.params.id;
+    try {
+        const result = await dieutri.getPetMedicalHistory(petID);
+        response.success(res, "success", result)
+    } catch (err) {
+        console.log(err.message);
+        response.error(res, "failed", 500)
+    }
+});
+
+
 module.exports = router;

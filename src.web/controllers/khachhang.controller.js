@@ -96,6 +96,8 @@ module.exports = {
     getMany: async(body) => {
         try {
             return await khachhang.findAll({
+                distinct: true,
+                group: ['sodienthoai'],
                 include: [{
                     model: giasuc,
                     as: 'giasuc',
@@ -130,6 +132,8 @@ module.exports = {
     getAll: async() => {
         try {
             return await khachhang.findAll({
+                distinct: true,
+                group: ['sodienthoai'],
                 include: [{
                     model: giasuc,
                     as: 'giasuc',
@@ -419,6 +423,8 @@ module.exports = {
     locKH: async() => {
         try {
             let a = await khachhang.findAll({
+                distinct: true,
+                group: ['sodienthoai'],
                 include: [{
                     model: giasuc,
                     as: 'giasuc'
