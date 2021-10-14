@@ -220,4 +220,17 @@ router.get("/getPetMedicalHistory/:id", async(req, res) => {
 });
 
 
+//get existed cur date 
+router.get("/isExisted/:id", async(req, res) => {
+    let petID = req.params.id;
+    try {
+        const result = await dieutri.isExisted(petID);
+        response.success(res, "success", result)
+    } catch (err) {
+        console.log(err.message);
+        response.error(res, "failed", 500)
+    }
+});
+
+
 module.exports = router;

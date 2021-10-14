@@ -590,4 +590,23 @@ module.exports = {
             return error;
         }
     },
+
+    // get medical history 
+    isExisted: async(id) => {
+        try {
+            let today = tzSaiGon();
+            return await model.count({
+                where: {
+                    giasuc_id: id,
+                    where: sequelize.where(
+                        sequelize.fn("date", sequelize.col("ngaytao")),
+                        "=",
+                        today
+                    )
+                }
+            });
+        } catch (error) {
+            return error;
+        }
+    },
 };
