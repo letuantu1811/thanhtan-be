@@ -132,8 +132,8 @@ module.exports = {
     getAll: async() => {
         try {
             return await khachhang.findAll({
-                distinct: true,
-                group: ['sodienthoai'],
+                // distinct: true,
+                // group: ['sodienthoai'],
                 include: [{
                     model: giasuc,
                     as: 'giasuc',
