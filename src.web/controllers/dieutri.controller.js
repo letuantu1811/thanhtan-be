@@ -39,6 +39,9 @@ module.exports = {
 
     createHoSo: async(res) => {
         try {
+            if (res.id !== "") {
+                await updateTK(res.id);
+            }
             let status = "";
             if (res.khachhang.id !== 0 && res.thucung.id !== 0) {
                 // tồn tại khách hàng và tồn tại pet
@@ -71,6 +74,10 @@ module.exports = {
             throw new Error();
         }
     },
+
+
+    // get one model
+
 
     // get one model
     getOne: async(id) => {
@@ -610,3 +617,19 @@ module.exports = {
         }
     },
 };
+
+function updateTK(id) {
+    // updateTK: async(id) => {
+    try {
+        return model.update({
+            dataikham: 1
+        }, {
+            where: {
+                id: id,
+            },
+        });
+    } catch (error) {
+        return error;
+    }
+    // },
+}
