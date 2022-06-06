@@ -129,10 +129,11 @@ module.exports = {
     },
 
     // disable model
-    getAllToday: async() => {
+    getAllToday: async(date) => {
         try {
-            let today = tzSaiGon();
-            console.log(today);
+            let today = date ? date : tzSaiGon();
+            // if
+            console.log(date);
             return await model.findAll({
                 include: {
                     model: giasuc,

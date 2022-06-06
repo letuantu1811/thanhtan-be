@@ -20,8 +20,9 @@ router.get("/notification", async(req, res) => {
 
 router.get("/", async(req, res) => {
     let body = req.body;
+    let dateselect = req.query.date;
     try {
-        const result = await dieutri.getAllToday();
+        const result = await dieutri.getAllToday(dateselect);
 
         response.success(res, "success", result)
     } catch (err) {
