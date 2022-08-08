@@ -27,6 +27,7 @@ module.exports = {
                         trangthai: 1,
                         dacdiem: "",
                         chungloai_id: 0,
+                        mavach: ""
                     }
                     obj = new Object();
                     obj.ngaytao = localDate(new Date());
@@ -40,6 +41,7 @@ module.exports = {
                     obj.trangthai = element.trangthai;
                     obj.dacdiem = element.dacdiem;
                     obj.chungloai_id = element.chungloai_id;
+                    obj.mavach = element.mavach;
                     arr.push(obj)
                     await giasuc.bulkCreate(arr);
                 }
@@ -315,7 +317,8 @@ module.exports = {
                     gianhap: data.gianhap,
                     soluongtoithieu: data.soluongtoithieu,
                     soluong: data.soluong,
-                    soluongquydoiton: data.soluongquydoiton
+                    soluongquydoiton: data.soluongquydoiton,
+                    mavach: data.mavach
                 }, {
                     where: {
                         id: data.id

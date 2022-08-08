@@ -58,6 +58,9 @@ const sanpham = db.define("sanpham", {
     },
     an: {
         type: Sequelize.BOOLEAN
+    },
+    mavach: {
+        type: Sequelize.STRING
     }
 }, {
     timestamps: false,
