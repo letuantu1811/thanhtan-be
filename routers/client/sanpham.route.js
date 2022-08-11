@@ -133,4 +133,31 @@ router.post("/createOne", async(req, res) => {
     }
 });
 
+router.get("/barcode", async(req, res) => {
+    let quyen = req.header("quyen");
+    console.log(quyen);
+    try {
+        const result = await controller.getAllForBarCode(quyen);
+        // 
+        response.success(res, "success", result)
+    } catch (err) {
+        console.log(err.message);
+        response.error(res, "failed", 500)
+    }
+});
+
+router.post("/addbarcode", async(req, res) => {
+    let quyen = req.header("quyen");
+    let data = req.body;
+    console.log(quyen);
+    try {
+        const result = await controller.addbarcode(data);
+        // 
+        response.success(res, "success", result)
+    } catch (err) {
+        console.log(err.message);
+        response.error(res, "failed", 500)
+    }
+});
+
 module.exports = router;

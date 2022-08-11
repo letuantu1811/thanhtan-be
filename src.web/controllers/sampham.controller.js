@@ -434,7 +434,8 @@ module.exports = {
                     gianhap: data.gianhap,
                     soluongtoithieu: data.soluongtoithieu,
                     soluong: data.soluong,
-                    soluongquydoiton: data.soluongquydoiton
+                    soluongquydoiton: data.soluongquydoiton,
+                    mavach: data.mavach || ""
                 }, { transaction: t }).then((x) => {
                     t.commit();
                     return x.id;
@@ -447,4 +448,57 @@ module.exports = {
             throw new Error(err);
         }
     },
+
+
+    getAllForBarCode: async(quyen) => {
+        let obj = {};
+        if (quyen.toUpperCase() !== "ADMIN") {
+            obj = { an: 0 }
+        }
+        try {
+            return await sanpham.findAll({
+                attributes: ['id', 'ten', 'mavach', 'gia'],
+                include: [{
+                    model: nhomsanpham,
+                    attributes: ['ten'],
+                    where: {
+                        trangthai: 1
+                    },
+                    require: true
+                }],
+                where: {
+                    trangthai: true,
+                    ...obj
+                },
+                order: [
+                    ['ten', 'ASC']
+                ]
+
+            });
+        } catch (error) {
+            return error
+        }
+    },
+
+    addbarcode: async(body) => {
+        let data = body;
+        try {
+            return sanpham.sequelize.transaction().then(async t => {
+                return await sanpham.update({
+                    mavach: data.mavach
+                }, {
+                    where: {
+                        id: data.id
+                    }
+                }, { transaction: t }).then(() => {
+                    t.commit();
+                }).catch((err) => {
+                    t.rollback();
+                    throw new Error(err);
+                })
+            })
+        } catch (error) {
+            throw new Error(err);
+        }
+    }
 }
