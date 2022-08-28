@@ -450,4 +450,21 @@ module.exports = {
             throw new Error();
         }
     },
+    /* 
+    @params body : object - input data {id,ten,tuoi}
+    */
+    editPet: async(data) => {
+        try {
+            return await giasuc.update({
+                ten: data.ten,
+                tuoi: data.tuoi
+            }, {
+                where: {
+                    id: data.id
+                }
+            })
+        } catch (error) {
+            return error
+        }
+    },
 }

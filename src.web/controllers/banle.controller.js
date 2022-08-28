@@ -71,8 +71,10 @@ module.exports = {
                 }],
                 order: [
                     ['ngaytao', 'DESC']
-                ]
-
+                ],
+                where: {
+                    trangthai: ENUM.ENABLE
+                },
             });
         } catch (error) {
             console.log(error);
