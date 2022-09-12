@@ -168,7 +168,6 @@ module.exports = {
         }
         try {
             let today = tzSaiGon();
-            console.log(today);
             return await model.findAll({
                 include: [{
                     model: giasuc,
@@ -617,6 +616,26 @@ module.exports = {
             return error;
         }
     },
+
+    filterBlockedInExam: async(pddID) => {
+        try {
+            let kh = await phieudieutri.count({
+                include: {
+                    model: sanpham,
+                    where: {
+                        an: 1
+                    }
+                },
+                where: {
+                    id: pddID,
+                },
+            });
+            console.log(kh);
+            return kh;
+        } catch (error) {
+            console.log(error);
+        }
+    }
 };
 
 function updateTK(id) {

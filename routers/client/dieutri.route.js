@@ -19,12 +19,32 @@ router.get("/notification", async(req, res) => {
 });
 
 router.get("/", async(req, res) => {
-    let body = req.body;
+    // let body = req.body;
+    let role = req.header("quyen");
     let dateselect = req.query.date;
     try {
         const result = await dieutri.getAllToday(dateselect);
+        // for (let index = 0; index < result.length; index++) {
+        //     const element = result[index];
+        //     console.log(dieutri.filterBlockedInExam(element.id));
+        // }
+        // result = await result.map(async item => {
+        //     if (await dieutri.filterBlockedInExam(item.id) > 0) {
+        //         return item;
+        //     }
+        // })
 
-        response.success(res, "success", result)
+        let arr = [];
+        if (role.toUpperCase() === 'USER') {
+            for (let index = 0; index < result.length; index++) {
+                const element = result[index];
+                if (await dieutri.filterBlockedInExam(element.id) === 0) {
+                    arr.push(element);
+                }
+            }
+        }
+
+        response.success(res, "success", role.toUpperCase() === 'USER' ? arr : result)
     } catch (err) {
         console.log(err.message);
         response.error(res, "failed", 500)
