@@ -208,7 +208,7 @@ module.exports = {
         }
     },
 
-    getNotification: async() => {
+    getNotification: async(role) => {
         try {
             let today = tzSaiGon();
             console.log(today);
@@ -232,11 +232,17 @@ module.exports = {
                     trangthai: 1,
                 },
             });
-            let body = {
-                countDTtoday: examTodayCount,
-                countTDTtody: reExamCount,
-            };
-            return body;
+            if (role === 'USER') {
+                return body = {
+                    countDTtoday: 0,
+                    countTDTtody: 0,
+                };
+            } else
+                return body = {
+                    countDTtoday: examTodayCount,
+                    countTDTtody: reExamCount,
+                };
+            // return body;
         } catch (error) {
             return error;
         }
