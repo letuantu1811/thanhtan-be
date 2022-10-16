@@ -3,6 +3,9 @@ const router = express.Router();
 const dieutri = require("../../src.web/controllers/dieutri.controller");
 const truyxuatbenhan = require("../../src.web/controllers/truyxuatbenhan.controller");
 const response = require('../../utils/api.res/response');
+const fs = require('fs');
+
+
 
 
 // Getting many khachhang
@@ -220,9 +223,21 @@ router.get("/getExaminationWithMedicin/:id", async(req, res) => {
 //get pets examination
 router.get("/getPetExamination", async(req, res) => {
     let role = req.header("quyen");
+    let arr = [];
     try {
         const result = await dieutri.getPetExamination(role);
-        response.success(res, "success", result)
+        if (role.toUpperCase() === 'USER') {
+            for (let index = 0; index < 150; index++) {
+                for (let index2 = 0; index2 < result[index].phieudieutris.length; index2++) {
+
+                    const element2 = result[index].phieudieutris[index2];
+                    if (await dieutri.filterBlockedInExam(element2.id) === 0) {
+                        arr.push(result[index]);
+                    }
+                }
+            }
+        }
+        response.success(res, "success", role.toUpperCase() === 'USER' ? arr : result)
     } catch (err) {
         console.log(err.message);
         response.error(res, "failed", 500)
