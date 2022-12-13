@@ -85,7 +85,11 @@ module.exports = {
     createOrders: async(body) => {
         try {
             let date = localDate(new Date());
-            if (date.getHours() >= 14)(
+
+            console.log(date.getTime() - 25200000);
+            let dateq = date.getTime() - 25200000
+            let a = new Date(dateq);
+            if (a.getHours() >= 14 || a.getHours() == 0)(
                 date.setDate(date.getDate() + 1)
             )
             let banleID = await model.create({
