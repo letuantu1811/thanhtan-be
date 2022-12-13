@@ -87,11 +87,8 @@ module.exports = {
             let date = localDate(new Date());
             let dateq = date.getTime() - 25200000
             let a = new Date(dateq);
-            if (a.getHours() >= 14 || a.getHours() == 0)(
-                date.setDate(a.getDate() + 1)
-            )
             let banleID = await model.create({
-                ngaytao: date,
+                ngaytao: a,
                 ten: body.ten,
                 ghichu: body.ghichu,
                 nguoitao_id: body.nguoitao_id,
