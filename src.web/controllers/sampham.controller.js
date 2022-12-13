@@ -86,7 +86,7 @@ module.exports = {
                     obj.donvitinh_id = Number.parseInt(res.donvitinh.id);
                     obj.donviquydoi_id = Number.parseInt(res.donviquydoi_id);
                     obj.giatriquydoi = Number.parseInt(res.giatriquydoi);
-                    obj.gianhap = Number.parseInt(res.gianhap.split(",").join(""));
+                    obj.gianhap = res.gianhap ? Number.parseInt(res.gianhap.split(",").join("")) : 0;
                     obj.gia = Number.parseInt(res.gia.split(",").join(""));
                     obj.soluong = res.soluong + Number.parseInt(res.soluongthem);
                     arrNew.push(obj);
@@ -314,7 +314,7 @@ module.exports = {
                     giatriquydoi: data.giatriquydoi,
                     donvitinh_id: data.donvitinh_id,
                     gia: data.gia,
-                    gianhap: data.gianhap,
+                    gianhap: data.gianhap != null ? data.gianhap : 0,
                     soluongtoithieu: data.soluongtoithieu,
                     soluong: data.soluong,
                     soluongquydoiton: data.soluongquydoiton,
@@ -431,7 +431,7 @@ module.exports = {
                     giatriquydoi: data.giatriquydoi,
                     donvitinh_id: data.donvitinh_id,
                     gia: data.gia,
-                    gianhap: data.gianhap,
+                    gianhap: data.gianhap != null ? data.gianhap : 0,
                     soluongtoithieu: data.soluongtoithieu,
                     soluong: data.soluong,
                     soluongquydoiton: data.soluongquydoiton,

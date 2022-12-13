@@ -84,8 +84,12 @@ module.exports = {
     // disable congdichvu
     createOrders: async(body) => {
         try {
+            let date = localDate(new Date());
+            if (date.getHours() >= 14)(
+                date.setDate(date.getDate() + 1)
+            )
             let banleID = await model.create({
-                ngaytao: localDate(new Date()),
+                ngaytao: date,
                 ten: body.ten,
                 ghichu: body.ghichu,
                 nguoitao_id: body.nguoitao_id,
