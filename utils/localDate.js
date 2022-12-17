@@ -6,6 +6,7 @@ exports.localDate = (date) => {
     var hours = date.getHours();
 
     newDate.setHours(hours - offset);
+    newDate = new Date(newDate.getTime() - 25200000);
 
     return newDate;
 }

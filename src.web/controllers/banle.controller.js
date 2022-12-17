@@ -85,10 +85,8 @@ module.exports = {
     createOrders: async(body) => {
         try {
             let date = localDate(new Date());
-            let dateq = date.getTime() - 25200000
-            let a = new Date(dateq);
             let banleID = await model.create({
-                ngaytao: a,
+                ngaytao: date,
                 ten: body.ten,
                 ghichu: body.ghichu,
                 nguoitao_id: body.nguoitao_id,
