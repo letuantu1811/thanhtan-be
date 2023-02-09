@@ -59,12 +59,13 @@ router.get("/detail/:id", async(req, res) => {
 });
 
 router.get("/reexam", async(req, res) => {
-    let body = req.body;
-    let role = req.header("quyen");
+    const role = req.header("quyen");
+    const isUserRole = role.toUpperCase() === 'USER'
+    const date = req.query.date;
     try {
-        const result = await dieutri.getReExamToday();
-        let arr = [];
-        if (role.toUpperCase() === 'USER') {
+        const result = await dieutri.getReExamByDate(date);
+        const arr = [];
+        if (isUserRole) {
             for (let index = 0; index < result.length; index++) {
                 const element = result[index];
                 if (await dieutri.filterBlockedInExam(element.id) === 0) {
@@ -73,10 +74,10 @@ router.get("/reexam", async(req, res) => {
             }
         }
 
-        response.success(res, "success", role.toUpperCase() === 'USER' ? arr : result)
+        response.success(res, "Lấy dữ liệu thành công", isUserRole ? arr : result)
     } catch (err) {
-        console.log(err.message);
-        response.error(res, "failed", 500)
+        console.log('Error at dieutri.router >> /reexam:', err.message);
+        response.error(res, "Lỗi lấy dữ liệu", 500)
     }
 });
 
