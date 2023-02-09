@@ -634,7 +634,6 @@ module.exports = {
                     id: pddID,
                 },
             });
-            console.log('filterBlockedInExam', kh);
             return kh;
         } catch (error) {
             console.log(error);
