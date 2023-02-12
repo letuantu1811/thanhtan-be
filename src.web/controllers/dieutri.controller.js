@@ -196,6 +196,7 @@ module.exports = {
                         "=",
                         selectedDate
                     ),
+                    trangthai: 1,
                 },
                 order: [
                     ["ngaytao", "DESC"]
