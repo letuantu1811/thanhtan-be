@@ -186,18 +186,16 @@ module.exports = {
         }
     },
 
-    getReExamToday: async() => {
+    getReExamByDate: async(date) => {
         try {
-            let today = tzSaiGon();
-            console.log(today);
+            const selectedDate = date ? date : tzSaiGon();
             return await model.findAll({
                 where: {
                     where: sequelize.where(
                         sequelize.fn("date", sequelize.col("ngaytaikham")),
                         "=",
-                        today
+                        selectedDate
                     ),
-                    // dataikham: null,
                 },
                 order: [
                     ["ngaytao", "DESC"]
@@ -636,7 +634,6 @@ module.exports = {
                     id: pddID,
                 },
             });
-            console.log(kh);
             return kh;
         } catch (error) {
             console.log(error);
