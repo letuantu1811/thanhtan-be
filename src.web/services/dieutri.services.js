@@ -5,6 +5,7 @@ const phieudieutri_congdichvu = require("./../../database/models/phieudieutri_co
 const phieudieutri_sanpham = require("./../../database/models/phieudieutri_sanpham");
 const phieudieutri = require("./../../database/models/phieudieutri");
 const { localDate } = require("../../utils/localDate");
+const { toNumber } = require("lodash");
 // {
 //     "khachhang": {
 //         "id": 1,
@@ -129,7 +130,6 @@ module.exports = {
     already: async(body) => {
         try {
 
-            console.log("already");
             let res = body;
             // update khach hang
             await khachhang.update({
@@ -178,7 +178,6 @@ module.exports = {
     },
 
     new: async(body) => {
-        console.log("already");
         let res = body;
         // update khach hang
         let khID = await khachhang.create({
@@ -227,7 +226,7 @@ async function create_phieudieutri(body) {
     return await phieudieutri.create({
         sophieudieutri: body.sophieudieutri,
         dataikham: body.taikham ? 1 : null,
-        trieuchung: body.trieuchung,
+        trieuchung: body.trieuchung ? body.trieuchung.trim() : '',
         chandoan: body.chandoan,
         ghichu: body.ghichu,
         thanhtien: body.thanhtien,
@@ -236,8 +235,9 @@ async function create_phieudieutri(body) {
         giasuc_id: body.thucung.id,
         bacsi_id: body.bacsiID,
         noidung: JSON.stringify(body),
-        // ngaytao: localDate(new Date()),
-        ngaytao: body.ngaykham
+        ngaytao: body.ngaykham,
+        discountAmount: toNumber(body.discountAmount) || 0,
+        addedDiscountAmount: toNumber(body.addedDiscountAmount) || 0,
     }).then(async res => {
         return res.dataValues.id;
     })
