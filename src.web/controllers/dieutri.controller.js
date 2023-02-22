@@ -15,9 +15,9 @@ const sanpham = require("../../database/models/sanpham");
 const { Op, where } = require("sequelize");
 const Giong = require("../../database/models/giong");
 const Chungloai = require("../../database/models/chungloai");
+const { toNumber } = require("lodash");
 
 module.exports = {
-    // Creating model
     create: async(res) => {
         console.log(model);
         try {
@@ -31,13 +31,15 @@ module.exports = {
                 dataikham: res.status_examination,
                 congdichvu: res.service_plus,
                 thanhtien: res.total,
+                discountAmount: toNumber(res.discountAmount) || 0,
+                addedDiscountAmount: toNumber(res.addedDiscountAmount) || 0,
             });
         } catch (error) {
             return error;
         }
     },
 
-    createHoSo: async(res) => {
+    createHoSo: async(res, userId) => {
         try {
             if (res.id !== "") {
                 await updateTK(res.id);
@@ -55,16 +57,15 @@ module.exports = {
                 // khách hàng mới
                 status = "new";
             }
-            console.log(status);
             switch (status) {
                 case "existed":
-                    await dtServices.existed(res);
+                    await dtServices.existed(res, userId);
                     break;
                 case "already":
-                    await dtServices.already(res);
+                    await dtServices.already(res, userId);
                     break;
                 case "new":
-                    await dtServices.new(res);
+                    await dtServices.new(res, userId);
                     break;
                 default:
                     break;
@@ -76,17 +77,33 @@ module.exports = {
     },
 
 
-    // get one model
 
 
     // get one model
     getOne: async(id) => {
         try {
-            return await model.findOne({
-                where: {
-                    id: id,
-                },
-            });
+      const rawExamForm = await model.findOne({
+        include: [
+          { model: giasuc, as: "giasuc" },
+          { model: khachhang, as: "khachhang" },
+        ],
+        where: {
+          id: id,
+        },
+      });
+
+      const examForm = rawExamForm.toJSON();
+
+      const discountAmount = toNumber(examForm.discountAmount) || 0;
+      const addedDiscountAmount = toNumber(examForm.addedDiscountAmount) || 0;
+      const thanhtien = toNumber(examForm.thanhtien) || 0;
+
+      const orginTotalAmount =
+        (thanhtien + discountAmount) / (1 - addedDiscountAmount / 100);
+
+      const reCalculateAmountExamForm = { ...examForm, thanhtien: orginTotalAmount };
+      return reCalculateAmountExamForm
+
         } catch (error) {
             return error;
         }
@@ -132,12 +149,12 @@ module.exports = {
     getAllToday: async(date) => {
         try {
             let today = date ? date : tzSaiGon();
-            // if
-            console.log(date);
-            return await model.findAll({
-                include: {
-                    model: giasuc,
-                },
+      // if
+      const currentDateTreetments = await model.findAll({
+        include: [
+          { model: giasuc, as: "giasuc" },
+          { model: khachhang, as: "khachhang" },
+        ],
                 where: {
                     where: sequelize.where(
                         sequelize.fn("date", sequelize.col("phieudieutri.ngaytao")),
@@ -150,6 +167,25 @@ module.exports = {
                     ["ngaytao", "DESC"]
                 ],
             });
+      return currentDateTreetments.map((treetMent) => {
+        const rawTreetMent = treetMent.toJSON();
+        console.log("🚀 ~ file: dieutri.controller.js:172 ~ returncurrentDateTreetments.map ~ rawTreetMent:", rawTreetMent)
+        const discountAmount = toNumber(rawTreetMent.discountAmount) || 0;
+        const addedDiscountAmount =
+          toNumber(rawTreetMent.addedDiscountAmount) || 0;
+        const thanhtien = toNumber(rawTreetMent.thanhtien) || 0;
+
+        const orginTotalAmount =
+          (thanhtien + discountAmount) / (1 - addedDiscountAmount / 100);
+
+        const reCalculateAmountExamForm = {
+          ...rawTreetMent,
+          discountAmount: 0,
+          addedDiscountAmount: 0,
+          thanhtien: orginTotalAmount,
+        };
+        return reCalculateAmountExamForm;
+      });
         } catch (error) {
             return error;
         }
@@ -189,17 +225,41 @@ module.exports = {
     getReExamByDate: async(date) => {
         try {
             const selectedDate = date ? date : tzSaiGon();
-            return await model.findAll({
-                where: {
-                    where: sequelize.where(
-                        sequelize.fn("date", sequelize.col("ngaytaikham")),
-                        "=",
-                        selectedDate
-                    ),
-                },
+            const treetments = await model.findAll({
+        include: [
+            { model: giasuc, as: "giasuc" },
+            { model: khachhang, as: "khachhang" },
+          ],
+        where: {
+          where: sequelize.where(
+            sequelize.fn("date", sequelize.col("ngaytaikham")),
+            "=",
+            selectedDate
+          ),
+          trangthai: 1,
+        },
                 order: [
                     ["ngaytao", "DESC"]
                 ],
+            });
+
+            return treetments.map((treetMent) => {
+              const rawTreetMent = treetMent.toJSON();
+              const discountAmount = toNumber(rawTreetMent.discountAmount) || 0;
+              const addedDiscountAmount =
+                toNumber(rawTreetMent.addedDiscountAmount) || 0;
+              const thanhtien = toNumber(rawTreetMent.thanhtien) || 0;
+      
+              const orginTotalAmount =
+                (thanhtien + discountAmount) / (1 - addedDiscountAmount / 100);
+      
+              const reCalculateAmountExamForm = {
+                ...rawTreetMent,
+                discountAmount: 0,
+                addedDiscountAmount: 0,
+                thanhtien: orginTotalAmount,
+              };
+              return reCalculateAmountExamForm;
             });
         } catch (error) {
             return error;
@@ -463,6 +523,7 @@ module.exports = {
                         model: sanpham,
                     },
                     { model: giasuc },
+          { model: khachhang },
                 ],
                 where: {
                     trangthai: 1,
@@ -544,13 +605,6 @@ module.exports = {
         let obj = {
             limit: null,
         };
-        // if (role.toUpperCase() === "USER") {
-        //   let config = await Thanhvien.findOne({
-        //     attributes: ["config"],
-        //     where: { id: 1 },
-        //   });
-        //   obj.limit = config.config;
-        // }
         try {
             let today = tzSaiGon();
             console.log(today);
@@ -642,7 +696,6 @@ module.exports = {
 };
 
 function updateTK(id) {
-    // updateTK: async(id) => {
     try {
         return model.update({
             dataikham: 1
@@ -654,5 +707,4 @@ function updateTK(id) {
     } catch (error) {
         return error;
     }
-    // },
 }
