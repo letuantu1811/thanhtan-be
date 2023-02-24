@@ -1,12 +1,15 @@
-const Sequelize = require("sequelize");
-const db = require("../config");
-const congdichvu = require("../models/congdichvu");
-const sanpham = require("../models/sanpham");
-const bacsi = require("../models/bacsi");
-const giasuc = require("./giasuc");
+const Sequelize = require('sequelize');
+const db = require('../config');
+const phieudieutri_congdichvu = require('../models/phieudieutri_congdichvu');
+const phieudieutri_sanpham = require('../models/phieudieutri_sanpham');
+const congdichvu = require('../models/congdichvu');
+const Sanpham = require('../models/sanpham');
+const sanpham = require('../models/sanpham');
+const bacsi = require('../models/bacsi');
+const giasuc = require('./giasuc');
 
 const phieudieutri = db.define(
-  "phieudieutri",
+  'phieudieutri',
   {
     id: {
       type: Sequelize.INTEGER,
@@ -80,35 +83,35 @@ const phieudieutri = db.define(
 );
 //--------------------congdichvu------------
 phieudieutri.belongsToMany(congdichvu, {
-  through: "phieudieutri_congdichvu",
-  foreignKey: "phieudieutri_id",
+  through: 'phieudieutri_congdichvu',
+  foreignKey: 'phieudieutri_id',
 });
 congdichvu.belongsToMany(phieudieutri, {
-  through: "phieudieutri_congdichvu",
-  foreignKey: "congdichvu_id",
+  through: 'phieudieutri_congdichvu',
+  foreignKey: 'congdichvu_id',
 });
 //--------------------sanpham---------------
 phieudieutri.belongsToMany(sanpham, {
-  through: "phieudieutri_sanpham",
-  foreignKey: "phieudieutri_id",
+  through: 'phieudieutri_sanpham',
+  foreignKey: 'phieudieutri_id',
 });
 sanpham.belongsToMany(phieudieutri, {
-  through: "phieudieutri_sanpham",
-  foreignKey: "sanpham_id",
+  through: 'phieudieutri_sanpham',
+  foreignKey: 'sanpham_id',
 });
 
 bacsi.hasMany(phieudieutri, {
-  foreignKey: "bacsi_id",
-  as: "bacsi",
+  foreignKey: 'bacsi_id',
+  as: 'bacsi',
 });
 phieudieutri.belongsTo(bacsi, {
-  foreignKey: "bacsi_id",
-  as: "bacsi",
+  foreignKey: 'bacsi_id',
+  as: 'bacsi',
 });
 giasuc.hasMany(phieudieutri, {
-  foreignKey: "giasuc_id",
+  foreignKey: 'giasuc_id',
 });
 phieudieutri.belongsTo(giasuc, {
-  foreignKey: "giasuc_id",
+  foreignKey: 'giasuc_id',
 });
 module.exports = phieudieutri;
