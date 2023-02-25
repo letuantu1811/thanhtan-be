@@ -523,7 +523,7 @@ module.exports = {
                         model: sanpham,
                     },
                     { model: giasuc },
-          { model: khachhang },
+                    { model: khachhang },
                 ],
                 where: {
                     trangthai: 1,
