@@ -491,22 +491,23 @@ module.exports = {
         }
     },
     getAllExamByPetId: async(id, phieudieutriid) => {
+        console.log(
+            '🚀 ~ file: dieutri.controller.js:494 ~ getAllExamByPetId:async ~ phieudieutriid:',
+            phieudieutriid,
+            typeof phieudieutriid,
+            !phieudieutriid,
+        );
         try {
             let arr = [];
             let obj = {};
-            console.log(phieudieutriid);
-            if (
-                phieudieutriid == null ||
-                phieudieutriid == "null" ||
-                phieudieutriid == ""
-            ) {
+            if (true) {
                 obj = {
                     giasuc_id: id,
                 };
             } else {
-                arr = phieudieutriid.split(" ");
+                arr = phieudieutriid.split(' ');
                 arr = arr.filter((item) => {
-                    return item !== "undefined";
+                    return item !== 'undefined';
                 });
                 obj = {
                     mapping_id: {

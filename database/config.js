@@ -19,12 +19,13 @@ module.exports = new Sequelize('tha81756_qlthuy', 'tha81756_qlthuy', 'Zaq@123456
     dialect: 'mysql',
     port: 3306,
     logging: true,
+    timezone: "+07:00",
     pool: {
         max: 5,
         min: 0,
         acquire: 30000,
-        idle: 10000
-    }
+        idle: 10000,
+    },
 });
 
 // [
