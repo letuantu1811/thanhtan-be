@@ -1,4 +1,4 @@
-const { toNumber } = require('lodash');
+const { toNumber, omit } = require('lodash');
 
 const khachhang = require('./../../database/models/khachhang');
 const phieudieutri_congdichvu = require('./../../database/models/phieudieutri_congdichvu');
@@ -9,6 +9,25 @@ const { localDate } = require('../../utils/localDate');
 const { updatePet, createPet } = require('./PetService');
 
 module.exports = {
+    updateExamForm: async(data) => {
+        try {
+            const examFormUpdated = {
+                noidung: JSON.stringify(data),
+                trieuchung: data.trieuchung,
+                chandoan: data.chandoan,
+                ghichu: data.ghichu,
+                ngaytao: data.ngaykham,
+                ngaytaikham: data.ngaytaikham,
+            }
+            await model.update(omit(examFormUpdated), {
+                where: {
+                    id: data.id,
+                },
+            });
+        } catch (error) {
+            throw new Error(error);
+        }
+    },
     existed: async(body) => {
         let res = body;
         let pdtID = await createExamForm(res);

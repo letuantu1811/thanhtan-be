@@ -1,6 +1,6 @@
 const model = require("../../database/models/phieudieutri");
 const { ENUM } = require("../../utils/index");
-const dtServices = require("../services/dieutri.services");
+const examFormServices = require("../services/dieutri.services");
 const { tzSaiGon } = require("../../utils/saigontz");
 const moment = require("moment");
 const sequelize = require("sequelize");
@@ -16,6 +16,8 @@ const { Op, where } = require("sequelize");
 const Giong = require("../../database/models/giong");
 const Chungloai = require("../../database/models/chungloai");
 const { toNumber } = require("lodash");
+const { updateExamForm } = require("../services/dieutri.services");
+const { ROLE_TYPE } = require("../../utils/constants");
 
 module.exports = {
     create: async(res) => {
@@ -59,13 +61,13 @@ module.exports = {
             }
             switch (status) {
                 case "existed":
-                    await dtServices.existed(res, userId);
+                    await examFormServices.existed(res, userId);
                     break;
                 case "already":
-                    await dtServices.already(res, userId);
+                    await examFormServices.already(res, userId);
                     break;
                 case "new":
-                    await dtServices.new(res, userId);
+                    await examFormServices.new(res, userId);
                     break;
                 default:
                     break;
@@ -540,22 +542,68 @@ module.exports = {
         }
     },
 
-    updateHSBA: async(data) => {
+    createExamForm: async(req, res) => {
         try {
-            await model.update({
-                noidung: JSON.stringify(data),
-                trieuchung: data.trieuchung,
-                chandoan: data.chandoan,
-                ghichu: data.ghichu,
-                ngaytao: data.ngaykham,
-                ngaytaikham: data.ngaytaikham,
-            }, {
-                where: {
-                    id: data.id,
-                },
-            });
-        } catch (error) {
-            throw new Error();
+            const body = req.body;
+        
+            if (body.id !== "") {
+                await updateTK(body.id);
+            }
+            let status = "";
+            if (body.khachhang.id !== 0 && body.thucung.id !== 0) {
+                // tồn tại khách hàng và tồn tại pet
+                status = "existed";
+            }
+            if (body.khachhang.id !== 0 && body.thucung.id === 0) {
+                // tồng tại khách hàng mà không tồn tại pet
+                status = "already";
+            }
+            if (body.khachhang.id === 0 && body.thucung.id === 0) {
+                // khách hàng mới
+                status = "new";
+            }
+
+            switch (status) {
+                case "existed":
+                    await examFormServices.existed(body, userId);
+                    break;
+                case "already":
+                    await examFormServices.already(body, userId);
+                    break;
+                case "new":
+                    await examFormServices.new(body, userId);
+                    break;
+                default:
+                    break;
+            }
+            
+            response.success(res, "success", 'Cập nhật dữ liệu thành công.')
+        } catch (err) {
+            console.log(err.message);
+            response.error(res, "failed", 500)
+        }
+    },
+
+    updateExamForm: async (req, res) => {
+        try {
+            const role = req.headers.quyen ? req.headers.quyen.toUpperCase() : null;
+            const examFormId = toNumber(req.body.id) || null;
+            const hasPermission = [ROLE_TYPE.ADMIN].includes(role);
+
+            if (!examFormId) {
+                return response.error(res, 'Yêu cầu id phiếu điều trị.', 500);
+            }
+            if (!hasPermission) {
+                return response.error(res, 'Bạn không có quyền để thực hiện thao tác này.', 500);
+            }
+
+            const data = req.body;
+            const examFormUpdated = await updateExamForm(data);
+
+            response.success(res, 'success', examFormUpdated);
+        } catch (err) {
+            console.log(err.message);
+            response.error(res, 'failed', 500);
         }
     },
 

@@ -4,6 +4,8 @@ const dieutri = require("../../src.web/controllers/dieutri.controller");
 const truyxuatbenhan = require("../../src.web/controllers/truyxuatbenhan.controller");
 const response = require('../../utils/api.res/response');
 const fs = require('fs');
+const { toNumber } = require("lodash");
+const { updateExamForm, createExamForm } = require("../../src.web/controllers/dieutri.controller");
 
 
 
@@ -94,17 +96,8 @@ router.post("/create", async(req, res) => {
     }
 });
 // Creating khachhang
-router.post("/createHoSo", async(req, res) => {
-    let body = req.body;
-    try {
-        const result = await dieutri.createHoSo(body);
-        console.log(result);
-        response.success(res, "success", result)
-    } catch (err) {
-        console.log(err.message);
-        response.error(res, "failed", 500)
-    }
-});
+router.route("/createHoSo").post(createExamForm);
+
 router.post("/importEXAM", async(req, res) => {
     let body = req.body;
     try {
@@ -153,16 +146,7 @@ router.get("/examByPetId", async(req, res) => {
 });
 
 // Update many exam by pet id
-router.put("/updateHSBA", async(req, res) => {
-    let data = req.body;
-    try {
-        const result = await dieutri.updateHSBA(data);
-        response.success(res, "success", result)
-    } catch (err) {
-        console.log(err.message);
-        response.error(res, "failed", 500)
-    }
-});
+router.route('/updateHSBA').put(updateExamForm)
 
 // Update pet by pet id
 router.put("/updatePet", async(req, res) => {
