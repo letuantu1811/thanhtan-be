@@ -18,6 +18,7 @@ const Chungloai = require("../../database/models/chungloai");
 const { toNumber } = require("lodash");
 const { updateExamForm } = require("../services/dieutri.services");
 const { ROLE_TYPE } = require("../../utils/constants");
+const { response } = require("../../utils/api.res");
 
 module.exports = {
     create: async(res) => {
@@ -40,46 +41,6 @@ module.exports = {
             return error;
         }
     },
-
-    createHoSo: async(res, userId) => {
-        try {
-            if (res.id !== "") {
-                await updateTK(res.id);
-            }
-            let status = "";
-            if (res.khachhang.id !== 0 && res.thucung.id !== 0) {
-                // tồn tại khách hàng và tồn tại pet
-                status = "existed";
-            }
-            if (res.khachhang.id !== 0 && res.thucung.id === 0) {
-                // tồng tại khách hàng mà không tồn tại pet
-                status = "already";
-            }
-            if (res.khachhang.id === 0 && res.thucung.id === 0) {
-                // khách hàng mới
-                status = "new";
-            }
-            switch (status) {
-                case "existed":
-                    await examFormServices.existed(res, userId);
-                    break;
-                case "already":
-                    await examFormServices.already(res, userId);
-                    break;
-                case "new":
-                    await examFormServices.new(res, userId);
-                    break;
-                default:
-                    break;
-            }
-        } catch (error) {
-            console.log(error);
-            throw new Error();
-        }
-    },
-
-
-
 
     // get one model
     getOne: async(id) => {
@@ -545,6 +506,11 @@ module.exports = {
     createExamForm: async(req, res) => {
         try {
             const body = req.body;
+            const userId = req.headers.id || null;
+
+            if (!userId || !userId.trim()) {
+                throw new Error(`Không tìm thấy thông tin người dùng userId: ${userId}`);
+            }
         
             if (body.id !== "") {
                 await updateTK(body.id);
