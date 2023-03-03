@@ -20,6 +20,32 @@ const { updateExamForm } = require("../services/dieutri.services");
 const { ROLE_TYPE } = require("../../utils/constants");
 const { response } = require("../../utils/api.res");
 
+
+// class MedicalReportController {
+//     create = async(req, res, next) => {
+//         console.log(model);
+//         try {
+//             const medicalReportCreated = await model.create({
+//                 ngaytao: localDate(new Date()),
+//                 khachhang_id: req.guest_id,
+//                 nguoitao_id: req.user_id,
+//                 trieuchung: req.description,
+//                 ghichu: req.note,
+//                 ngaytaikham: req.re_examination,
+//                 dataikham: req.status_examination,
+//                 congdichvu: req.service_plus,
+//                 thanhtien: req.total,
+//                 discountAmount: toNumber(req.discountAmount) || 0,
+//                 addedDiscountAmount: toNumber(req.addedDiscountAmount) || 0,
+//             });
+//             return response.success(res, "success", medicalReportCreated)
+//         } catch (error) {
+//             next(error);
+//         }
+//     }
+// }
+
+// module.export = new MedicalReportController()
 module.exports = {
     create: async(res) => {
         console.log(model);
@@ -53,7 +79,7 @@ module.exports = {
         where: {
           id: id,
         },
-      });
+      })
 
       const examForm = rawExamForm.toJSON();
 
@@ -617,7 +643,7 @@ module.exports = {
     },
 
     getPetExamination: async(role) => {
-        let obj = {
+        const obj = {
             limit: null,
         };
         try {
