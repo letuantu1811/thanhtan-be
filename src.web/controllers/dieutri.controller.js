@@ -80,30 +80,33 @@ module.exports = {
 
 
     // get one model
-    getOne: async(id) => {
+    getOne: async (id) => {
         try {
-      const rawExamForm = await model.findOne({
-        include: [
-          { model: giasuc, as: "giasuc" },
-          { model: khachhang, as: "khachhang" },
-        ],
-        where: {
-          id: id,
-        },
-      });
+            const rawExamForm = await model.findOne({
+                include: [
+                    {
+                        model: giasuc,
+                        as: 'giasuc',
+                        include: [
+                            { model: Giong, as: 'giong' },
+                            { model: Chungloai, as: 'chungloai' },
+                        ],
+                    },
+                    { model: khachhang, as: 'khachhang' },
+                ],
+                where: { id},
+            });
 
-      const examForm = rawExamForm.toJSON();
+            const examForm = rawExamForm.toJSON();
 
-      const discountAmount = toNumber(examForm.discountAmount) || 0;
-      const addedDiscountAmount = toNumber(examForm.addedDiscountAmount) || 0;
-      const thanhtien = toNumber(examForm.thanhtien) || 0;
+            const discountAmount = toNumber(examForm.discountAmount) || 0;
+            const addedDiscountAmount = toNumber(examForm.addedDiscountAmount) || 0;
+            const thanhtien = toNumber(examForm.thanhtien) || 0;
 
-      const orginTotalAmount =
-        (thanhtien + discountAmount) / (1 - addedDiscountAmount / 100);
+            const orginTotalAmount = (thanhtien + discountAmount) / (1 - addedDiscountAmount / 100);
 
-      const reCalculateAmountExamForm = { ...examForm, thanhtien: orginTotalAmount };
-      return reCalculateAmountExamForm
-
+            const reCalculateAmountExamForm = { ...examForm, thanhtien: orginTotalAmount };
+            return reCalculateAmountExamForm;
         } catch (error) {
             return error;
         }
@@ -149,43 +152,39 @@ module.exports = {
     getAllToday: async(date) => {
         try {
             let today = date ? date : tzSaiGon();
-      // if
-      const currentDateTreetments = await model.findAll({
-        include: [
-          { model: giasuc, as: "giasuc" },
-          { model: khachhang, as: "khachhang" },
-        ],
+            // if
+            const currentDateTreetments = await model.findAll({
+                include: [
+                    { model: giasuc, as: 'giasuc' },
+                    { model: khachhang, as: 'khachhang' },
+                ],
                 where: {
                     where: sequelize.where(
-                        sequelize.fn("date", sequelize.col("phieudieutri.ngaytao")),
-                        "=",
-                        today
+                        sequelize.fn('date', sequelize.col('phieudieutri.ngaytao')),
+                        '=',
+                        today,
                     ),
                     trangthai: 1,
                 },
-                order: [
-                    ["ngaytao", "DESC"]
-                ],
+                order: [['ngaytao', 'DESC']],
             });
-      return currentDateTreetments.map((treetMent) => {
-        const rawTreetMent = treetMent.toJSON();
-        console.log("🚀 ~ file: dieutri.controller.js:172 ~ returncurrentDateTreetments.map ~ rawTreetMent:", rawTreetMent)
-        const discountAmount = toNumber(rawTreetMent.discountAmount) || 0;
-        const addedDiscountAmount =
-          toNumber(rawTreetMent.addedDiscountAmount) || 0;
-        const thanhtien = toNumber(rawTreetMent.thanhtien) || 0;
+            return currentDateTreetments.map((treetMent) => {
+                const rawTreetMent = treetMent.toJSON();
+                const discountAmount = toNumber(rawTreetMent.discountAmount) || 0;
+                const addedDiscountAmount = toNumber(rawTreetMent.addedDiscountAmount) || 0;
+                const thanhtien = toNumber(rawTreetMent.thanhtien) || 0;
 
-        const orginTotalAmount =
-          (thanhtien + discountAmount) / (1 - addedDiscountAmount / 100);
+                const orginTotalAmount =
+                    (thanhtien + discountAmount) / (1 - addedDiscountAmount / 100);
 
-        const reCalculateAmountExamForm = {
-          ...rawTreetMent,
-          discountAmount: 0,
-          addedDiscountAmount: 0,
-          thanhtien: orginTotalAmount,
-        };
-        return reCalculateAmountExamForm;
-      });
+                const reCalculateAmountExamForm = {
+                    ...rawTreetMent,
+                    discountAmount: 0,
+                    addedDiscountAmount: 0,
+                    thanhtien: orginTotalAmount,
+                };
+                return reCalculateAmountExamForm;
+            });
         } catch (error) {
             return error;
         }
@@ -601,35 +600,27 @@ module.exports = {
         }
     },
 
-    getPetExamination: async(role) => {
-        let obj = {
-            limit: null,
-        };
+    getPetExamination: async () => {
         try {
-            let today = tzSaiGon();
-            console.log(today);
             return await giasuc.findAll({
-                include: [{
+                include: [
+                    {
                         model: khachhang,
-                        require: true,
-                        as: "khachhang"
+                        as: 'khachhang',
                     },
                     {
                         model: phieudieutri,
                     },
                     {
                         model: Giong,
-                        as: "giong",
-                        include: { model: Chungloai, as: "chungloai" }
-                    }
+                        as: 'giong',
+                        include: { model: Chungloai, as: 'chungloai' },
+                    },
                 ],
-                ...obj,
                 where: {
                     trangthai: 1,
                 },
-                order: [
-                    ["ngaytao", "DESC"]
-                ],
+                order: [['ngaytao', 'DESC']],
             });
         } catch (error) {
             console.log(error);

@@ -1,17 +1,17 @@
 const httpStatus = require('http-status');
+const { HttpException } = require('../utils/api.res/api.error');
 const config = {
   env: "development"
 }
 
-const ApiError = require('../utils/api.res/api.error');
-
 const errorConverter = (err, req, res, next) => {
   let error = err;
-  if (!(error instanceof ApiError)) {
-    const statusCode =
-      error.statusCode ? httpStatus.BAD_REQUEST : httpStatus.INTERNAL_SERVER_ERROR;
-    const message = error.message || httpStatus[statusCode];
-    error = new ApiError(statusCode, message, false, err.stack);
+  if (!(error instanceof HttpException)) {
+      const statusCode = error.statusCode
+          ? httpStatus.BAD_REQUEST
+          : httpStatus.INTERNAL_SERVER_ERROR;
+      const message = error.message || httpStatus[statusCode];
+      error = new HttpException(statusCode, message, false, err.stack);
   }
   next(error);
 };
@@ -36,9 +36,7 @@ const errorHandler = (err, req, res, next) => {
       stack: err.stack
     }),
   };
-  // if (config.env === 'development') {
-  //   logger.error(err);
-  // }
+
   console.log(err);
   res.status(statusCode).send(response);
 

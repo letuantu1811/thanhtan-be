@@ -226,7 +226,7 @@ router.get("/getPetExamination", async(req, res) => {
     let role = req.header("quyen");
     let arr = [];
     try {
-        const result = await dieutri.getPetExamination(role);
+        const result = await dieutri.getPetExamination();
         if (role.toUpperCase() === 'USER') {
             for (let index = 0; index < 150; index++) {
                 for (let index2 = 0; index2 < result[index].phieudieutris.length; index2++) {
