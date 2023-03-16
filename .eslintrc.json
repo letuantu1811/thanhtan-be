@@ -1,0 +1,56 @@
+{
+    "env": {
+        "node": true,
+        "commonjs": true,
+        "es2020": true,
+        "jest/globals": true
+    },
+    "plugins": ["jest"],
+    "extends": ["standard"],
+    "parserOptions": {
+        "ecmaVersion": 11
+    },
+    "rules": {
+        "space-before-function-paren": "off",
+        "comma-dangle": ["error", {
+            "arrays": "always-multiline",
+            "objects": "always-multiline",
+            "imports": "always-multiline",
+            "exports": "always-multiline",
+            "functions": "always-multiline"
+        }],
+        "indent": ["error", 4, {
+            "SwitchCase": 1
+        }],
+        "linebreak-style": ["error", "unix"],
+        "quotes": ["error", "single"],
+        "import/newline-after-import": ["error", { "count": 1 }],
+        "sort-imports": [
+            "error",
+            {
+                "ignoreCase": true,
+                "ignoreDeclarationSort": true,
+                "ignoreMemberSort": true,
+                "memberSyntaxSortOrder": ["none", "single", "all", "multiple"],
+                "allowSeparatedGroups": false
+            }
+        ],
+        "semi": [2, "always"],
+        "max-len": [
+            "error",
+            {
+                "code": 100,
+                "comments": 100,
+                "ignoreRegExpLiterals": true,
+                "ignoreComments": true,
+                "ignoreTrailingComments": false,
+                "ignoreUrls": true,
+                "ignoreStrings": false,
+                "ignoreTemplateLiterals": true
+            }
+        ]
+    },
+    "ignorePatterns": [
+        "src/migrations/**"
+    ]
+}

@@ -13,9 +13,9 @@ const thanhvien = require('./thanhvien.route')
 const setting = require('./setting.route')
 const giong = require('./giong.route')
 const thongke = require('./thongke.route')
+const pet = require('./pet.route');
 
 let initClientAPI = (app, url) => {
-    // insert routers ADMIN here
     app.use(url + "products", sanpham);
     app.use(url + "categories", nhomsanpham);
     app.use(url + "customers", khachhang);
@@ -31,6 +31,7 @@ let initClientAPI = (app, url) => {
     app.use(url + "config", setting);
     app.use(url + "kinds", giong);
     app.use(url + "summaries", thongke);
+    app.use(url + "pets", pet);
 }
 
 module.exports = initClientAPI;

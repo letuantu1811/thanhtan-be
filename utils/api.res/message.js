@@ -66,7 +66,8 @@ const error = (message, code, data) => {
     status: false,
     code: code,
     message: message,
-    data: data
+    data: data, 
+    path: data.path
   }
 }
 module.exports = {

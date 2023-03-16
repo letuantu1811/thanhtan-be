@@ -141,10 +141,9 @@ router.get("/all", async(req, res) => {
 // Getting many exam by pet id
 router.get("/examByPetId", async(req, res) => {
     try {
-        let id = req.query.id
-        let phieudieutriid = req.query.phieudieutriid
-        console.log(phieudieutriid + "123");
-        const result = await dieutri.getAllExamByPetId(id, phieudieutriid);
+        
+
+        const result = await dieutri.getAllExamByPetId(req.query);
         response.success(res, "success", result)
     } catch (err) {
         console.log(err.message);

@@ -489,7 +489,7 @@ module.exports = {
             throw new Error();
         }
     },
-    getAllExamByPetId: async(id, phieudieutriid) => {
+    getAllExamByPetId: async({ id, phieudieutriid }) => {
         try {
             let arr = [];
             let obj = {};
