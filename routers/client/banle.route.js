@@ -15,8 +15,17 @@ router.get("/", async(req, res) => {
     }
 });
 
-router.get("/prints", async(req, res) => {
+router.get("/prints/:mode", async(req, res) => {
     try {
+        const mode = req.params.mode;
+        if(!mode ) {
+            return response.error(res, 'Vui lòng chọn định dạng khổ giấy in.', 500, req.url);
+        }
+        
+        if(!['k80', 'a5'].cludes(mode)) {
+            return response.error(res, `Định dạng ${mode} không được hỗ trợ. Vui lòng chọn khổ K80 hoặc A5.`, 500, req.url);
+        }
+
         const result = await controller.printOrder();
 
         return response.success(res, "success", result)

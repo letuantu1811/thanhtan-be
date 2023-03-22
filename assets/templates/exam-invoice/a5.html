@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+
+<style>
+   .nopadding-cdt {
+        padding: 0 0 15px !important;
+        margin: 0 !important;
+    }
+    
+    .nopadding-cth {
+        padding: 0 0 0 0 !important;
+        margin: 0 !important;
+    }
+    
+    .nopadding-tm {
+        padding: 0 15px 0 30px;
+    }
+    
+    .nopadding-tk {
+        padding: 0 30px 0 15px;
+    }
+    
+    .table tr.active td {
+        background-color: #48da24 !important;
+        color: white;
+    }
+    
+    #invoice {
+        /* padding: 10px; */
+        height: 210mm;
+        width: 148mm;
+    }
+</style>
+
+<body>
+  <div hidden="true" id="invoice">
+    <div class="header-a" style="width: 100%; padding-top: -40px;">
+      <div class="header-left" style="max-width: 20%;
+              min-width: 20%;
+              float: left;
+              padding-left: -20px;">
+        <img style="max-width:80px;max-height:80px"
+          src="https://scontent.fsgn5-13.fna.fbcdn.net/v/t1.6435-9/67682927_407046376823679_7483366332956672_n.jpg?_nc_cat=106&ccb=1-5&_nc_sid=09cbfe&_nc_ohc=GMWDs9ICILoAX_nyKWS&_nc_ht=scontent.fsgn5-13.fna&oh=00_AT_g9xQ9SIk2TCpSoAlGMhjMxhyUg9eocd8hvf4oJPfZ8w&oe=6205E11F" />
+        <!-- PHIẾU ĐIỀU TRỊ <br> Số: {{this.dtID}} -->
+      </div>
+      <div class="header-right" style="float: left;
+              text-align: center; font-size: 15px;
+              max-width: 80%;
+              min-width: 80%; padding-bottom:10px">
+        PHÒNG KHÁM THÚ Y - PET SHOP<br> <b>THANH TÂN</b> <br> 86A Tây Thạnh, P. Tây Thạnh, Q. Tân Phú, TP. Hồ Chí Minh
+        <br> ĐT: 0979 557781
+        <!-- PHIẾU ĐIỀU TRỊ <br> Số: {{this.dtID}} -->
+      </div>
+    </div>
+    <div style="text-align: center; padding-top: 65px;">
+      <h3>PHIẾU ĐIỀU TRỊ</h3>
+    </div>
+    <div class="header-b">
+      <div style="min-width: 100%; max-width: 100%; float: left; font-size: 13px">
+        <b> Tên chủ (Ông, Bà):</b> {{khachhang.ten}} - <b>SĐT:</b> {{khachhang.sodienthoai}} <br> <b>Địa chỉ:</b>
+        {{khachhang.diachi}} <br> <b>Tên gia súc:</b> {{thucungObj.ten}} - <b>Tuổi:</b> {{thucungObj.tuoi}} ( tháng ) -
+        <b>Giới tính:</b> {{thucungObj.gioitinh
+        == 'true' ? 'Đực' : 'Cái'}} - <b>Trọng lượng:</b> {{thucungObj.trongluong}} (kg) <br> <b>Triệu chứng:</b>
+        {{trieuchung}} <br> <b>Chẩn đoán:</b> {{chandoan}}<br>
+      </div>
+      <!-- <div>
+              <br> <br> <br> {{trieuchung}} <br> {{chandoan}} <br>
+          </div> -->
+    </div>
+  
+    <div class="header-cdv" style="padding-top: 10px;">
+      <b style="font-size:13px">Công dịch vụ</b> <br>
+      <table style="width:100%; text-align: center; font-size: 10px">
+        <tr>
+          <th style=" min-width: 10%; max-width: 10%; ">STT</th>
+          <th style="text-align:left;  min-width: 40%; max-width: 40%;">Tên dịch vụ</th>
+          <th>Số lượng</th>
+          <th style="text-align:right">Thành tiền</th>
+          <!-- <th style="text-align:right">Thành tiền</th> -->
+        </tr>
+  
+        <hr>
+        <!-- <hr> -->
+        <tr *ngFor="let item of dataSourceCDV; index as i;">
+          <td style="min-width: 10%; max-width: 10%; text-align: center">{{i+1}}</td>
+          <td style="text-align:left; min-width: 10%; max-width: 10%;">{{item.ten}}</td>
+          <td>1</td>
+          <td style="text-align: right; ">{{formatThanhTienThuoc(item.gia)}}</td>
+  
+        </tr>
+      </table>
+  
+      <hr />
+  
+    </div>
+    <div class="header-cdv " style="padding-top: 5px; ">
+      <b style="font-size:13px">Đơn thuốc</b> <br>
+      <table style="width:100%; text-align: center; font-size: 10px">
+        <tr>
+          <th style="text-align:left; min-width: 10% ">STT</th>
+          <th style="text-align:left;">Tên thuốc</th>
+          <!-- <th>ĐCT</th> -->
+          <th>LLượng</th>
+          <th>Số lượng</th>
+          <th>Đơn giá</th>
+          <th style="text-align:right ">Thành tiền</th>
+        </tr>
+        <hr>
+        <tr *ngFor="let item of dataSourceSP; index as i; ">
+          <td style="min-width: 10%; max-width: 10%;">{{i+1}}</td>
+          <td style="text-align:left;">{{item.tenthaythe}}</td>
+          <!-- <td></td> -->
+          <td>{{item.lieuluong}}</td>
+          <td>{{item.soluong}}</td>
+          <td>{{formatDonGiaThuoc(item.gia, item.soluong)}}</td>
+          <td style="text-align: right; ">{{formatThanhTienThuoc(item.gia)}}</td>
+        </tr>
+      </table>
+      <hr />
+      <div class="footer-cdv " style="margin-top: 20px; float: right; font-size: 13px">
+        <div class="cdv-left " style="float: left; text-align: left; ">
+          <!-- Tổng công dịch vụ:<br> Tổng tiền thuốc:<br> -->
+          {{ giamgia !== 0 ? 'Giảm giá:' : ''}} <br>
+          <b>Tổng cộng: <br></b>
+        </div>
+        <div class="cdv-right " style="float: left; text-align: right; ">
+          <!-- {{thanhtien-tienthuoc}} <br> {{tienthuoc}} <br> -->
+          {{ giamgia !== 0 ? formatGiamGia() : ''}} <br>
+          <!-- {{formatGiamGia()}} <br> -->
+          <b> {{formatSum()}} <br></b>
+          <!-- <b> {{tongcongprint}} <br> -->
+        </div>
+      </div>
+    </div>
+    <div style="padding-top: 60px; font-size: 13px;">
+      Lời dặn: {{ghichu}} <br>
+    </div>
+  
+    <div style=" float: right; text-align: center;font-size: 13px; ">
+      Ngày {{ day }} tháng {{ month }} năm {{ year }} <br> Bác sĩ điều trị <br>
+      <br>
+      <br>
+      <br>
+      <br> {{bacsi.ten}}
+    </div>
+  </div>
+</body>
+
+</html>

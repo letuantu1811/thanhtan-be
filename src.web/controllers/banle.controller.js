@@ -130,7 +130,7 @@ module.exports = {
             return error
         }
     },
-    printOrder: async() => {
-        return await OrderService.getInvoiceTemplate();
+    printOrder: async(mode) => {
+        return await OrderService.getInvoiceTemplate(mode);
     }
 }

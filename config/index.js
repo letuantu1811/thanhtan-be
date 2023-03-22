@@ -13,7 +13,7 @@ const config = {
     port: toNumber(process.env.APP_PORT),
     host: process.env.APP_HOST,
     assetsPath: path.join(__dirname, '../assets'),
-    templatePath: path.join(__dirname, '../assets/templates/{mode}.html'),
+    templateExamInvoicePath: path.join(__dirname, '../assets/templates/exam-invoice/'),
 };
 
 module.exports = config;

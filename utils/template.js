@@ -1,11 +1,12 @@
 const { readFileAsync } = require("./file.helper");
 
-exports.getDataTemplate = async (filename) => {
+exports.getDataTemplate = async (filename, extension = 'html') => {
   if (!filename) {
       throw new Error("Yêu cầu filename");
   }
   
-  const bufferData = await readFileAsync(filename);
+  const filePath = `${filename}.${extension}`;
+  const bufferData = await readFileAsync(filePath);
   return bufferData ? bufferData.toString() : "";
 };
 
