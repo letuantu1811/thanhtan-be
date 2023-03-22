@@ -15,10 +15,21 @@ router.get("/", async(req, res) => {
     }
 });
 
+router.get("/prints", async(req, res) => {
+    try {
+        const result = await controller.printOrder();
+
+        return response.success(res, "success", result)
+    } catch (err) {
+        console.log(err.message);
+        return response.error(res, err.message, 500, req.url);
+    }
+});
+
 // Creating donvitinh
 router.post("/create", async(req, res) => {
     let body = req.body;
-    try {
+    try {  
         const result = await controller.createOrders(body);
 
         response.success(res, "success", result)

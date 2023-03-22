@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<style>
+    .header-a {
+        width: 100%;
+    }
+
+    .header-left {
+        /* background-color: blueviolet; */
+        max-width: 50%;
+        min-width: 50%;
+        float: left;
+        text-align: center;
+    }
+
+    .header-right {
+        float: left;
+        /* background-color: blue; */
+        text-align: center;
+        max-width: 50%;
+        min-width: 50%;
+    }
+
+    body {
+        padding: 10px;
+        height: 210mm;
+        width: 148mm;
+        /* margin: 30mm 45mm 30mm 45mm; */
+        /* change the margins as you want them to be. */
+
+    }
+
+    .header-b {
+        margin-top: 100px;
+    }
+
+    .header-cdv {
+        margin-top: 10px;
+    }
+
+    .content-cdv {
+        margin-left: 20px;
+    }
+</style>
+
+<body>
+    <div class="header-a">
+        <div class="header-left">
+            Chi Cục Thú Y TP. Hồ Chí Minh<br>
+            Trạm chẩn đoán xét nghiệm & điều trị <br>
+            151 Lý Thường Kiệt, P7, Q11 <br> ĐT: 38551258
+        </div>
+        <div class="header-right">
+            PHIẾU ĐIỀU TRỊ <br>
+            Số: 51985/15-XN1
+        </div>
+    </div>
+    <div class="header-b">
+        Tên chủ (Ông, Bà): {{Hồng Hạnh}} <br>
+        Địa chỉ: {{Quận 1}} <br>
+        Loại gia súc: {{Có vàng}} - Tuổi: {{12}} ( tháng ) - Giới tính: {{Đực}} - Trọng lượng : {{5}} (kg) <br>
+        Chẩn đoán bệnh: {{Viêm phổi}} - Diễn giải: {{HO, KHÓ THở (CEVEO)}} <br>
+    </div>
+
+    <div class="header-cdv">
+        <b class="">CÔNG DỊCH VỤ</b> <br>
+
+        <hr>
+        <div class="content-cdv">
+            Khám bệnh/lần:........................................1.......15.000<br>
+        </div>
+        <div class="content-cdv">
+            Chích 1 ngày:.............................................1.......9.000<br>
+        </div>
+
+    </div>
+    <div class="header-cdv">
+        <b class="">ĐƠN THUỐC</b> <br>
+        <table style="width:100%; text-align: center;">
+            <tr>
+                <th>STT</th>
+                <th>Tên thuốc</th>
+                <th>ĐCT</th>
+                <th>LLượng</th>
+                <th>Số lượng</th>
+                <th>Đơn giá</th>
+                <th>Thành tiền</th>
+            </tr>
+            <hr>
+            <tr>
+                <td>1</td>
+                <td>Bio Dexa 100ml</td>
+                <td>IV</td>
+                <td>0.5</td>
+                <td>0.5</td>
+                <td>1000</td>
+                <td>500</td>
+            </tr>
+            <tr>
+                <td>2</td>
+                <td>Ống chích nhựa</td>
+                <td>IV</td>
+                <td>1</td>
+                <td>1</td>
+                <td>2000</td>
+                <td>2000</td>
+            </tr>
+        </table>
+        <hr/>
+        <div class="footer-cdv" style="margin-top: 20px; float: right;">
+            <div class="cdv-left" style="float: left; text-align: left;">
+                Tổng công dịch vụ:<br>  
+                Tổng tiền thuốc:<br>   
+                <b>Tổng cộng:<br></b>
+            </div>
+            <div class="cdv-right" style="float: left; text-align: right;">
+                100.000 <br>
+                50.000  <br>
+                <b>150.000 <br></b>
+            </div>
+        </div>
+    </div>
+    <div style="margin-top: 100px;">
+       Lời dặn: {{TK MOI NGAY}} <br>
+       Điều trị: {{5}}
+    </div>
+
+    <div style="margin-top: 100px; float: right; text-align: center;">
+        Ngày {{24}} tháng {{4}} năm {{2022}} <br>
+                Bác sĩ điều trị <br>
+                <br>
+                <br>
+                <br>
+                <br>
+                {{Trần Thanh Tân}}
+     </div>
+</body>
+
+</html>
