@@ -1,0 +1,15 @@
+{
+  "singleQuote": true,
+  "trailingComma": "all",
+  "arrowParens": "always",
+  "printWidth": 120,
+  "jsxBracketSameLine": true,
+  "overrides": [
+    {
+      "files": ["*.html"],
+      "options": {
+        "printWidth": 80
+      }
+    }
+  ]
+}

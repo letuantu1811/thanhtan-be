@@ -4,6 +4,7 @@ const dieutri = require("../../src.web/controllers/dieutri.controller");
 const truyxuatbenhan = require("../../src.web/controllers/truyxuatbenhan.controller");
 const response = require('../../utils/api.res/response');
 const fs = require('fs');
+const { getInvoiceTemplateByMode } = require("../../src.web/controllers/TreetmentFormController");
 
 
 
@@ -77,7 +78,7 @@ router.get("/reexam", async(req, res) => {
         response.success(res, "Lấy dữ liệu thành công", isUserRole ? arr : result)
     } catch (err) {
         console.log('Error at dieutri.router >> /reexam:', err.message);
-        response.error(res, "Lỗi lấy dữ liệu", 500)
+        response.error(res, err.message , 500);
     }
 });
 
@@ -271,5 +272,6 @@ router.get("/isExisted/:id", async(req, res) => {
     }
 });
 
+router.get('/prints/:mode', getInvoiceTemplateByMode);
 
 module.exports = router;
