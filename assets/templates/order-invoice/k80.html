@@ -9,12 +9,33 @@
 </head>
 
 <style>
+    @media print {
+        @page {
+            size: 97mm 297mm;
+        }
+    }
+
+    @media print {
+
+        html,
+        body {
+            width: 97mm!important;
+            height: 297mm!important;
+            display: block !important;
+            line-height: 1 !important;
+            font-family: Time New Roman, sans-serif;
+        }
+    }
+
+    * {
+        box-sizing: border-box;
+    }
+
     .header-a {
         width: 100%;
     }
 
     .header-left {
-        /* background-color: blueviolet; */
         max-width: 50%;
         min-width: 50%;
         float: left;
@@ -23,20 +44,18 @@
 
     .header-right {
         float: left;
-        /* background-color: blue; */
         text-align: center;
         max-width: 50%;
         min-width: 50%;
     }
 
     body {
-        padding: 10px;
-        height: 210mm;
-        width: 148mm;
-        /* margin: 30mm 45mm 30mm 45mm; */
-        /* change the margins as you want them to be. */
-
-    }
+            width: 97mm!important;
+            height: 297mm!important;
+            display: block !important;
+            line-height: 1 !important;
+            font-family: Time New Roman, sans-serif;
+        }
 
     .header-b {
         margin-top: 100px;
@@ -114,34 +133,34 @@
                 <td>2000</td>
             </tr>
         </table>
-        <hr/>
+        <hr />
         <div class="footer-cdv" style="margin-top: 20px; float: right;">
             <div class="cdv-left" style="float: left; text-align: left;">
-                Tổng công dịch vụ:<br>  
-                Tổng tiền thuốc:<br>   
+                Tổng công dịch vụ:<br>
+                Tổng tiền thuốc:<br>
                 <b>Tổng cộng:<br></b>
             </div>
             <div class="cdv-right" style="float: left; text-align: right;">
                 100.000 <br>
-                50.000  <br>
+                50.000 <br>
                 <b>150.000 <br></b>
             </div>
         </div>
     </div>
     <div style="margin-top: 100px;">
-       Lời dặn: {{TK MOI NGAY}} <br>
-       Điều trị: {{5}}
+        Lời dặn: {{TK MOI NGAY}} <br>
+        Điều trị: {{5}}
     </div>
 
     <div style="margin-top: 100px; float: right; text-align: center;">
         Ngày {{24}} tháng {{4}} năm {{2022}} <br>
-                Bác sĩ điều trị <br>
-                <br>
-                <br>
-                <br>
-                <br>
-                {{Trần Thanh Tân}}
-     </div>
+        Bác sĩ điều trị <br>
+        <br>
+        <br>
+        <br>
+        <br>
+        {{Trần Thanh Tân}}
+    </div>
 </body>
 
 </html>

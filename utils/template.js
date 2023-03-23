@@ -1,10 +1,11 @@
+const { isObject, isEmpty } = require("lodash");
 const { readFileAsync } = require("./file.helper");
 
-exports.getDataTemplate = async (filename, extension = 'html') => {
+exports.getDataTemplate = async (filename, extension = "html") => {
   if (!filename) {
-      throw new Error("Yêu cầu filename");
+    throw new Error("Yêu cầu filename");
   }
-  
+
   const filePath = `${filename}.${extension}`;
   const bufferData = await readFileAsync(filePath);
   return bufferData ? bufferData.toString() : "";
@@ -12,14 +13,16 @@ exports.getDataTemplate = async (filename, extension = 'html') => {
 
 exports.replaceValueHtml = (html = "", params) => {
   if (!html || !params) {
-      return html;
+    throw new Error("Yêu cầu html hoặc paráms");
   }
-
-  for (const param of params) {
-      const regExp = new RegExp(param.code, "g");
-      if (html.match(regExp) && param.value) {
-          html = html.replace(regExp, param.value);
-      }
+  if (!isObject(params)) {
+    throw new Error("Yêu cầu object");
+  }
+  for (const [key, value] of Object.entries(params)) {
+    const regExp = new RegExp(`{${key}}`, "g");
+    if (html.match(regExp) && !isEmpty(value)) {
+      html = html.replace(regExp, value);
+    }
   }
   return html;
 };

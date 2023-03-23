@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>Sale Invoice</title>
+	<style>
+		* {
+			box-sizing: border-box;
+			margin: 0;
+			padding: 0;
+		}
+
+		body {
+			font-family: Arial, sans-serif;
+			font-size: 14px;
+		}
+
+		.container {
+			max-width: 800px;
+			margin: 0 auto;
+			padding: 20px;
+		}
+
+		.invoice-header {
+			display: flex;
+			justify-content: space-between;
+			align-items: center;
+			margin-bottom: 20px;
+		}
+
+		.invoice-header h1 {
+			font-size: 28px;
+			font-weight: bold;
+			text-transform: uppercase;
+		}
+
+		.invoice-header p {
+			font-size: 14px;
+			font-weight: bold;
+			text-align: right;
+		}
+
+		.invoice-info {
+			display: flex;
+			justify-content: space-between;
+			align-items: center;
+			margin-bottom: 20px;
+		}
+
+		.invoice-info div {
+			font-size: 14px;
+		}
+
+		.invoice-table {
+			width: 100%;
+			border-collapse: collapse;
+			margin-bottom: 20px;
+		}
+
+		.invoice-table th,
+		.invoice-table td {
+			padding: 10px;
+			border: 1px solid #000;
+			text-align: left;
+			font-size: 14px;
+		}
+
+		.invoice-table th {
+			background-color: #f2f2f2;
+			font-weight: bold;
+		}
+
+		.invoice-total {
+			display: flex;
+			justify-content: flex-end;
+			align-items: center;
+			font-size: 14px;
+		}
+
+		.invoice-total p {
+			margin-right: 20px;
+		}
+	</style>
+</head>
+<body>
+	<div class="container">
+		<div class="invoice-header">
+			<h1>Sale Invoice</h1>
+			<p>Invoice #: 12345<br>Date: 23/03/2023</p>
+		</div>
+		<div class="invoice-info">
+			<div>
+				<p>Customer Name: John Doe</p>
+				<p>Address: 123 Main Street<br>City: Anytown<br>State: Any State<br>Zip: 12345</p>
+			</div>
+			<div>
+				<p>Seller Name: Acme Corp.</p>
+				<p>Address: 456 Main Street<br>City: Anytown<br>State: Any State<br>Zip: 12345</p>
+			</div>
+		</div>
+		<table class="invoice-table">
+			<thead>
+				<tr>
+					<th>Description</th>
+					<th>Qty</th>
+					<th>Price</th>
+					<th>Total</th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr>
+					<td>Product A</td>
+					<td>2</td>
+					<td>$10.00</td>
+					<td>$20.00</td>
+				</tr>
+				<tr>
+					<td>Product B</td>
+					<td>1</td>
+					<td>$20.00</td>
+					<td>$20.00</td>
+				</tr>
+			</tbody>
+		</table>
+    <div class="invoice-total">
+      <p>Subtotal: $40.00</p>
+      <p>Tax: $4.00</p>
+      <p>Total: $44.00</p>
+    </div>
+  </div>
+  
+  <script>
+    // Open print dialog when page is loaded
+    window.onload = function() {
+      window.print();
+    };
+  </script>

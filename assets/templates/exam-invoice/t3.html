@@ -1,0 +1,222 @@
+
+@import url('https://fonts.googleapis.com/css?family=Open+Sans:300,400,600');
+.container {
+position: absolute;
+display: none;
+z-index: 2147483647;
+color: black;
+font-size: 14px;
+font-family: 'Open Sans', 'sans-serif', 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
+-webkit-font-smoothing: antialiased;
+-moz-osx-font-smoothing: grayscale;
+text-rendering: optimizeLegibility;
+-moz-transition: width 1s ease-in-out;
+-webkit-transition: width 1s ease-in-out;
+-moz-transition: width 1s ease-in-out;
+-o-transition: width 1s ease-in-out;
+transition: width 1s ease-in-out;
+/* transition: width 1s ease-in-out, left 1.5s ease-in-out; */
+}
+
+.container button {
+background-color: transparent;
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<style>
+
+    @media print {
+        @page {
+            size: 97mm 297mm;
+        }
+    }
+
+    @media print {
+        html,
+        body {
+            width: 97mm!important;
+            height: 297mm!important;
+            display: block !important;
+            line-height: 1 !important;
+            font-family: Time New Roman, sans-serif;
+        }
+    }
+
+    * {
+        box-sizing: border-box;
+    }
+
+    .header-a {
+        width: 100%;
+    }
+
+    .header-left {
+        max-width: 50%;
+        min-width: 50%;
+        float: left;
+        text-align: center;
+    }
+
+    .header-right {
+        float: left;
+        text-align: center;
+        max-width: 50%;
+        min-width: 50%;
+    }
+
+    body {
+            width: 97mm!important;
+            height: 297mm!important;
+            display: block !important;
+            line-height: 1 !important;
+            font-family: Time New Roman, sans-serif;
+        }
+
+    .header-b {
+        margin-top: 100px;
+    }
+
+    .header-cdv {
+        margin-top: 10px;
+    }
+
+    .content-cdv {
+        margin-left: 20px;
+    }
+    /* -webkit-print-color-adjust: exact; */
+</style>
+
+
+<div class="invoice-content-wrap" id="download_section">
+  <!--Header Start Here -->
+  <header class="invoice-header text-invoice content-min-width" id="invo_header">
+    <div class="invoice-logo-content">
+      <div class="invoice-logo">
+        <a href="agency_service.html" class="logo"><img src="../assets/images/logo/logo.png" alt="this is a invoice logo"></a>
+      </div>
+      <div class="invo-head-content">
+        <div class="invo-head-wrap">
+          <div class="invo-num-title invo-no inter-700">Invoice No:</div>
+          <div class="invo-num inter-400">#DI56789</div>
+        </div>
+        <div class="invo-head-wrap invoi-date-wrap">
+          <div class="invo-num-title invo-date inter-700">Invoice Date:</div>
+          <div class="invo-num inter-400">30/11/2022</div>
+        </div>
+      </div>
+    </div>
+    <div class="invoice-header-contact">
+      <div class="invo-cont-wrap invo-contact-wrap">
+        <div class="invo-social-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><g clip-path="url(#clip0_6_94)"><path d="M5 4H9L11 9L8.5 10.5C9.57096 12.6715 11.3285 14.429 13.5 15.5L15 13L20 15V19C20 19.5304 19.7893 20.0391 19.4142 20.4142C19.0391 20.7893 18.5304 21 18 21C14.0993 20.763 10.4202 19.1065 7.65683 16.3432C4.8935 13.5798 3.23705 9.90074 3 6C3 5.46957 3.21071 4.96086 3.58579 4.58579C3.96086 4.21071 4.46957 4 5 4" stroke="#00BAFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path><path d="M15 7C15.5304 7 16.0391 7.21071 16.4142 7.58579C16.7893 7.96086 17 8.46957 17 9" stroke="#00BAFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path><path d="M15 3C16.5913 3 18.1174 3.63214 19.2426 4.75736C20.3679 5.88258 21 7.4087 21 9" stroke="#00BAFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></g><defs><clipPath id="clip0_6_94"><rect width="24" height="24" fill="white"></rect></clipPath></defs></svg>
+        </div>
+        <div class="invo-social-name">
+          <a href="tel:12345678899" class="invo-hedaer-contact inter-400">+1 234 567 8899</a>
+        </div>
+      </div>
+      <div class="invo-cont-wrap">
+        <div class="invo-social-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><g clip-path="url(#clip0_6_108)"><path d="M19 5H5C3.89543 5 3 5.89543 3 7V17C3 18.1046 3.89543 19 5 19H19C20.1046 19 21 18.1046 21 17V7C21 5.89543 20.1046 5 19 5Z" stroke="#00BAFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path><path d="M3 7L12 13L21 7" stroke="#00BAFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></g><defs><clipPath id="clip0_6_108"><rect width="24" height="24" fill="white"></rect></clipPath></defs></svg>
+        </div>
+        <div class="invo-social-name">
+          <a href="mailto:contact@invoice.com" class="invo-hedaer-mail inter-400">contact@invoice.com</a>
+        </div>
+      </div>
+    </div>
+  </header>
+  <!--Header End Here -->
+  <!--Invoice content start here -->
+  <section class="agency-service-content" id="agency_service">
+    <div class="container">
+      <!--invoice owner name content -->
+      <div class="invoice-owner-conte-wrap">
+        <div class="invo-to-wrap">
+          <div class="invoice-to-content">
+            <p class="invo-to inter-700 medium-font mtb-0">Invoice To:</p>
+            <h1 class="invo-to-owner inter-700 md-lg-font">Jordon Smith</h1>
+            <p class="invo-owner-address medium-font inter-400 mtb-0">121 E Parkview St, IN 45240<br> Toronto, Ontario<br> Canada</p>
+          </div>
+        </div>
+        <div class="invo-pay-to-wrap">
+          <div class="invoice-pay-content">
+            <p class="invo-to inter-700 medium-font mtb-0">Pay To:</p>
+            <h2 class="invo-to-owner inter-700 md-lg-font">Digital Invoico</h2>
+            <p class="invo-owner-address medium-font inter-400 mtb-0">4510 E Dolphine St, IN 3526<br> Hills Road, New York<br> United States</p>
+          </div>
+        </div>
+      </div>
+      <!--Invoice Table Data Start here -->
+      <div class="table-wrapper agency-service-table">
+        <table class="invoice-table">
+          <thead>
+            <tr class="invo-tb-header">
+              <th class="invo-table-title serv-wid inter-700 medium-font">Service</th>
+              <th class="invo-table-title desc-wid inter-700 medium-font">Description</th>
+              <th class="invo-table-title qty-wid inter-700 medium-font">Qty</th>
+              <th class="invo-table-title pric-wid inter-700 medium-font">Price</th>
+              <th class="invo-table-title tota-wid inter-700 medium-font total-head">Total</th>
+            </tr>
+          </thead>
+          <tbody class="invo-tb-body">
+            <tr class="invo-tb-row">
+              <td class="invo-tb-data">Marketing</td>
+              <td class="invo-tb-data">Digital Marketing &amp; SEO</td>
+              <td class="invo-tb-data">2</td>
+              <td class="invo-tb-data">$120</td>
+              <td class="invo-tb-data total-data">$240.00</td>
+            </tr>
+            <tr class="invo-tb-row">
+              <td class="invo-tb-data">Web Design &amp; Development</td>
+              <td class="invo-tb-data">Dektop &amp; Mobile Web App Design</td>
+              <td class="invo-tb-data">2</td>
+              <td class="invo-tb-data">$250</td>
+              <td class="invo-tb-data total-data">$500.00</td>
+            </tr>
+            <tr class="invo-tb-row">
+              <td class="invo-tb-data">UI/UX Design</td>
+              <td class="invo-tb-data">Mobile Adroid &amp; iOS App Design</td>
+              <td class="invo-tb-data">1</td>
+              <td class="invo-tb-data">$80</td>
+              <td class="invo-tb-data total-data">$80.00</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <!--Invoice Table Data End here -->
+      <!--Invoice additional info start here -->
+      <div class="invo-addition-wrap">
+        <div class="invo-add-info-content">
+          <h3 class="addi-info-title inter-700 medium-font">Additional Information:</h3>
+          <p class="add-info-desc inter-400 mtb-0">A ut vitae nullam risus at. Justo enim nisi elementum ac. Massa molestie metus vitae ornare turpis donec odio sollicitudin. Ac ut tellus eu donec dictum risus blandit. Quam diam dictum amet.</p>
+        </div>
+        <div class="invo-bill-total">
+          <table class="invo-total-table">
+            <tbody>
+              <tr>
+                <td class="inter-700 medium-font b-text hotel-sub">Sub Total:</td>
+                <td class="invo-total-data inter-400 medium-font second-color">$820.00</td>
+              </tr>
+              <tr class="tax-row bottom-border">
+                <td class="inter-700 medium-font b-text hotel-sub">Tax <span class="invo-total-data inter-700 medium-font second-color">(18%)</span></td>
+                <td class="invo-total-data inter-400 medium-font second-color">$147.60</td>
+              </tr>
+              <tr class="invo-grand-total">
+                <td class="inter-700 sm-text primary-color hotel-sub">Grand Total:</td>
+                <td class="sm-text b-text invo-total-price">$967.60</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <!--Invoice additional info end here -->
+    </div>
+  </section>
+  <!--Invoice content end here -->
+</div>
