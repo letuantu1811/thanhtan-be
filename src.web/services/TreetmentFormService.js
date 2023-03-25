@@ -5,11 +5,12 @@ const { getDataTemplate } = require("../../utils/template");
 
 class TreetmentFormService {
   getInvoiceTemplate = async (mode) => {
-    if (![PRINT_MODE.A5, PRINT_MODE.K80].includes(mode)) {
-      throw new BadRequestException(`Định dạng ${mode} không được hỗ trợ. Vui lòng chọn khổ K80 hoặc A5.`);
-    }
+    // if (![PRINT_MODE.A5, PRINT_MODE.K80].includes(mode)) {
+    //   throw new BadRequestException(`Định dạng ${mode} không được hỗ trợ. Vui lòng chọn khổ K80 hoặc A5.`);
+    // }
 
-    const templateInvoiceByMode = `${templateExamInvoicePath}${mode}`;
+    // const templateInvoiceByMode = `${templateExamInvoicePath}${mode}`;
+    const templateInvoiceByMode = `${templateExamInvoicePath}template-1`;
 
     const invoiceTemplate = await getDataTemplate(templateInvoiceByMode);
 
