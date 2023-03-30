@@ -491,28 +491,28 @@ module.exports = {
     },
     getAllExamByPetId: async(id, phieudieutriid) => {
         try {
-            let arr = [];
-            let obj = {};
+            // let arr = [];
+            // let obj = {};
             console.log(phieudieutriid);
-            if (
-                phieudieutriid == null ||
-                phieudieutriid == "null" ||
-                phieudieutriid == ""
-            ) {
-                obj = {
-                    giasuc_id: id,
-                };
-            } else {
-                arr = phieudieutriid.split(" ");
-                arr = arr.filter((item) => {
-                    return item !== "undefined";
-                });
-                obj = {
-                    mapping_id: {
-                        [Op.in]: arr,
-                    },
-                };
-            }
+            // if (
+            //     phieudieutriid == null ||
+            //     phieudieutriid == "null" ||
+            //     phieudieutriid == ""
+            // ) {
+            //     obj = {
+            //         giasuc_id: id,
+            //     };
+            // } else {
+            //     arr = phieudieutriid.split(" ");
+            //     arr = arr.filter((item) => {
+            //         return item !== "undefined";
+            //     });
+            //     obj = {
+            //         mapping_id: {
+            //             [Op.in]: arr,
+            //         },
+            //     };
+            // }
 
             return await model.findAll({
                 include: [{
@@ -522,11 +522,11 @@ module.exports = {
                         model: sanpham,
                     },
                     { model: giasuc },
-          { model: khachhang },
+                    { model: khachhang },
                 ],
                 where: {
                     trangthai: 1,
-                    ...obj,
+                    giasuc_id: id,
                 },
                 order: [
                     ["ngaytao", "DESC"]
