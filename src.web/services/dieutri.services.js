@@ -6,7 +6,7 @@ const phieudieutri_sanpham = require("./../../database/models/phieudieutri_sanph
 const phieudieutri = require("./../../database/models/phieudieutri");
 const { localDate } = require("../../utils/localDate");
 const { toNumber } = require("lodash");
-const { Op } = require("sequelize");
+
 module.exports = {
 
     existed: async(body) => {
