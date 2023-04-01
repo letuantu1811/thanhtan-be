@@ -6,76 +6,7 @@ const phieudieutri_sanpham = require("./../../database/models/phieudieutri_sanph
 const phieudieutri = require("./../../database/models/phieudieutri");
 const { localDate } = require("../../utils/localDate");
 const { toNumber } = require("lodash");
-// {
-//     "khachhang": {
-//         "id": 1,
-//         "ten": "Nguyễn Công Sơn",
-//         "diachi": "Gò Vấp",
-//         "sodienthoai": "0935320248"
-//     },
-//     "thucung": {
-//         "id": 3,
-//         "trongluong": 1,
-//         "giong": "Bulldog size L",
-//         "tuoi": 2,
-//         "gioitinh": false,
-//         "chungloaiName": "Chó ta",
-//         "chungloai": {
-//             "ten": "Chó ta"
-//         },
-//         "ten": "TUONG"
-//     },
-//     "dsCDV": [
-//         {
-//             "gia": "100000",
-//             "id": 2,
-//             "ten": "Thiến"
-//         },
-//         {
-//             "gia": "40000",
-//             "id": 1,
-//             "ten": "Tiêm"
-//         }
-//     ],
-//     "dsSP": [
-//         {
-//             "gia": 3000,
-//             "soluong": 1,
-//             "id": 9,
-//             "ten": "Benebac plus 15g",
-//             "donvitinh": {
-//                 "id": 23,
-//                 "ten": "Cái",
-//                 "nguoitao_id": 1,
-//                 "trangthai": true,
-//                 "ngaytao": "2021-01-30T02:31:58.000Z",
-//                 "ngaysua": "2021-01-30T02:31:58.000Z"
-//             }
-//         },
-//         {
-//             "gia": 2000,
-//             "soluong": 1,
-//             "id": 8,
-//             "ten": "Auriderm",
-//             "donvitinh": {
-//                 "id": 22,
-//                 "ten": "Gram",
-//                 "nguoitao_id": 1,
-//                 "trangthai": true,
-//                 "ngaytao": "2021-01-25T19:29:51.000Z",
-//                 "ngaysua": "2021-01-25T19:29:51.000Z"
-//             }
-//         }
-//     ],
-//     "triuchung": "112",
-//     "chandoan": "1221",
-//     "ghichu": "",
-//     "thanhtien": 145000,
-//     "ngaytaikham": "2021-03-23",
-//     "chungloai": "",
-//     "giong": "",
-//     "bacsiId": "0"
-// }
+const { Op } = require("sequelize");
 module.exports = {
 
     existed: async(body) => {
@@ -175,62 +106,75 @@ module.exports = {
         }
     },
 
-    new: async(body) => {
-        const customerId = await khachhang.create({
-            ten: body.khachhang.ten,
-            diachi: body.khachhang.diachi,
-            sodienthoai: body.khachhang.sodienthoai,
-            ngaytao: localDate(new Date())
-        }).then(res => {
-            console.log(res + " create khach hang at taohoso");
-            return res.dataValues.id;
-        });
+    new: async (body) => {
+        let res = body;
+        try {
+            const customerId = await khachhang
+                .create(
+                    {
+                        ten: body.khachhang.ten,
+                        diachi: body.khachhang.diachi,
+                        sodienthoai: body.khachhang.sodienthoai,
+                        ngaytao: localDate(new Date()),
+                    }
+                )
+                .then((res) => {
+                    return res.dataValues.id;
+                });
 
-        //update thu cung
-        const petId = await giasuc.create({
-            ten: res.thucung.ten,
-            trongluong: res.thucung.trongluong,
-            dacdiem: res.thucung.dacdiem,
-            tuoi: res.thucung.tuoi,
-            gioitinh: res.thucung.gioitinh,
-            chungloai_id: res.thucung.chungloai.id !== 0 ? res.thucung.chungloai.id : null,
-            giong_id: res.thucung.giong.id === 0 ? null : res.thucung.giong.id,
-            khachhang_id: customerId,
-            ngaytao: localDate(new Date())
-        }).then(res => {
-            console.log(res);
-            return res.dataValues.id;
-        });
-        res.thucung.id = petId;
-        res.khachhang.id = customerId;
+            //update thu cung
+            const petId = await giasuc
+                .create(
+                    {
+                        ten: res.thucung.ten,
+                        trongluong: res.thucung.trongluong,
+                        dacdiem: res.thucung.dacdiem,
+                        tuoi: res.thucung.tuoi,
+                        gioitinh: res.thucung.gioitinh,
+                        chungloai_id:
+                            res.thucung.chungloai.id !== 0 ? res.thucung.chungloai.id : null,
+                        giong_id: res.thucung.giong.id === 0 ? null : res.thucung.giong.id,
+                        khachhang_id: customerId,
+                        ngaytao: localDate(new Date()),
+                    }
+                )
+                .then((res) => {
+                    return res.dataValues.id;
+                });
+            res.thucung.id = petId;
+            res.khachhang.id = customerId;
 
-        const healthFormId = await create_phieudieutri(res);
-        await create_phieudieutri_sanpham(healthFormId, res.dsSP)
-        await create_phieudieutri_congdichvu(healthFormId, res.dsCDV)
-
+            const healthFormId = await create_phieudieutri(res);
+            await create_phieudieutri_sanpham(healthFormId, res.dsSP);
+            await create_phieudieutri_congdichvu(healthFormId, res.dsCDV);
+        } catch (error) {
+            throw error;
+        }
     },
 };
 
 async function create_phieudieutri(body) {
-    return await phieudieutri.create({
-        sophieudieutri: body.sophieudieutri,
-        dataikham: body.taikham ? 1 : null,
-        trieuchung: body.trieuchung ? body.trieuchung.trim() : '',
-        chandoan: body.chandoan,
-        ghichu: body.ghichu,
-        thanhtien: body.thanhtien,
-        ngaytaikham: body.ngaytaikham,
-        khachhang_id: body.khachhang.id,
-        giasuc_id: body.thucung.id,
-        bacsi_id: body.bacsiID,
-        noidung: JSON.stringify(body),
-        ngaytao: body.ngaykham,
-        discountAmount: toNumber(body.discountAmount) || 0,
-        addedDiscountAmount: toNumber(body.addedDiscountAmount) || 0,
-    }).then(async res => {
-        return res.dataValues.id;
-    })
-};
+    return await phieudieutri
+        .create({
+            sophieudieutri: body.sophieudieutri,
+            dataikham: body.taikham ? 1 : null,
+            trieuchung: body.trieuchung ? body.trieuchung.trim() : '',
+            chandoan: body.chandoan,
+            ghichu: body.ghichu,
+            thanhtien: body.thanhtien,
+            ngaytaikham: body.ngaytaikham,
+            khachhang_id: body.khachhang.id,
+            giasuc_id: body.thucung.id,
+            bacsi_id: body.bacsiID,
+            noidung: JSON.stringify(body),
+            ngaytao: body.ngaykham,
+            discountAmount: toNumber(body.discountAmount) || 0,
+            addedDiscountAmount: toNumber(body.addedDiscountAmount) || 0,
+        })
+        .then((res) => {
+            return res.dataValues.id;
+        });
+}
 
 async function create_phieudieutri_sanpham(healthFormId, listSP) {
     try {
@@ -263,13 +207,13 @@ async function create_phieudieutri_congdichvu(healthFormId, listCDV) {
             let obj = {
                 phieudieutri_id: 0,
                 congdichvu_id: 0,
-                ngaytao: localDate(new Date())
-            }
+                ngaytao: localDate(new Date()),
+            };
             obj = new Object();
             obj.phieudieutri_id = healthFormId;
             obj.congdichvu_id = element.id;
             obj.ngaytao = localDate(new Date());
-            arr.push(obj)
+            arr.push(obj);
         }
         await phieudieutri_congdichvu.bulkCreate(arr);
     } catch (error) {

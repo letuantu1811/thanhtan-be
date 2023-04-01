@@ -101,8 +101,8 @@ router.post("/createHoSo", async(req, res) => {
         console.log(result);
         response.success(res, "success", result)
     } catch (err) {
-        console.log(err.message);
-        response.error(res, "failed", 500)
+        console.log('createHoSo', err.message);
+        response.error(res, err.message, 500);
     }
 });
 router.post("/importEXAM", async(req, res) => {
