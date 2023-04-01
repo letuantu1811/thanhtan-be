@@ -71,8 +71,7 @@ module.exports = {
                     break;
             }
         } catch (error) {
-            console.log(error);
-            throw new Error();
+            throw error;
         }
     },
 
