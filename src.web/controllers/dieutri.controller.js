@@ -606,7 +606,6 @@ module.exports = {
                     {
                         model: khachhang,
                         as: 'khachhang',
-                        require: true
                     },
                     {
                         model: phieudieutri,
