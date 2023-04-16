@@ -128,23 +128,23 @@ class CustomerController {
                       model: Nhomkhachhang,
                       as: 'nhomkhachhang',
                   },
-                  {
-                      model: phieudieutri,
-                      as: 'phieudieutri',
-                      include: [
-                          {
-                              model: sanpham,
-                              attributes: ['an'],
-                          },
-                      ],
-                  },
+                  // {
+                  //     model: phieudieutri,
+                  //     as: 'phieudieutri',
+                  //     include: [
+                  //         {
+                  //             model: sanpham,
+                  //             attributes: ['an'],
+                  //         },
+                  //     ],
+                  // },
               ],
               order: [['ngaytao', 'DESC']],
               where: {
                   trangthai: true,
               },
           })
-          .map((customer) => customer.toJSON());
+          .map((customer) => customer.toJSON())
 
       // if(isAdmin) return customers;
       
