@@ -6,6 +6,8 @@ const chungloai = require('../../database/models/chungloai');
 const Nhomkhachhang = require('../../database/models/nhomkhachhang');
 const Giong = require('../../database/models/giong');
 const { localDate } = require('../../utils/localDate');
+const phieudieutri = require('../../database/models/phieudieutri');
+const sanpham = require('../../database/models/sanpham');
 
 class CustomerController {
   create = async (body) => {
@@ -95,40 +97,67 @@ class CustomerController {
     }
   };
 
-  getCustomers = async () => {
+  getCustomers = async (isAdmin) => {
     try {
-      return await khachhang.findAll({
-        include: [
-          {
-            model: giasuc,
-            as: 'giasuc',
-            where: {
-              trangthai: 1,
-            },
-            required: false,
-            include: {
-              model: chungloai,
-              attributes: ['id', 'ten'],
-              as: 'chungloai',
-            },
-            include: {
-              model: Giong,
-              attributes: ['id', 'ten'],
-              as: 'giong',
-              include: {
-                attributes: ['id', 'ten'],
-                model: chungloai,
+      const customers = await khachhang
+          .findAll({
+              include: [
+                  {
+                      model: giasuc,
+                      as: 'giasuc',
+                      where: {
+                          trangthai: 1,
+                      },
+                      required: false,
+                      include: {
+                          model: chungloai,
+                          attributes: ['id', 'ten'],
+                          as: 'chungloai',
+                      },
+                      include: {
+                          model: Giong,
+                          attributes: ['id', 'ten'],
+                          as: 'giong',
+                          include: {
+                              attributes: ['id', 'ten'],
+                              model: chungloai,
+                          },
+                      },
+                  },
+                  {
+                      model: Nhomkhachhang,
+                      as: 'nhomkhachhang',
+                  },
+                  {
+                      model: phieudieutri,
+                      as: 'phieudieutri',
+                      include: [
+                          {
+                              model: sanpham,
+                              attributes: ['an'],
+                          },
+                      ],
+                  },
+              ],
+              order: [['ngaytao', 'DESC']],
+              where: {
+                  trangthai: true,
               },
-            },
-          },
-          {
-            model: Nhomkhachhang,
-            as: 'nhomkhachhang',
-          },
-        ],
-        order: [['ngaytao', 'DESC']],
-        where: { trangthai: true },
+          })
+          .map((customer) => customer.toJSON());
+
+      if(isAdmin) return customers;
+      
+      const filteredCustomerByRole = customers.filter((customer) => {
+          const products = customer.phieudieutri.reduce((acc, phieudieutri) => {
+              return [...acc, ...phieudieutri.sanphams];
+          }, []);
+
+          const hasHiddenProduct = products.some((product) => product.an === true);
+          
+          return !hasHiddenProduct;
       });
+      return filteredCustomerByRole;
     } catch (error) {
       return error;
     }

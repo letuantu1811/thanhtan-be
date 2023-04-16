@@ -24,22 +24,23 @@ router.get("/notification", async(req, res) => {
 router.get("/", async(req, res) => {
     // let body = req.body;
     let role = req.header("quyen");
+    const isAdmin = role.toUpperCase() === 'ADMIN';
     let dateselect = req.query.date;
     console.log(req);
     try {
-        const result = await dieutri.getAllToday(dateselect);
+        const result = await dieutri.getAllToday(dateselect, isAdmin);
 
         let arr = [];
-        if (role.toUpperCase() === 'USER') {
+        if (!isAdmin) {
             for (let index = 0; index < result.length; index++) {
                 const element = result[index];
-                if (await dieutri.filterBlockedInExam(element.id) === 0) {
+                if ((await dieutri.filterBlockedInExam(element.id)) === 0) {
                     arr.push(element);
                 }
             }
         }
 
-        response.success(res, "success", role.toUpperCase() === 'USER' ? arr : result)
+        response.success(res, 'success', !isAdmin ? arr : result);
     } catch (err) {
         console.log(err.message);
         response.error(res, "failed", 500)
@@ -60,21 +61,21 @@ router.get("/detail/:id", async(req, res) => {
 
 router.get("/reexam", async(req, res) => {
     const role = req.header("quyen");
-    const isUserRole = role.toUpperCase() === 'USER'
+    const isAdmin = role.toUpperCase() === 'ADMIN'
     const date = req.query.date;
     try {
-        const result = await dieutri.getReExamByDate(date);
+        const result = await dieutri.getReExamByDate(date, isAdmin);
         const arr = [];
-        if (isUserRole) {
+        if (!isAdmin) {
             for (let index = 0; index < result.length; index++) {
                 const element = result[index];
-                if (await dieutri.filterBlockedInExam(element.id) === 0) {
+                if ((await dieutri.filterBlockedInExam(element.id)) === 0) {
                     arr.push(element);
                 }
             }
         }
 
-        response.success(res, "Lấy dữ liệu thành công", isUserRole ? arr : result)
+        response.success(res, 'Lấy dữ liệu thành công', !isAdmin ? arr : result);
     } catch (err) {
         console.log('Error at dieutri.router >> /reexam:', err.message);
         response.error(res, "Lỗi lấy dữ liệu", 500)
@@ -141,10 +142,12 @@ router.get("/all", async(req, res) => {
 // Getting many exam by pet id
 router.get("/examByPetId", async(req, res) => {
     try {
+        const role = req.header('quyen');
+        const isAdmin = role.toUpperCase() === 'ADMIN';
         let id = req.query.id
         let phieudieutriid = req.query.phieudieutriid
         console.log(phieudieutriid + "123");
-        const result = await dieutri.getAllExamByPetId(id, phieudieutriid);
+        const result = await dieutri.getAllExamByPetId(id, isAdmin);
         response.success(res, "success", result)
     } catch (err) {
         console.log(err.message);
@@ -248,9 +251,11 @@ router.get("/getPetExamination", async(req, res) => {
 
 //get pets examination
 router.get("/getPetMedicalHistory/:id", async(req, res) => {
+    const role = req.header('quyen');
+    const isAdmin = role.toUpperCase() === 'ADMIN';
     let petID = req.params.id;
     try {
-        const result = await dieutri.getPetMedicalHistory(petID);
+        const result = await dieutri.getPetMedicalHistory(petID, isAdmin);
         response.success(res, "success", result)
     } catch (err) {
         console.log(err.message);
