@@ -253,10 +253,6 @@ module.exports = {
 
             return treetments.map((treetMent) => {
                 const rawTreetMent = treetMent.toJSON();
-                console.log(
-                    '🚀 ~ file: dieutri.controller.js:242 ~ returntreetments.map ~ rawTreetMent:',
-                    rawTreetMent
-                );
                 const discountAmount = toNumber(rawTreetMent.discountAmount) || 0;
                 const addedDiscountAmount = toNumber(rawTreetMent.addedDiscountAmount) || 0;
                 const thanhtien = toNumber(rawTreetMent.thanhtien) || 0;
@@ -498,7 +494,6 @@ module.exports = {
         }
     },
     getAllExamByPetId: async (id, isAdmin) => {
-        console.log("🚀 ~ file: dieutri.controller.js:501 ~ getAllExamByPetId: ~ isAdmin:", isAdmin)
         try {
             const productByRoleCondition = isAdmin ? {} : { an: 0 };
             return await model.findAll({
@@ -645,34 +640,7 @@ module.exports = {
             return error;
         }
     },
-    // getPetMedicalHistory: async (id, isAdmin) => {
-    //     try {
-    //         const productByRoleCondition = isAdmin ? {} : { an: 0 };
-    //         return await model.findAll({
-    //             attributes: ['trieuchung', 'chandoan', 'ghichu'],
-    //             include: [
-    //                 {
-    //                     attributes: ['id'],
-    //                     required: true,
-    //                     model: giasuc,
-    //                     where: {
-    //                         id: id,
-    //                     },
-    //                 },
-    //                 {
-    //                     model: sanpham,
-    //                     where: {
-    //                         ...productByRoleCondition,
-    //                     },
-    //                 },
-    //             ],
-    //         });
-    //     } catch (error) {
-    //         return error;
-    //     }
-    // },
-
-    // get medical history
+    
     isExisted: async (id) => {
         try {
             let today = tzSaiGon();
