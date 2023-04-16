@@ -5,9 +5,11 @@ const CustomerController = require('../../src.web/controllers/khachhang.controll
 const response = require('../../utils/api.res/response');
 
 router.get("/", async(req, res) => {    
+    const role = req.header('quyen');
+    const isAdmin = role.toUpperCase() === 'ADMIN';
     try {
-        const result = await CustomerController.getCustomers();
-        response.success(res, "success", result)
+        const customers = await CustomerController.getCustomers(isAdmin);
+        response.success(res, 'success', customers);
     } catch (err) {
         console.log('Error at getCustomers:', err.message);
         response.error(res, err.message, 500);
