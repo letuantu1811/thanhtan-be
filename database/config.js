@@ -1,4 +1,4 @@
-const Sequelize = require("sequelize");
+const Sequelize = require('sequelize');
 // module.exports = new Sequelize('qlthuy', 'root', '12wqasxZ', {
 //     // host: '34.126.105.244',
 //     host: 'localhost',
@@ -13,8 +13,8 @@ const Sequelize = require("sequelize");
 //         idle: 10000
 //     }
 // });
-module.exports = new Sequelize('tha81756_qlthuy', 'tha81756_qlthuy', 'Zaq@123456', {
-    host: '103.138.88.13',
+module.exports = new Sequelize('tha81756_qlthuy', 'tha81756_qlthuy', 'xqHIjeDP&9K8hVHL', {
+    host: '103.138.88.35',
     // host: 'localhost',
     dialect: 'mysql',
     port: 3306,
@@ -23,8 +23,8 @@ module.exports = new Sequelize('tha81756_qlthuy', 'tha81756_qlthuy', 'Zaq@123456
         max: 5,
         min: 0,
         acquire: 30000,
-        idle: 10000
-    }
+        idle: 10000,
+    },
 });
 
 // [
