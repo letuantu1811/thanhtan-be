@@ -37,8 +37,8 @@ app.use(
 );
 
 // adding morgan to log HTTP requests
-app.use(morgan('dev'));
-// app.use(morgan('combined'));
+// app.use(morgan('dev'));
+app.use(morgan('combined'));
 
 // adding Helmet to enhance your API's security
 app.use(helmet());
@@ -47,10 +47,11 @@ app.use(helmet());
 app.use(bodyParser.json());
 
 app.use(
-  cors({
-    credentials: true,
-    origin: true,
-  })
+    cors({
+        origin: '*',
+        credentials: true,
+        exposedHeaders: ['Content-Disposition'],
+    })
 );
 
 app.use(compression());

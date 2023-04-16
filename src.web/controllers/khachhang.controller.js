@@ -146,18 +146,19 @@ class CustomerController {
           })
           .map((customer) => customer.toJSON());
 
-      if(isAdmin) return customers;
+      // if(isAdmin) return customers;
       
-      const filteredCustomerByRole = customers.filter((customer) => {
-          const products = customer.phieudieutri.reduce((acc, phieudieutri) => {
-              return [...acc, ...phieudieutri.sanphams];
-          }, []);
+      // const filteredCustomerByRole = customers.filter((customer) => {
+      //     const products = customer.phieudieutri.reduce((acc, phieudieutri) => {
+      //         return [...acc, ...phieudieutri.sanphams];
+      //     }, []);
 
-          const hasHiddenProduct = products.some((product) => product.an === true);
+      //     const hasHiddenProduct = products.some((product) => product.an === true);
           
-          return !hasHiddenProduct;
-      });
-      return filteredCustomerByRole;
+      //     return !hasHiddenProduct;
+      // });
+      // return filteredCustomerByRole;
+      return customers;
     } catch (error) {
       return error;
     }
