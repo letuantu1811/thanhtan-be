@@ -149,19 +149,19 @@ module.exports = {
     getAllToday: async (date, isAdmin) => {
         try {
             let today = date ? date : tzSaiGon();
-            const productByRoleCondition = isAdmin ? {} : { an: 0 };
+            const defaultIncludes = [
+                { model: giasuc, as: 'giasuc' },
+                { model: khachhang, as: 'khachhang' },
+            ];
+            if (!isAdmin) {
+                defaultIncludes.push({
+                    model: sanpham,
+                    where: { an: 0 },
+                });
+            }
 
             const currentDateTreetments = await model.findAll({
-                include: [
-                    { model: giasuc, as: 'giasuc' },
-                    { model: khachhang, as: 'khachhang' },
-                    {
-                        model: sanpham,
-                        where: {
-                            ...productByRoleCondition,
-                        },
-                    },
-                ],
+                include: [...defaultIncludes],
                 where: {
                     where: sequelize.where(
                         sequelize.fn('date', sequelize.col('phieudieutri.ngaytao')),
@@ -228,18 +228,20 @@ module.exports = {
     getReExamByDate: async (date, isAdmin) => {
         try {
             const selectedDate = date ? date : tzSaiGon();
-            const productByRoleCondition = isAdmin ? {} : { an: 0 };
+
+            const defaultIncludes = [
+                { model: giasuc, as: 'giasuc' },
+                { model: khachhang, as: 'khachhang' },
+            ];
+            if (!isAdmin) {
+                defaultIncludes.push({
+                    model: sanpham,
+                    where: { an: 0 },
+                });
+            }
+
             const treetments = await model.findAll({
-                include: [
-                    { model: giasuc, as: 'giasuc' },
-                    { model: khachhang, as: 'khachhang' },
-                    {
-                        model: sanpham,
-                        where: {
-                            ...productByRoleCondition,
-                        },
-                    },
-                ],
+                include: [...defaultIncludes],
                 where: {
                     where: sequelize.where(
                         sequelize.fn('date', sequelize.col('ngaytaikham')),
@@ -495,19 +497,22 @@ module.exports = {
     },
     getAllExamByPetId: async (id, isAdmin) => {
         try {
-            const productByRoleCondition = isAdmin ? {} : { an: 0 };
+            const defaultIncludes = [
+                {
+                    model: Congdichvu,
+                },
+                { model: giasuc },
+                { model: khachhang, as: 'khachhang' },
+            ];
+            if (!isAdmin) {
+                defaultIncludes.push({
+                    model: sanpham,
+                    where: { an: 0 },
+                });
+            }
+
             return await model.findAll({
-                include: [
-                    {
-                        model: Congdichvu,
-                    },
-                    {
-                        model: sanpham,
-                        where: { ...productByRoleCondition },
-                    },
-                    { model: giasuc },
-                    { model: khachhang, as: 'khachhang' },
-                ],
+                include: [...defaultIncludes],
                 where: {
                     trangthai: 1,
                     giasuc_id: id,
@@ -640,7 +645,7 @@ module.exports = {
             return error;
         }
     },
-    
+
     isExisted: async (id) => {
         try {
             let today = tzSaiGon();
