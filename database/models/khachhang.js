@@ -67,10 +67,13 @@ Banle.belongsTo(khachhang, {
 });
 
 phieudieutri.belongsTo(khachhang, {
-    foreignKey: "khachhang_id",
+    foreignKey: 'khachhang_id',
+    as: 'khachhang',
+    
 });
 khachhang.hasMany(phieudieutri, {
-  foreignKey: "khachhang_id",
+    as: 'phieudieutri',
+    foreignKey: 'khachhang_id',
 });
 
 

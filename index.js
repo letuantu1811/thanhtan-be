@@ -49,10 +49,11 @@ app.use(compression());
 app.use(bodyParser.json());
 
 app.use(
-  cors({
-    credentials: true,
-    origin: true,
-  })
+    cors({
+        origin: '*',
+        credentials: true,
+        exposedHeaders: ['Content-Disposition'],
+    })
 );
 
 

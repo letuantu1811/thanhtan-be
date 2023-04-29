@@ -1,24 +1,24 @@
-const model = require("../../database/models/phieudieutri");
-const { ENUM } = require("../../utils/index");
-const dtServices = require("../services/dieutri.services");
-const { tzSaiGon } = require("../../utils/saigontz");
-const moment = require("moment");
-const sequelize = require("sequelize");
-const Thanhvien = require("../../database/models/thanhvien");
-const { localDate } = require("../../utils/localDate");
-const giasuc = require("../../database/models/giasuc");
-const phieudieutri = require("../../database/models/phieudieutri");
-const phieudieutri_congdichvu = require("../../database/models/phieudieutri_congdichvu");
-const khachhang = require("../../database/models/khachhang");
-const Congdichvu = require("../../database/models/congdichvu");
-const sanpham = require("../../database/models/sanpham");
-const { Op, where } = require("sequelize");
-const Giong = require("../../database/models/giong");
-const Chungloai = require("../../database/models/chungloai");
-const { toNumber } = require("lodash");
+const model = require('../../database/models/phieudieutri');
+const { ENUM } = require('../../utils/index');
+const dtServices = require('../services/dieutri.services');
+const { tzSaiGon } = require('../../utils/saigontz');
+const moment = require('moment');
+const sequelize = require('sequelize');
+const Thanhvien = require('../../database/models/thanhvien');
+const { localDate } = require('../../utils/localDate');
+const giasuc = require('../../database/models/giasuc');
+const phieudieutri = require('../../database/models/phieudieutri');
+const phieudieutri_congdichvu = require('../../database/models/phieudieutri_congdichvu');
+const khachhang = require('../../database/models/khachhang');
+const Congdichvu = require('../../database/models/congdichvu');
+const sanpham = require('../../database/models/sanpham');
+const { Op, where } = require('sequelize');
+const Giong = require('../../database/models/giong');
+const Chungloai = require('../../database/models/chungloai');
+const { toNumber, isNil, omit } = require('lodash');
 
 module.exports = {
-    create: async(res) => {
+    create: async (res) => {
         console.log(model);
         try {
             return await model.create({
@@ -39,45 +39,41 @@ module.exports = {
         }
     },
 
-    createHoSo: async(res, userId) => {
+    createHoSo: async (res, userId) => {
         try {
-            if (res.id !== "") {
+            if (res.id !== '') {
                 await updateTK(res.id);
             }
-            let status = "";
+            let status = '';
             if (res.khachhang.id !== 0 && res.thucung.id !== 0) {
                 // tồn tại khách hàng và tồn tại pet
-                status = "existed";
+                status = 'existed';
             }
             if (res.khachhang.id !== 0 && res.thucung.id === 0) {
                 // tồng tại khách hàng mà không tồn tại pet
-                status = "already";
+                status = 'already';
             }
             if (res.khachhang.id === 0 && res.thucung.id === 0) {
                 // khách hàng mới
-                status = "new";
+                status = 'new';
             }
             switch (status) {
-                case "existed":
+                case 'existed':
                     await dtServices.existed(res, userId);
                     break;
-                case "already":
+                case 'already':
                     await dtServices.already(res, userId);
                     break;
-                case "new":
+                case 'new':
                     await dtServices.new(res, userId);
                     break;
                 default:
                     break;
             }
         } catch (error) {
-            console.log(error);
-            throw new Error();
+            throw error;
         }
     },
-
-
-
 
     // get one model
     getOne: async (id) => {
@@ -94,7 +90,7 @@ module.exports = {
                     },
                     { model: khachhang, as: 'khachhang' },
                 ],
-                where: { id},
+                where: { id },
             });
 
             const examForm = rawExamForm.toJSON();
@@ -113,18 +109,16 @@ module.exports = {
     },
 
     // get many san pham
-    getMany: async(body) => {
+    getMany: async (body) => {
         let limit = body.limit;
         let offset = body.offset;
         let quyen = body.quyen;
         try {
             return await model.findAll({
                 where: {
-                    state: quyen == "admin" ? "" : ENUM.ENABLE,
+                    state: quyen == 'admin' ? '' : ENUM.ENABLE,
                 },
-                order: [
-                    ["ngaytao", "DESC"]
-                ],
+                order: [['ngaytao', 'DESC']],
                 offset: offset,
                 limit: limit,
             });
@@ -134,35 +128,45 @@ module.exports = {
     },
 
     // disable model
-    disable: async(id) => {
+    disable: async (id) => {
         try {
-            return await model.update({
-                state: ENUM.DISABLE,
-            }, {
-                where: {
-                    id: id,
+            return await model.update(
+                {
+                    state: ENUM.DISABLE,
                 },
-            });
+                {
+                    where: {
+                        id: id,
+                    },
+                }
+            );
         } catch (error) {
             return error;
         }
     },
 
     // disable model
-    getAllToday: async(date) => {
+    getAllToday: async (date, isAdmin) => {
         try {
             let today = date ? date : tzSaiGon();
-            // if
+            const defaultIncludes = [
+                { model: giasuc, as: 'giasuc' },
+                { model: khachhang, as: 'khachhang' },
+            ];
+            if (!isAdmin) {
+                defaultIncludes.push({
+                    model: sanpham,
+                    where: { an: 0 },
+                });
+            }
+
             const currentDateTreetments = await model.findAll({
-                include: [
-                    { model: giasuc, as: 'giasuc' },
-                    { model: khachhang, as: 'khachhang' },
-                ],
+                include: [...defaultIncludes],
                 where: {
                     where: sequelize.where(
                         sequelize.fn('date', sequelize.col('phieudieutri.ngaytao')),
                         '=',
-                        today,
+                        today
                     ),
                     trangthai: 1,
                 },
@@ -190,13 +194,13 @@ module.exports = {
         }
     },
 
-    getAll: async(role) => {
+    getAll: async (role) => {
         let obj = {
             limit: null,
         };
-        if (role.toUpperCase() === "USER") {
+        if (role.toUpperCase() === 'USER') {
             let config = await Thanhvien.findOne({
-                attributes: ["config"],
+                attributes: ['config'],
                 where: { id: 1 },
             });
             obj.limit = config.config;
@@ -204,16 +208,16 @@ module.exports = {
         try {
             let today = tzSaiGon();
             return await model.findAll({
-                include: [{
-                    model: giasuc,
-                }, ],
+                include: [
+                    {
+                        model: giasuc,
+                    },
+                ],
                 ...obj,
                 where: {
                     trangthai: 1,
                 },
-                order: [
-                    ["ngaytao", "DESC"]
-                ],
+                order: [['ngaytao', 'DESC']],
             });
         } catch (error) {
             console.log(error);
@@ -221,59 +225,65 @@ module.exports = {
         }
     },
 
-    getReExamByDate: async(date) => {
+    getReExamByDate: async (date, isAdmin) => {
         try {
             const selectedDate = date ? date : tzSaiGon();
+
+            const defaultIncludes = [
+                { model: giasuc, as: 'giasuc' },
+                { model: khachhang, as: 'khachhang' },
+            ];
+            if (!isAdmin) {
+                defaultIncludes.push({
+                    model: sanpham,
+                    where: { an: 0 },
+                });
+            }
+
             const treetments = await model.findAll({
-        include: [
-            { model: giasuc, as: "giasuc" },
-            { model: khachhang, as: "khachhang" },
-          ],
-        where: {
-          where: sequelize.where(
-            sequelize.fn("date", sequelize.col("ngaytaikham")),
-            "=",
-            selectedDate
-          ),
-          trangthai: 1,
-        },
-                order: [
-                    ["ngaytao", "DESC"]
-                ],
+                include: [...defaultIncludes],
+                where: {
+                    where: sequelize.where(
+                        sequelize.fn('date', sequelize.col('ngaytaikham')),
+                        '=',
+                        selectedDate
+                    ),
+                    trangthai: 1,
+                },
+                order: [['ngaytao', 'DESC']],
             });
 
             return treetments.map((treetMent) => {
-              const rawTreetMent = treetMent.toJSON();
-              const discountAmount = toNumber(rawTreetMent.discountAmount) || 0;
-              const addedDiscountAmount =
-                toNumber(rawTreetMent.addedDiscountAmount) || 0;
-              const thanhtien = toNumber(rawTreetMent.thanhtien) || 0;
-      
-              const orginTotalAmount =
-                (thanhtien + discountAmount) / (1 - addedDiscountAmount / 100);
-      
-              const reCalculateAmountExamForm = {
-                ...rawTreetMent,
-                discountAmount: 0,
-                addedDiscountAmount: 0,
-                thanhtien: orginTotalAmount,
-              };
-              return reCalculateAmountExamForm;
+                const rawTreetMent = treetMent.toJSON();
+                const discountAmount = toNumber(rawTreetMent.discountAmount) || 0;
+                const addedDiscountAmount = toNumber(rawTreetMent.addedDiscountAmount) || 0;
+                const thanhtien = toNumber(rawTreetMent.thanhtien) || 0;
+
+                const orginTotalAmount =
+                    (thanhtien + discountAmount) / (1 - addedDiscountAmount / 100);
+
+                const reCalculateAmountExamForm = {
+                    ...rawTreetMent,
+                    discountAmount: 0,
+                    addedDiscountAmount: 0,
+                    thanhtien: orginTotalAmount,
+                };
+                return reCalculateAmountExamForm;
             });
         } catch (error) {
             return error;
         }
     },
 
-    getNotification: async(role) => {
+    getNotification: async (role) => {
         try {
             let today = tzSaiGon();
             console.log(today);
             let reExamCount = await model.count({
                 where: {
                     where: sequelize.where(
-                        sequelize.fn("date", sequelize.col("ngaytaikham")),
-                        "=",
+                        sequelize.fn('date', sequelize.col('ngaytaikham')),
+                        '=',
                         today
                     ),
                     // dataikham: null,
@@ -282,50 +292,50 @@ module.exports = {
             let examTodayCount = await model.count({
                 where: {
                     where: sequelize.where(
-                        sequelize.fn("date", sequelize.col("ngaytao")),
-                        "=",
+                        sequelize.fn('date', sequelize.col('ngaytao')),
+                        '=',
                         today
                     ),
                     trangthai: 1,
                 },
             });
             if (role === 'USER') {
-                return body = {
+                return (body = {
                     countDTtoday: 0,
                     countTDTtody: 0,
-                };
+                });
             } else
-                return body = {
+                return (body = {
                     countDTtoday: examTodayCount,
                     countTDTtody: reExamCount,
-                };
+                });
             // return body;
         } catch (error) {
             return error;
         }
     },
 
-    importEXAM: async(res) => {
+    importEXAM: async (res) => {
         console.log(model);
         try {
             let arr = [];
             let obj = {
-                mapping_id: "",
+                mapping_id: '',
                 khachhang_id: 0,
                 nguoitao_id: 0,
-                ngaytao: "",
-                ngaysua: "",
+                ngaytao: '',
+                ngaysua: '',
                 trangthai: 1,
-                trieuchung: "",
-                ghichu: "",
+                trieuchung: '',
+                ghichu: '',
                 ngaytaikham: 1,
                 dataikham: 0,
                 tylegiamgia: 0,
                 thanhtien: 0,
                 giasuc_id: 1,
-                noidung: "",
+                noidung: '',
                 bacsi_id: 1,
-                chandoan: "",
+                chandoan: '',
             };
             for (let index = 0; index < res.length; index++) {
                 const item = res[index];
@@ -373,20 +383,20 @@ module.exports = {
         }
     },
 
-    importServicePlus: async(res) => {
+    importServicePlus: async (res) => {
         try {
             let obj = {
                 phieudieutri_id: 0,
                 congdichvu_id: 0,
                 gia: 0,
-                ngaytao: "",
+                ngaytao: '',
             };
             let arr = [];
             // ``
             for (let index = 0; index < res.length; index++) {
                 const element = res[index];
                 let pdtID = await phieudieutri.findOne({
-                    attributes: ["id"],
+                    attributes: ['id'],
                     where: {
                         mapping_id: element.PhieuDieuTriId,
                     },
@@ -394,90 +404,30 @@ module.exports = {
                 for (let index2 = 0; index2 < element.congdichvu.length; index2++) {
                     const cdv = element.congdichvu[index2];
                     let cdvID = await Congdichvu.findOne({
-                        attributes: ["id", "gia"],
+                        attributes: ['id', 'gia'],
                         where: {
                             ten: cdv.TenCongDichVu,
                         },
                     });
                     obj = new Object();
                     if (cdvID !== null && pdtID !== null) {
-                        obj.phieudieutri_id = pdtID.id !== null ? pdtID.id : "";
-                        obj.congdichvu_id = cdvID.id !== null ? cdvID.id : "";
+                        obj.phieudieutri_id = pdtID.id !== null ? pdtID.id : '';
+                        obj.congdichvu_id = cdvID.id !== null ? cdvID.id : '';
                         obj.ngaytao = element.NgayDieuTri;
                         obj.gia = cdvID.gia;
-                        if (obj.phieudieutri_id !== "" || obj.congdichvu_id !== "")
-                            arr.push(obj);
+                        if (obj.phieudieutri_id !== '' || obj.congdichvu_id !== '') arr.push(obj);
                     }
                 }
             }
             if (arr.length > 0) {
-                return phieudieutri_congdichvu.sequelize
-                    .transaction()
-                    .then(async(t) => {
-                        return await phieudieutri_congdichvu
-                            .bulkCreate(arr, { transaction: t })
-                            .then(() => {
-                                return t.commit();
-                            })
-                            .catch((err) => {
-                                console.log(err + " tại func thêm phieudieutri_congdichv");
-                                t.rollback();
-                                throw Error(err);
-                            });
-                    });
-            }
-            // console.log(arr);
-        } catch (error) {
-            console.log(error);
-            throw new Error();
-        }
-    },
-    importProducts: async(res) => {
-        try {
-            let obj = {
-                phieudieutri_id: 0,
-                sanpham_id: 0,
-                gia: 0,
-                ngaytao: "",
-            };
-            let arr = [];
-            // ``
-            for (let index = 0; index < res.length; index++) {
-                const element = res[index];
-                let pdtID = await phieudieutri.findOne({
-                    attributes: ["id"],
-                    where: {
-                        mapping_id: element.PhieuDieuTriId,
-                    },
-                });
-                for (let index2 = 0; index2 < element.sanpham.length; index2++) {
-                    const cdv = element.sanpham[index2];
-                    let spID = await sanpham.findOne({
-                        attributes: ["id", "gia"],
-                        where: {
-                            ten: cdv.TenThuoc,
-                        },
-                    });
-                    obj = new Object();
-                    if (spID !== null && pdtID !== null) {
-                        obj.phieudieutri_id = pdtID.id !== null ? pdtID.id : "";
-                        obj.sanpham_id = spID.id !== null ? spID.id : "";
-                        obj.ngaytao = element.NgayPhatSinh;
-                        obj.gia = spID.gia;
-                        if (obj.phieudieutri_id !== "" || obj.sanpham_id !== "")
-                            arr.push(obj);
-                    }
-                }
-            }
-            if (arr.length > 0) {
-                return phieudieutri_sanpham.sequelize.transaction().then(async(t) => {
-                    return await phieudieutri_sanpham
+                return phieudieutri_congdichvu.sequelize.transaction().then(async (t) => {
+                    return await phieudieutri_congdichvu
                         .bulkCreate(arr, { transaction: t })
                         .then(() => {
                             return t.commit();
                         })
                         .catch((err) => {
-                            console.log(err + " tại func thêm phieudieutri_sanpham");
+                            console.log(err + ' tại func thêm phieudieutri_congdichv');
                             t.rollback();
                             throw Error(err);
                         });
@@ -489,48 +439,85 @@ module.exports = {
             throw new Error();
         }
     },
-    getAllExamByPetId: async(id, phieudieutriid) => {
+    importProducts: async (res) => {
         try {
+            let obj = {
+                phieudieutri_id: 0,
+                sanpham_id: 0,
+                gia: 0,
+                ngaytao: '',
+            };
             let arr = [];
-            let obj = {};
-            console.log(phieudieutriid);
-            if (
-                phieudieutriid == null ||
-                phieudieutriid == "null" ||
-                phieudieutriid == ""
-            ) {
-                obj = {
-                    giasuc_id: id,
-                };
-            } else {
-                arr = phieudieutriid.split(" ");
-                arr = arr.filter((item) => {
-                    return item !== "undefined";
-                });
-                obj = {
-                    mapping_id: {
-                        [Op.in]: arr,
+            // ``
+            for (let index = 0; index < res.length; index++) {
+                const element = res[index];
+                let pdtID = await phieudieutri.findOne({
+                    attributes: ['id'],
+                    where: {
+                        mapping_id: element.PhieuDieuTriId,
                     },
-                };
+                });
+                for (let index2 = 0; index2 < element.sanpham.length; index2++) {
+                    const cdv = element.sanpham[index2];
+                    let spID = await sanpham.findOne({
+                        attributes: ['id', 'gia'],
+                        where: {
+                            ten: cdv.TenThuoc,
+                        },
+                    });
+                    obj = new Object();
+                    if (spID !== null && pdtID !== null) {
+                        obj.phieudieutri_id = pdtID.id !== null ? pdtID.id : '';
+                        obj.sanpham_id = spID.id !== null ? spID.id : '';
+                        obj.ngaytao = element.NgayPhatSinh;
+                        obj.gia = spID.gia;
+                        if (obj.phieudieutri_id !== '' || obj.sanpham_id !== '') arr.push(obj);
+                    }
+                }
+            }
+            if (arr.length > 0) {
+                return phieudieutri_sanpham.sequelize.transaction().then(async (t) => {
+                    return await phieudieutri_sanpham
+                        .bulkCreate(arr, { transaction: t })
+                        .then(() => {
+                            return t.commit();
+                        })
+                        .catch((err) => {
+                            console.log(err + ' tại func thêm phieudieutri_sanpham');
+                            t.rollback();
+                            throw Error(err);
+                        });
+                });
+            }
+            // console.log(arr);
+        } catch (error) {
+            console.log(error);
+            throw new Error();
+        }
+    },
+    getAllExamByPetId: async (id, isAdmin) => {
+        try {
+            const defaultIncludes = [
+                {
+                    model: Congdichvu,
+                },
+                { model: giasuc },
+                { model: khachhang, as: 'khachhang' },
+            ];
+            if (!isAdmin) {
+                defaultIncludes.push({
+                    model: sanpham,
+                    where: { an: 0 },
+                });
             }
 
             return await model.findAll({
-                include: [{
-                        model: Congdichvu,
-                    },
-                    {
-                        model: sanpham,
-                    },
-                    { model: giasuc },
-          { model: khachhang },
-                ],
+                include: [...defaultIncludes],
                 where: {
                     trangthai: 1,
-                    ...obj,
+                    giasuc_id: id,
                 },
-                order: [
-                    ["ngaytao", "DESC"]
-                ],
+                order: [['ngaytao', 'DESC']],
             });
         } catch (error) {
             console.log(error);
@@ -538,63 +525,75 @@ module.exports = {
         }
     },
 
-    updateHSBA: async(data) => {
+    updateHSBA: async (data) => {
         try {
-            await model.update({
-                noidung: JSON.stringify(data),
-                trieuchung: data.trieuchung,
-                chandoan: data.chandoan,
-                ghichu: data.ghichu,
-                ngaytao: data.ngaykham,
-                ngaytaikham: data.ngaytaikham,
-            }, {
-                where: {
-                    id: data.id,
+            await model.update(
+                {
+                    noidung: JSON.stringify(data),
+                    trieuchung: data.trieuchung,
+                    chandoan: data.chandoan,
+                    ghichu: data.ghichu,
+                    ngaytao: data.ngaykham,
+                    ngaytaikham: data.ngaytaikham,
                 },
-            });
+                {
+                    where: {
+                        id: data.id,
+                    },
+                }
+            );
         } catch (error) {
             throw new Error();
         }
     },
 
-    updatePet: async(data) => {
+    updatePet: async (data) => {
         try {
-            await giasuc.update({
-                ten: data.ten,
-                tuoi: data.tuoi,
-            }, {
-                where: {
-                    id: data.id,
+            await giasuc.update(
+                {
+                    ten: data.ten,
+                    tuoi: data.tuoi,
                 },
-            });
+                {
+                    where: {
+                        id: data.id,
+                    },
+                }
+            );
         } catch (error) {
             throw new Error();
         }
     },
 
-    deletePet: async(id) => {
+    deletePet: async (id) => {
         try {
-            await giasuc.update({
-                trangthai: 0,
-            }, {
-                where: {
-                    id: id,
+            await giasuc.update(
+                {
+                    trangthai: 0,
                 },
-            });
+                {
+                    where: {
+                        id: id,
+                    },
+                }
+            );
         } catch (error) {
             throw new Error();
         }
     },
 
-    deleteDT: async(id) => {
+    deleteDT: async (id) => {
         try {
-            await phieudieutri.update({
-                trangthai: 0,
-            }, {
-                where: {
-                    id: id,
+            await phieudieutri.update(
+                {
+                    trangthai: 0,
                 },
-            });
+                {
+                    where: {
+                        id: id,
+                    },
+                }
+            );
         } catch (error) {
             throw new Error();
         }
@@ -628,52 +627,51 @@ module.exports = {
         }
     },
 
-    // get medical history 
-    getPetMedicalHistory: async(id) => {
+    // get medical history
+    getPetMedicalHistory: async (id) => {
         try {
             return await model.findAll({
-                attributes: ["trieuchung", "chandoan", "ghichu"],
+                attributes: ['trieuchung', 'chandoan', 'ghichu'],
                 include: {
-                    attributes: ["id"],
+                    attributes: ['id'],
                     required: true,
                     model: giasuc,
                     where: {
-                        id: id
-                    }
-                }
+                        id: id,
+                    },
+                },
             });
         } catch (error) {
             return error;
         }
     },
 
-    // get medical history 
-    isExisted: async(id) => {
+    isExisted: async (id) => {
         try {
             let today = tzSaiGon();
             return await model.count({
                 where: {
                     giasuc_id: id,
                     where: sequelize.where(
-                        sequelize.fn("date", sequelize.col("ngaytao")),
-                        "=",
+                        sequelize.fn('date', sequelize.col('ngaytao')),
+                        '=',
                         today
-                    )
-                }
+                    ),
+                },
             });
         } catch (error) {
             return error;
         }
     },
 
-    filterBlockedInExam: async(pddID) => {
+    filterBlockedInExam: async (pddID) => {
         try {
             let kh = await phieudieutri.count({
                 include: {
                     model: sanpham,
                     where: {
-                        an: 1
-                    }
+                        an: 1,
+                    },
                 },
                 where: {
                     id: pddID,
@@ -683,18 +681,21 @@ module.exports = {
         } catch (error) {
             console.log(error);
         }
-    }
+    },
 };
 
 function updateTK(id) {
     try {
-        return model.update({
-            dataikham: 1
-        }, {
-            where: {
-                id: id,
+        return model.update(
+            {
+                dataikham: 1,
             },
-        });
+            {
+                where: {
+                    id: id,
+                },
+            }
+        );
     } catch (error) {
         return error;
     }
