@@ -37,8 +37,8 @@ app.use(
 );
 
 // adding morgan to log HTTP requests
-app.use(morgan('dev'));
-// app.use(morgan('combined'));
+// app.use(morgan('dev'));
+app.use(morgan('combined'));
 
 // adding Helmet to enhance your API's security
 app.use(helmet());
