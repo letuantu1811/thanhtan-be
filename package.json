@@ -15,6 +15,7 @@
         "compression": "^1.7.4",
         "config": "^3.3.3",
         "cors": "^2.8.5",
+        "date-fns": "^2.30.0",
         "dotenv": "^8.2.0",
         "ejs": "^3.1.5",
         "express": "^4.17.1",
@@ -31,5 +32,8 @@
         "path": "^0.12.7",
         "require-all": "^3.0.0",
         "sequelize": "^5.5.1"
+    },
+    "devDependencies": {
+        "prettier": "^2.8.8"
     }
 }

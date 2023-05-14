@@ -5,10 +5,10 @@ exports.success = (res, message, data) => {
     data: data
   })
 }
-exports.error = (res, message, code, data) => {
+exports.error = (res, message, code, path) => {
   res.status(code).json({
     status: false,
     message: message,
-    data: data
-  })
+    path: path,
+  });
 }

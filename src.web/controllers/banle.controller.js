@@ -8,6 +8,7 @@ const BL_SP = require('../../database/models/banle_sanpham');
 const khachhang = require('../../database/models/khachhang');
 const Thanhvien = require('../../database/models/thanhvien');
 const { localDate } = require('../../utils/localDate');
+const OrderService = require('../services/OrderService');
 
 module.exports = {
     getOne: async(id) => {
@@ -128,5 +129,8 @@ module.exports = {
         } catch (error) {
             return error
         }
+    },
+    printOrder: async(mode) => {
+        return await OrderService.getInvoiceTemplate(mode);
     }
 }
