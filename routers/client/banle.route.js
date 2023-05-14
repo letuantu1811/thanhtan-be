@@ -16,20 +16,13 @@ router.get("/", async(req, res) => {
     }
 });
 
-router.get("/prints/:mode", async(req, res) => {
+router.post("/prints/:mode", async(req, res) => {
     try {
         const mode = req.params.mode.toUpperCase();
+        const billAsPayload = req.body;
+        const userId = req.header('id');
         
-        if (![PRINT_MODE.A5, PRINT_MODE.K80].includes(mode)) {
-          return response.error(
-            res,
-            `Định dạng ${mode} không được hỗ trợ. Vui lòng chọn khổ K80 hoặc A5.`,
-            500,
-            req.url
-          );
-        }
-
-        const result = await controller.printOrder(mode);
+        const result = await controller.printBill(userId, mode, billAsPayload);
 
         return response.success(res, "success", result)
     } catch (err) {

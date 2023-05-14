@@ -8,10 +8,6 @@ const { unMaskPrice, formatPrice, convertNumberToText } = require('../../utils/s
 
 class TreatmentFormService {
 	getInvoiceTemplateByMode = async (mode, payload) => {
-		console.log(
-			'🚀 ~ file: TreatmentFormService.js:10 ~ TreatmentFormService ~ getInvoiceTemplateByMode= ~ payload:',
-			payload,
-		);
 		if (![PRINT_MODE.A5, PRINT_MODE.K80].includes(mode)) {
 			throw new BadRequestException(`Định dạng ${mode} không được hỗ trợ. Vui lòng chọn khổ K80 hoặc A5.`);
 		}
@@ -55,7 +51,7 @@ const mapToExaminationFormPrint = (payload) => {
 	};
 };
 
-calculateTotalAmount = (payload) => {
+const calculateTotalAmount = (payload) => {
 	const services = payload.dsCDV;
 	const products = payload.dsSP;
 	if (isEmpty(products) && isEmpty(services)) return 0;
@@ -65,14 +61,16 @@ calculateTotalAmount = (payload) => {
 	return totalAmountServices + totalAmountProducts;
 };
 
-makeHtmlTableTotalProductsToRender = (payload) => {
+const makeHtmlTableTotalProductsToRender = (payload) => {
 	const services = payload.dsCDV;
 	const products = payload.dsSP;
 
 	const productAsDrugMoney = services.filter((service) => service.id === 159);
 	const amountProductAsDrugMoney = productAsDrugMoney.length ? toNumber(unMaskPrice(productAsDrugMoney[0].gia)) : 0;
+	if (isEmpty(products) && isEmpty(productAsDrugMoney)) return '';
 
 	const sumProducts = sumBy(products, (product) => toNumber(product.gia)) || 0;
+
 	const contentTable = {
 		name: 'TIỀN THUỐC',
 		quantity: 1,
@@ -84,7 +82,7 @@ makeHtmlTableTotalProductsToRender = (payload) => {
 	return makeHtmlTableServiceItemToRender(contentTable);
 };
 
-makeHtmlTableServicesToRender = (payload) => {
+const makeHtmlTableServicesToRender = (payload) => {
 	const services = payload.dsCDV;
 	if (isEmpty(services)) return '';
 

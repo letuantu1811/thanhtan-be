@@ -248,6 +248,9 @@
             .mt-1 {
                 margin-top: 1rem;
             }
+            .mt-2 {
+                margin-top: 2rem;
+            }
 
             .mb-1 {
                 margin-bottom: 1rem;
@@ -410,33 +413,33 @@
 
 <body onafterprint="self.close()">
     <header class="text-center">
-        <div class="container">
-            <!-- <img src="http://thanhtanvet.com/assets/img/avatars/logo_web.jpg" class="img-fluid w-40" alt=""> -->
+        <div class="container text-center">
+            <img src="http://thanhtanvet.com/assets/img/avatars/logo_web.jpg" class="img-fluid w-40" alt="">
             <p>Phòng Khám Thú Y & Pet Shop Thanh Tân</p>
             <p>86A Tây Thạnh, Tân Phú, Thành phố Hồ Chí Minh</p>
             <p>SĐT: 0979557781 (Zalo)</p>
 
-            <h2 class="font-weigh-bold mt-1">HÓA ĐƠN</h2>
-            <h3 class="font-weigh-bold mb-1">Số phiếu: {numberOfForm}</h3>
+            <h2 class="font-weigh-bold mt-1">HÓA ĐƠN BÁN HÀNG</h2>
+            <!-- <h3 class="font-weigh-bold mb-1">Số hóa đơn: {numberOfForm}</h3> -->
 
         </div>
     </header>
 
     <section>
-        <div class="container">
-            <div class="row">
+        <div class="container mt-1">
+            <!-- <div class="row">
                 <div class="col-6">
-                    <p>Ngày: {dateOfExamination}</p>
+                    <p>Ngày : {dateOfExamination}</p>
                 </div>
                 <div class="col-6">
                     <div class="row">
                         <p>Tái khám: {dateOfReExamination}</p>
                     </div>
                 </div>
-            </div>
-            <p>Tên chủ: {customerName}</p>
-            <p>Tên thú cưng: {petName}</p>
-            <p>Địa chỉ: {customerAddress}</p>
+            </div> -->
+            <p><span class="font-weigh-bold">Tên khách hàng:</span> {customerName}</p>
+            <!-- <p>Tên thú cưng: {petName}</p>
+            <p>Địa chỉ: {customerAddress}</p> -->
         </div>
     </section>
 
@@ -452,7 +455,7 @@
                     </tr>
                 </thead>
                 <tbody>
-                    {details}
+                    {detailProducts}
                     <!-- <tr class=" border-top-1">
             <td colspan="4">Bio Dexa 100ml</td>
           </tr>
@@ -477,18 +480,18 @@
                         <td colspan="3">Tổng cộng:</td>
                         <td class="text-right">{totalAmount}</td>
                     </tr>
-                    <tr>
+                    <!-- <tr>
                         <td colspan="3">Chiết khấu:</td>
                         <td class="text-right">{discountMember}</td>
-                    </tr>
-                    <tr>
+                    </tr> -->
+                    <!-- <tr>
                         <td colspan="3">Giảm giá:</td>
                         <td class="text-right">{discountAmount}</td>
-                    </tr>
-                    <tr>
+                    </tr> -->
+                    <!-- <tr>
                         <td colspan="3">Tổng tiền (sau CK):</td>
                         <td class="text-right">{totalAmountAfterDiscount}</td>
-                    </tr>
+                    </tr> -->
                     <tr class="font-size-h1 font-weigh-bold">
                         <td colspan="3">Tổng tiền phải trả:</td>
                         <td class="text-right">{totalAmountAfterDiscount}</td>
