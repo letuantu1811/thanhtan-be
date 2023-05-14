@@ -495,7 +495,7 @@ module.exports = {
             throw new Error();
         }
     },
-    getAllExamByPetId: async (id, isAdmin) => {
+    getAllExamByPetId: async (id, isViewedNonRestricted) => {
         try {
             const defaultIncludes = [
                 {
@@ -504,7 +504,12 @@ module.exports = {
                 { model: giasuc },
                 { model: khachhang, as: 'khachhang' },
             ];
-            if (!isAdmin) {
+            if (isViewedNonRestricted) {
+                defaultIncludes.push({
+                    model: sanpham,
+                });
+                
+            } else {
                 defaultIncludes.push({
                     model: sanpham,
                     where: { an: 0 },
@@ -521,7 +526,7 @@ module.exports = {
             });
         } catch (error) {
             console.log(error);
-            throw new Error();
+            throw new Error(error);
         }
     },
 

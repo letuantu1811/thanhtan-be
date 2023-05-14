@@ -145,7 +145,7 @@ router.get('/examByPetId', async (req, res) => {
         let id = req.query.id;
         let phieudieutriid = req.query.phieudieutriid;
         console.log(phieudieutriid + '123');
-        const result = await dieutri.getAllExamByPetId(id, isAdmin);
+        const result = await dieutri.getAllExamByPetId(id, isViewedNonRestricted);
         response.success(res, 'success', result);
     } catch (err) {
         console.log(err.message);
