@@ -15,9 +15,6 @@ const config = {
     host: process.env.APP_HOST,
     assetsPath: assetsPath,
     templateExamInvoicePath: `${assetsPath}templates/exam-invoice/`,
-    bootstrapCssPath: `${assetsPath}css/bootstrap`,
-    bootstrapGridCssPath: `${assetsPath}css/bootstrap-grid`,
-    rebootCssPath: `${assetsPath}css/bootstrap-reboot`,
 };
 
 module.exports = config;

@@ -20,7 +20,7 @@ exports.replaceValueHtml = (html = "", params) => {
   }
   for (const [key, value] of Object.entries(params)) {
     const regExp = new RegExp(`{${key}}`, "g");
-    if (html.match(regExp) && !isEmpty(value)) {
+    if (html.match(regExp)) {
       html = html.replace(regExp, value);
     }
   }

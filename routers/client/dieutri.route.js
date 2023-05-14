@@ -4,7 +4,7 @@ const dieutri = require('../../src.web/controllers/dieutri.controller');
 const truyxuatbenhan = require('../../src.web/controllers/truyxuatbenhan.controller');
 const response = require('../../utils/api.res/response');
 const fs = require('fs');
-const { getInvoiceTemplateByMode } = require("../../src.web/controllers/TreetmentFormController");
+const { getInvoiceTemplateByMode } = require("../../src.web/controllers/TreatmentFormController");
 
 // Getting many khachhang
 router.get('/notification', async (req, res) => {
@@ -271,6 +271,6 @@ router.get('/isExisted/:id', async (req, res) => {
     }
 });
 
-router.get('/prints/:mode', getInvoiceTemplateByMode);
+router.post('/prints/:mode', getInvoiceTemplateByMode);
 
 module.exports = router;
