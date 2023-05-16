@@ -1,143 +1,145 @@
-const khachhang = require("./../../database/models/khachhang");
-const giasuc = require("./../../database/models/giasuc");
-const nhomsanpham = require("./../../database/models/nhomsanpham");
-const phieudieutri_congdichvu = require("./../../database/models/phieudieutri_congdichvu");
-const phieudieutri_sanpham = require("./../../database/models/phieudieutri_sanpham");
-const phieudieutri = require("./../../database/models/phieudieutri");
-const { localDate } = require("../../utils/localDate");
-const { toNumber } = require("lodash");
+const khachhang = require('./../../database/models/khachhang');
+const giasuc = require('./../../database/models/giasuc');
+const nhomsanpham = require('./../../database/models/nhomsanpham');
+const phieudieutri_congdichvu = require('./../../database/models/phieudieutri_congdichvu');
+const phieudieutri_sanpham = require('./../../database/models/phieudieutri_sanpham');
+const phieudieutri = require('./../../database/models/phieudieutri');
+const { localDate } = require('../../utils/localDate');
+const { toNumber } = require('lodash');
 
 module.exports = {
-
-    existed: async(body) => {
-        let res = body;
+    existed: async (body) => {
+        const res = body;
         const healthFormId = await create_phieudieutri(res);
         // update khach hang
-        await khachhang.update({
-            ten: res.khachhang.ten,
-            diachi: res.khachhang.diachi,
-            sodienthoai: res.khachhang.sodienthoai
-        }, {
-            where: {
-                id: res.khachhang.id
-            }
-        }).then(res => {
-            console.log(res + " update khach hang at taohoso");
+        await khachhang
+            .update(
+                {
+                    ten: res.khachhang.ten,
+                    diachi: res.khachhang.diachi,
+                    sodienthoai: res.khachhang.sodienthoai,
+                },
+                {
+                    where: {
+                        id: res.khachhang.id,
+                    },
+                },
+            )
+            .then((res) => {
+                console.log(res + ' update khach hang at taohoso');
+            });
+
+        // update thu cung
+        await giasuc
+            .update(
+                {
+                    ten: res.thucung.ten,
+                    trongluong: res.thucung.trongluong,
+                    dacdiem: res.thucung.dacdiem,
+                    tuoi: res.thucung.tuoi,
+                    gioitinh: res.thucung.gioitinh,
+                    chungloai_id: res.thucung.chungloai.id === 0 ? null : res.thucung.chungloai.id,
+                    giong_id: res.thucung.giong.id === 0 ? null : res.thucung.giong.id,
+                },
+                {
+                    where: {
+                        id: res.thucung.id,
+                    },
+                },
+            )
+            .then((res) => {
+                console.log(res);
+            });
+
+        await create_phieudieutri_sanpham(healthFormId, res.dsSP).then(async (res) => {
+            console.log(res + ' tại create_phieudieutri_sanpham');
         });
-
-        //update thu cung
-        await giasuc.update({
-            ten: res.thucung.ten,
-            trongluong: res.thucung.trongluong,
-            dacdiem: res.thucung.dacdiem,
-            tuoi: res.thucung.tuoi,
-            gioitinh: res.thucung.gioitinh,
-            chungloai_id: res.thucung.chungloai.id === 0 ? null : res.thucung.chungloai.id,
-            giong_id: res.thucung.giong.id === 0 ? null : res.thucung.giong.id
-        }, {
-            where: {
-                id: res.thucung.id
-            }
-        }).then(res => {
-            console.log(res);
+        await create_phieudieutri_congdichvu(healthFormId, res.dsCDV).then((res) => {
+            console.log(res + ' tại create_phieudieutri_congdichvu ');
         });
-
-
-
-        await create_phieudieutri_sanpham(healthFormId, res.dsSP).then(async res => {
-            console.log(res + " tại create_phieudieutri_sanpham");
-        });
-        await create_phieudieutri_congdichvu(healthFormId, res.dsCDV).then(res => {
-            console.log(res + " tại create_phieudieutri_congdichvu ");
-        });
-
-
     },
 
-
-
-    already: async(body) => {
+    already: async (body) => {
         try {
-
-            let res = body;
+            const res = body;
             // update khach hang
-            await khachhang.update({
-                ten: res.khachhang.ten,
-                diachi: res.khachhang.diachi,
-                sodienthoai: res.khachhang.sodienthoai
-            }, {
-                where: {
-                    id: res.khachhang.id
-                }
-            }).then(res => {
-                console.log(res + " update khach hang at taohoso");
-            });
+            await khachhang
+                .update(
+                    {
+                        ten: res.khachhang.ten,
+                        diachi: res.khachhang.diachi,
+                        sodienthoai: res.khachhang.sodienthoai,
+                    },
+                    {
+                        where: {
+                            id: res.khachhang.id,
+                        },
+                    },
+                )
+                .then((res) => {
+                    console.log(res + ' update khach hang at taohoso');
+                });
 
-            //update thu cung
-            let gsID = await giasuc.create({
-                ten: res.thucung.ten,
-                trongluong: res.thucung.trongluong,
-                dacdiem: res.thucung.dacdiem,
-                tuoi: res.thucung.tuoi,
-                gioitinh: res.thucung.gioitinh,
-                chungloai_id: res.thucung.chungloai.id !== 0 ? res.thucung.chungloai.id : null,
-                giong_id: res.thucung.giong.id === 0 ? null : res.thucung.giong.id,
-                khachhang_id: res.khachhang.id,
-                ngaytao: localDate(new Date()),
-            }).then(res => {
-                console.log(res);
-                return res.dataValues.id;
-            });
+            // update thu cung
+            const gsID = await giasuc
+                .create({
+                    ten: res.thucung.ten,
+                    trongluong: res.thucung.trongluong,
+                    dacdiem: res.thucung.dacdiem,
+                    tuoi: res.thucung.tuoi,
+                    gioitinh: res.thucung.gioitinh,
+                    chungloai_id: res.thucung.chungloai.id !== 0 ? res.thucung.chungloai.id : null,
+                    giong_id: res.thucung.giong.id === 0 ? null : res.thucung.giong.id,
+                    khachhang_id: res.khachhang.id,
+                    ngaytao: localDate(new Date()),
+                })
+                .then((res) => {
+                    console.log(res);
+                    return res.dataValues.id;
+                });
             res.thucung.id = gsID;
             console.log(res);
             const healthFormId = await create_phieudieutri(res);
 
-
-
-            await create_phieudieutri_sanpham(healthFormId, res.dsSP).then(async res => {
-                console.log(res + " tại create_phieudieutri_sanpham");
+            await create_phieudieutri_sanpham(healthFormId, res.dsSP).then(async (res) => {
+                console.log(res + ' tại create_phieudieutri_sanpham');
             });
-            await create_phieudieutri_congdichvu(healthFormId, res.dsCDV).then(res => {
-                console.log(res + " tại create_phieudieutri_congdichvu ");
+            await create_phieudieutri_congdichvu(healthFormId, res.dsCDV).then((res) => {
+                console.log(res + ' tại create_phieudieutri_congdichvu ');
             });
         } catch (error) {
-            log.error(error)
-            throw new Error()
+            log.error(error);
+            throw new Error();
         }
     },
 
     new: async (body) => {
-        let res = body;
+        const res = body;
         try {
             const customerId = await khachhang
-                .create(
-                    {
-                        ten: body.khachhang.ten,
-                        diachi: body.khachhang.diachi,
-                        sodienthoai: body.khachhang.sodienthoai,
-                        ngaytao: localDate(new Date()),
-                    }
-                )
+                .create({
+                    ten: body.khachhang.ten,
+                    diachi: body.khachhang.diachi,
+                    sodienthoai: body.khachhang.sodienthoai,
+                    ngaytao: localDate(new Date()),
+                })
                 .then((res) => {
                     return res.dataValues.id;
                 });
 
-            //update thu cung
+            // update thu cung
             const petId = await giasuc
-                .create(
-                    {
-                        ten: res.thucung.ten,
-                        trongluong: res.thucung.trongluong,
-                        dacdiem: res.thucung.dacdiem,
-                        tuoi: res.thucung.tuoi,
-                        gioitinh: res.thucung.gioitinh,
-                        chungloai_id:
-                            res.thucung.chungloai.id !== 0 ? res.thucung.chungloai.id : null,
-                        giong_id: res.thucung.giong.id === 0 ? null : res.thucung.giong.id,
-                        khachhang_id: customerId,
-                        ngaytao: localDate(new Date()),
-                    }
-                )
+                .create({
+                    ten: res.thucung.ten,
+                    trongluong: res.thucung.trongluong,
+                    dacdiem: res.thucung.dacdiem,
+                    tuoi: res.thucung.tuoi,
+                    gioitinh: res.thucung.gioitinh,
+                    chungloai_id: res.thucung.chungloai.id !== 0 ? res.thucung.chungloai.id : null,
+                    giong_id: res.thucung.giong.id === 0 ? null : res.thucung.giong.id,
+                    khachhang_id: customerId,
+                    ngaytao: localDate(new Date()),
+                })
                 .then((res) => {
                     return res.dataValues.id;
                 });
@@ -178,30 +180,30 @@ async function create_phieudieutri(body) {
 
 async function create_phieudieutri_sanpham(healthFormId, listSP) {
     try {
-        let arr = [];
+        const arr = [];
         for (let index = 0; index < listSP.length; index++) {
             const element = listSP[index];
             let obj = {
                 phieudieutri_id: 0,
                 sanpham_id: 0,
-                ngaytao: localDate(new Date())
-            }
+                ngaytao: localDate(new Date()),
+            };
             obj = new Object();
             obj.phieudieutri_id = healthFormId;
             obj.sanpham_id = element.id;
             obj.ngaytao = localDate(new Date());
-            arr.push(obj)
+            arr.push(obj);
         }
 
         await phieudieutri_sanpham.bulkCreate(arr);
     } catch (error) {
         console.log(error);
     }
-};
+}
 
 async function create_phieudieutri_congdichvu(healthFormId, listCDV) {
     try {
-        let arr = [];
+        const arr = [];
         for (let index = 0; index < listCDV.length; index++) {
             const element = listCDV[index];
             let obj = {
@@ -219,4 +221,4 @@ async function create_phieudieutri_congdichvu(healthFormId, listCDV) {
     } catch (error) {
         console.log(error);
     }
-};
+}

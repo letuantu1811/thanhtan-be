@@ -1,17 +1,19 @@
 {
-  "singleQuote": true,
-  "trailingComma": "all",
-  "arrowParens": "always",
-  "printWidth": 120,
-  "jsxBracketSameLine": true,
-  "tabWidth": 4,
-  "overrides": [
-    {
-      "files": ["*.html"],
-      "options": {
-        "printWidth": 80,
-        "tabWidth": 2
-      }
-    }
-  ]
+    "singleQuote": true,
+    "trailingComma": "all",
+    "arrowParens": "always",
+    "printWidth": 100,
+    "jsxBracketSameLine": true,
+    "tabWidth": 4,
+    "semi": true,
+    "endOfLine": "lf",
+    "overrides": [
+        {
+            "files": ["*.html"],
+            "options": {
+                "printWidth": 80,
+                "tabWidth": 2
+            }
+        }
+    ]
 }

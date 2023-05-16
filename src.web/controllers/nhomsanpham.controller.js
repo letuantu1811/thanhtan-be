@@ -1,101 +1,103 @@
 const nhomsanpham = require('../../database/models/nhomsanpham');
 const { ENUM } = require('../../utils/index');
-const { Op } = require("sequelize");
+const { Op } = require('sequelize');
 const sanpham = require('../../database/models/sanpham');
 const { localDate } = require('../../utils/localDate');
 
 module.exports = {
     // Creating sanpham
-    create: async(res) => {
+    create: async (res) => {
         try {
             return await nhomsanpham.create({
                 ngaytao: localDate(new Date()),
                 ten: res.ten,
                 nguoitao_id: 1,
-                trangthai: 1
-            })
+                trangthai: 1,
+            });
         } catch (error) {
-            return error
+            return error;
         }
-
     },
     // Updating sanpham
-    update: async(res) => {
+    update: async (res) => {
         try {
-            return await nhomsanpham.update({
-                ten: res.ten,
-                trangthai: 1,
-                nguoitao_id: 1
-            }, {
-                where: {
-                    id: res.id
-                }
-            })
+            return await nhomsanpham.update(
+                {
+                    ten: res.ten,
+                    trangthai: 1,
+                    nguoitao_id: 1,
+                },
+                {
+                    where: {
+                        id: res.id,
+                    },
+                },
+            );
         } catch (error) {
             throw new Error();
         }
-
     },
     // get one sanpham
-    getOne: async(id) => {
+    getOne: async (id) => {
         try {
             return await sanpham.findOne({
                 where: {
-                    id: id
-                }
-            })
+                    id: id,
+                },
+            });
         } catch (error) {
-            return error
+            return error;
         }
     },
     // get many san pham
-    getMany: async(id) => {
+    getMany: async (id) => {
         try {
             return await nhomsanpham.findAll({
-                include: [{
-                    model: sanpham,
-                    trangthai: 1
-                }],
+                include: [
+                    {
+                        model: sanpham,
+                        trangthai: 1,
+                    },
+                ],
                 where: {
                     id: id,
-                    trangthai: ENUM.ENABLE
+                    trangthai: ENUM.ENABLE,
                 },
-                order: [
-                    ['ngaytao', 'DESC']
-                ]
-            })
+                order: [['ngaytao', 'DESC']],
+            });
         } catch (error) {
-            return error
+            return error;
         }
     },
     // disable sanpham
-    disable: async(id) => {
+    disable: async (id) => {
         try {
-            return await nhomsanpham.update({
-                trangthai: 0
-            }, {
-                where: {
-                    id: id
-                }
-            })
+            return await nhomsanpham.update(
+                {
+                    trangthai: 0,
+                },
+                {
+                    where: {
+                        id: id,
+                    },
+                },
+            );
         } catch (error) {
-            return error
+            return error;
         }
     },
     // get many san pham
-    getAll: async() => {
+    getAll: async () => {
         // let nhomsanpham_id = body.nhomsanpham_id || "";
         try {
             return await nhomsanpham.findAll({
                 where: {
-                    trangthai: ENUM.ENABLE
+                    trangthai: ENUM.ENABLE,
                 },
-                order: [
-                    ['ngaytao', 'DESC']
-                ]
-            })
+                order: [['ngaytao', 'DESC']],
+            });
         } catch (error) {
-            return error
+            return error;
         }
-    }
-}
+    },
+};

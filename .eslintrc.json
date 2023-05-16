@@ -31,12 +31,7 @@
         ],
         "linebreak-style": ["error", "unix"],
         "quotes": ["error", "single"],
-        "import/newline-after-import": [
-            "error",
-            {
-                "count": 1
-            }
-        ],
+        "import/newline-after-import": ["error", { "count": 1 }],
         "sort-imports": [
             "error",
             {

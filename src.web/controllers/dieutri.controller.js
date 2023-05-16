@@ -110,9 +110,9 @@ module.exports = {
 
     // get many san pham
     getMany: async (body) => {
-        let limit = body.limit;
-        let offset = body.offset;
-        let quyen = body.quyen;
+        const limit = body.limit;
+        const offset = body.offset;
+        const quyen = body.quyen;
         try {
             return await model.findAll({
                 where: {
@@ -138,7 +138,7 @@ module.exports = {
                     where: {
                         id: id,
                     },
-                }
+                },
             );
         } catch (error) {
             return error;
@@ -148,7 +148,7 @@ module.exports = {
     // disable model
     getAllToday: async (date, isAdmin) => {
         try {
-            let today = date ? date : tzSaiGon();
+            const today = date || tzSaiGon();
             const defaultIncludes = [
                 { model: giasuc, as: 'giasuc' },
                 { model: khachhang, as: 'khachhang' },
@@ -166,7 +166,7 @@ module.exports = {
                     where: sequelize.where(
                         sequelize.fn('date', sequelize.col('phieudieutri.ngaytao')),
                         '=',
-                        today
+                        today,
                     ),
                     trangthai: 1,
                 },
@@ -195,18 +195,18 @@ module.exports = {
     },
 
     getAll: async (role) => {
-        let obj = {
+        const obj = {
             limit: null,
         };
         if (role.toUpperCase() === 'USER') {
-            let config = await Thanhvien.findOne({
+            const config = await Thanhvien.findOne({
                 attributes: ['config'],
                 where: { id: 1 },
             });
             obj.limit = config.config;
         }
         try {
-            let today = tzSaiGon();
+            const today = tzSaiGon();
             return await model.findAll({
                 include: [
                     {
@@ -227,7 +227,7 @@ module.exports = {
 
     getReExamByDate: async (date, isAdmin) => {
         try {
-            const selectedDate = date ? date : tzSaiGon();
+            const selectedDate = date || tzSaiGon();
 
             const defaultIncludes = [
                 { model: giasuc, as: 'giasuc' },
@@ -246,7 +246,7 @@ module.exports = {
                     where: sequelize.where(
                         sequelize.fn('date', sequelize.col('ngaytaikham')),
                         '=',
-                        selectedDate
+                        selectedDate,
                     ),
                     trangthai: 1,
                 },
@@ -277,24 +277,24 @@ module.exports = {
 
     getNotification: async (role) => {
         try {
-            let today = tzSaiGon();
+            const today = tzSaiGon();
             console.log(today);
-            let reExamCount = await model.count({
+            const reExamCount = await model.count({
                 where: {
                     where: sequelize.where(
                         sequelize.fn('date', sequelize.col('ngaytaikham')),
                         '=',
-                        today
+                        today,
                     ),
                     // dataikham: null,
                 },
             });
-            let examTodayCount = await model.count({
+            const examTodayCount = await model.count({
                 where: {
                     where: sequelize.where(
                         sequelize.fn('date', sequelize.col('ngaytao')),
                         '=',
-                        today
+                        today,
                     ),
                     trangthai: 1,
                 },
@@ -304,11 +304,12 @@ module.exports = {
                     countDTtoday: 0,
                     countTDTtody: 0,
                 });
-            } else
+            } else {
                 return (body = {
                     countDTtoday: examTodayCount,
                     countTDTtody: reExamCount,
                 });
+            }
             // return body;
         } catch (error) {
             return error;
@@ -318,7 +319,7 @@ module.exports = {
     importEXAM: async (res) => {
         console.log(model);
         try {
-            let arr = [];
+            const arr = [];
             let obj = {
                 mapping_id: '',
                 khachhang_id: 0,
@@ -339,7 +340,7 @@ module.exports = {
             };
             for (let index = 0; index < res.length; index++) {
                 const item = res[index];
-                let kh = await khachhang.findOne({
+                const kh = await khachhang.findOne({
                     where: {
                         sodienthoai: item.thongtin.DienThoai,
                     },
@@ -391,11 +392,11 @@ module.exports = {
                 gia: 0,
                 ngaytao: '',
             };
-            let arr = [];
+            const arr = [];
             // ``
             for (let index = 0; index < res.length; index++) {
                 const element = res[index];
-                let pdtID = await phieudieutri.findOne({
+                const pdtID = await phieudieutri.findOne({
                     attributes: ['id'],
                     where: {
                         mapping_id: element.PhieuDieuTriId,
@@ -403,7 +404,7 @@ module.exports = {
                 });
                 for (let index2 = 0; index2 < element.congdichvu.length; index2++) {
                     const cdv = element.congdichvu[index2];
-                    let cdvID = await Congdichvu.findOne({
+                    const cdvID = await Congdichvu.findOne({
                         attributes: ['id', 'gia'],
                         where: {
                             ten: cdv.TenCongDichVu,
@@ -447,11 +448,11 @@ module.exports = {
                 gia: 0,
                 ngaytao: '',
             };
-            let arr = [];
+            const arr = [];
             // ``
             for (let index = 0; index < res.length; index++) {
                 const element = res[index];
-                let pdtID = await phieudieutri.findOne({
+                const pdtID = await phieudieutri.findOne({
                     attributes: ['id'],
                     where: {
                         mapping_id: element.PhieuDieuTriId,
@@ -459,7 +460,7 @@ module.exports = {
                 });
                 for (let index2 = 0; index2 < element.sanpham.length; index2++) {
                     const cdv = element.sanpham[index2];
-                    let spID = await sanpham.findOne({
+                    const spID = await sanpham.findOne({
                         attributes: ['id', 'gia'],
                         where: {
                             ten: cdv.TenThuoc,
@@ -508,7 +509,6 @@ module.exports = {
                 defaultIncludes.push({
                     model: sanpham,
                 });
-                
             } else {
                 defaultIncludes.push({
                     model: sanpham,
@@ -545,7 +545,7 @@ module.exports = {
                     where: {
                         id: data.id,
                     },
-                }
+                },
             );
         } catch (error) {
             throw new Error();
@@ -563,7 +563,7 @@ module.exports = {
                     where: {
                         id: data.id,
                     },
-                }
+                },
             );
         } catch (error) {
             throw new Error();
@@ -580,7 +580,7 @@ module.exports = {
                     where: {
                         id: id,
                     },
-                }
+                },
             );
         } catch (error) {
             throw new Error();
@@ -597,7 +597,7 @@ module.exports = {
                     where: {
                         id: id,
                     },
-                }
+                },
             );
         } catch (error) {
             throw new Error();
@@ -653,14 +653,14 @@ module.exports = {
 
     isExisted: async (id) => {
         try {
-            let today = tzSaiGon();
+            const today = tzSaiGon();
             return await model.count({
                 where: {
                     giasuc_id: id,
                     where: sequelize.where(
                         sequelize.fn('date', sequelize.col('ngaytao')),
                         '=',
-                        today
+                        today,
                     ),
                 },
             });
@@ -671,7 +671,7 @@ module.exports = {
 
     filterBlockedInExam: async (pddID) => {
         try {
-            let kh = await phieudieutri.count({
+            const kh = await phieudieutri.count({
                 include: {
                     model: sanpham,
                     where: {
@@ -699,7 +699,7 @@ function updateTK(id) {
                 where: {
                     id: id,
                 },
-            }
+            },
         );
     } catch (error) {
         return error;

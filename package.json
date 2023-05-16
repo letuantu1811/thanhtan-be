@@ -6,7 +6,10 @@
     "scripts": {
         "start": "node index.js",
         "start:dev": "nodemon index.js",
-        "test": "echo \"Error: no test specified\" && exit 1"
+        "test": "echo \"Error: no test specified\" && exit 1",
+        "pretty": "prettier --write \"src/**/*.{js,jsx,json,html,ts}\"",
+        "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
+        "lint": "./node_modules/.bin/eslint src.web --fix"
     },
     "author": "",
     "license": "ISC",
@@ -34,6 +37,13 @@
         "sequelize": "^5.5.1"
     },
     "devDependencies": {
-        "prettier": "^2.8.8"
+        "eslint": "^8.40.0",
+        "prettier": "^2.8.8",
+        "eslint-config-prettier": "^8.3.0",
+        "eslint-config-standard": "^16.0.3",
+        "eslint-plugin-import": "^2.25.4",
+        "eslint-plugin-jest": "^26.1.4",
+        "eslint-plugin-node": "^11.1.0",
+        "eslint-plugin-promise": "^5.2.0"
     }
 }

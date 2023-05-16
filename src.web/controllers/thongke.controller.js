@@ -4,54 +4,53 @@ const phieudieutri_congdichvu = require('../../database/models/phieudieutri_cong
 const banle = require('../../database/models/banle');
 // const giasuc = require('../../database/models/giasuc');
 const { ENUM } = require('../../utils/index');
-const { Op, QueryTypes } = require("sequelize");
-const sequelize = require("sequelize");
-
-
+const { Op, QueryTypes } = require('sequelize');
+const sequelize = require('sequelize');
 
 module.exports = {
-    thongKeDoanhThuTheoNgay: async(startDate, endDate) => {
+    thongKeDoanhThuTheoNgay: async (startDate, endDate) => {
         try {
-            console.log(startDate + " " + endDate);
+            console.log(startDate + ' ' + endDate);
             return await phieudieutri.findAll({
                 attributes: [
                     [sequelize.fn('sum', sequelize.col('thanhtien')), 'thanhtien'],
-                    [sequelize.fn('count', sequelize.col('thanhtien')), 'soluong']
+                    [sequelize.fn('count', sequelize.col('thanhtien')), 'soluong'],
                 ],
                 where: {
                     ngaytao: {
-                        [Op.between]: [startDate, endDate]
-                    }
-                }
-            })
+                        [Op.between]: [startDate, endDate],
+                    },
+                },
+            });
         } catch (error) {
-            return error
+            return error;
         }
     },
 
-    thongKeDoanhThuBanLeTheoNgay: async(startDate, endDate) => {
+    thongKeDoanhThuBanLeTheoNgay: async (startDate, endDate) => {
         try {
-            console.log(startDate + " " + endDate);
+            console.log(startDate + ' ' + endDate);
             return await banle.findAll({
                 attributes: [
                     [sequelize.fn('sum', sequelize.col('tongdonhang')), 'thanhtien'],
-                    [sequelize.fn('count', sequelize.col('tongdonhang')), 'soluong']
+                    [sequelize.fn('count', sequelize.col('tongdonhang')), 'soluong'],
                 ],
                 where: {
                     ngaytao: {
-                        [Op.between]: [startDate, endDate]
-                    }
-                }
-            })
+                        [Op.between]: [startDate, endDate],
+                    },
+                },
+            });
         } catch (error) {
-            return error
+            return error;
         }
     },
 
-    thongKeCDVTheoNgay: async(startDate, endDate) => {
+    thongKeCDVTheoNgay: async (startDate, endDate) => {
         try {
-            console.log(startDate + " " + endDate);
-            return await phieudieutri.sequelize.query(`
+            console.log(startDate + ' ' + endDate);
+            return await phieudieutri.sequelize.query(
+                `
             select 
                 sum(c.gia) as thongke, count(c.gia) as soluong 
             from 
@@ -59,16 +58,19 @@ module.exports = {
                 left join phieudieutri_congdichvu pc4 on pc4.phieudieutri_id  = p2.id 
                 left join congdichvu c on c.id = pc4.congdichvu_id 
             where 
-                p2.ngaytao BETWEEN '${startDate}' and '${endDate}'`, { type: QueryTypes.SELECT });
+                p2.ngaytao BETWEEN '${startDate}' and '${endDate}'`,
+                { type: QueryTypes.SELECT },
+            );
         } catch (error) {
-            return error
+            return error;
         }
     },
 
-    chartDieuTri: async(startDate, endDate) => {
+    chartDieuTri: async (startDate, endDate) => {
         try {
-            console.log(startDate + " " + endDate);
-            return await phieudieutri.sequelize.query(`
+            console.log(startDate + ' ' + endDate);
+            return await phieudieutri.sequelize.query(
+                `
             SELECT
                 YEAR(ngaytao) AS year,
                 MONTH(ngaytao) AS month,
@@ -80,16 +82,19 @@ module.exports = {
             GROUP BY
                 YEAR(ngaytao),
                 MONTH(ngaytao)
-            `, { type: QueryTypes.SELECT });
+            `,
+                { type: QueryTypes.SELECT },
+            );
         } catch (error) {
-            return error
+            return error;
         }
     },
 
-    chartBanLe: async(startDate, endDate) => {
+    chartBanLe: async (startDate, endDate) => {
         try {
-            console.log(startDate + " " + endDate);
-            return await phieudieutri.sequelize.query(`
+            console.log(startDate + ' ' + endDate);
+            return await phieudieutri.sequelize.query(
+                `
             SELECT
                 YEAR(ngaytao) AS year,
                 MONTH(ngaytao) AS month,
@@ -101,16 +106,18 @@ module.exports = {
             GROUP BY
                 YEAR(ngaytao),
                 MONTH(ngaytao)
-            `, { type: QueryTypes.SELECT });
+            `,
+                { type: QueryTypes.SELECT },
+            );
         } catch (error) {
-            return error
+            return error;
         }
     },
 
-
-    chartTop3CongDichVu: async(startDate, endDate, id) => {
+    chartTop3CongDichVu: async (startDate, endDate, id) => {
         try {
-            return await phieudieutri_congdichvu.sequelize.query(`
+            return await phieudieutri_congdichvu.sequelize.query(
+                `
             select
                 COUNT(p.congdichvu_id) as soluong,
                 sum(pc.gia) * 1000 as tongcong,
@@ -123,20 +130,25 @@ module.exports = {
             left join phieudieutri c2 on
                 p.phieudieutri_id = c2.id
             where
-                p.ngaytao BETWEEN '${startDate}' AND '${endDate}' ${ id !== null ? 'or p.id = ' + id : ''}
+                p.ngaytao BETWEEN '${startDate}' AND '${endDate}' ${
+                    id !== null ? 'or p.id = ' + id : ''
+                }
             group by
                 p.congdichvu_id
             order by
                 soluong desc
-            limit ${id !== null ? 4 : 3}`, { type: QueryTypes.SELECT });
+            limit ${id !== null ? 4 : 3}`,
+                { type: QueryTypes.SELECT },
+            );
         } catch (error) {
             return error;
         }
     },
 
-    chartOtherCongDichVu: async(startDate, endDate) => {
+    chartOtherCongDichVu: async (startDate, endDate) => {
         try {
-            return await phieudieutri_congdichvu.sequelize.query(`
+            return await phieudieutri_congdichvu.sequelize.query(
+                `
             select
                 sum(a.soluong) as soluong,
                 sum(a.tongcong) as tongcong,
@@ -162,10 +174,11 @@ module.exports = {
                 order by
                     soluong desc
                 limit 3,
-                100000) as a`, { type: QueryTypes.SELECT });
+                100000) as a`,
+                { type: QueryTypes.SELECT },
+            );
         } catch (error) {
             return error;
         }
-    }
-
-}
+    },
+};
