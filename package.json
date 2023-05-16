@@ -7,7 +7,7 @@
         "start": "node index.js",
         "start:dev": "nodemon index.js",
         "test": "echo \"Error: no test specified\" && exit 1",
-        "pretty": "prettier --write \"src/**/*.{js,jsx,json,html,ts}\"",
+        "pretty": "prettier --write \"src.web/**/*.{js,jsx,json,html,ts}\"",
         "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
         "lint": "./node_modules/.bin/eslint src.web --fix"
     },

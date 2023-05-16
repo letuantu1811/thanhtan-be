@@ -8,60 +8,60 @@ const { formatPrice, convertNumberToText, unMaskPrice } = require('../../utils/s
 const { getCurrentDate } = require('../../utils/formatDate');
 
 class OrderService {
-	getInvoiceTemplate = async (userId, mode, payload) => {
-		const templateInvoiceByMode = `${templateBillPath}${mode}`;
+    getInvoiceTemplate = async (userId, mode, payload) => {
+        const templateInvoiceByMode = `${templateBillPath}${mode}`;
 
-		const invoiceTemplate = await getDataTemplate(templateInvoiceByMode);
+        const invoiceTemplate = await getDataTemplate(templateInvoiceByMode);
 
-		const mappedData = await _mapToBillPrint(userId, payload);
-		const conventedInvoiceTemplate = replaceValueHtml(invoiceTemplate, mappedData);
+        const mappedData = await _mapToBillPrint(userId, payload);
+        const conventedInvoiceTemplate = replaceValueHtml(invoiceTemplate, mappedData);
 
-		return conventedInvoiceTemplate;
-	};
+        return conventedInvoiceTemplate;
+    };
 }
 
 const _mapToBillPrint = async (userId, payload) => {
-	const createById = toNumber(payload.nguoitao_id) || toNumber(userId) || null;
-	const user = await getOneUser(createById);
+    const createById = toNumber(payload.nguoitao_id) || toNumber(userId) || null;
+    const user = await getOneUser(createById);
 
     const createByName = user ? user.tendaydu : '';
     const customerName = payload.ten || 'Khách lẻ';
 
-	const totalAmount = toNumber(unMaskPrice(payload.tongdonhang)) || 0;
-	const detailProducts = _makeHtmlTableServicesToRender(payload);
+    const totalAmount = toNumber(unMaskPrice(payload.tongdonhang)) || 0;
+    const detailProducts = _makeHtmlTableServicesToRender(payload);
 
-	return {
-		customerName: customerName,
-		detailProducts: detailProducts,
-		totalAmount: formatPrice(totalAmount) || '0',
-		discountAmount: formatPrice(toNumber) || '0',
-		totalAmountAfterDiscount: formatPrice(totalAmount) || '0',
-		priceToText: convertNumberToText(totalAmount) || '',
-		createByName: createByName,
-		createAtDateTime: getCurrentDate(),
-	};
+    return {
+        customerName: customerName,
+        detailProducts: detailProducts,
+        totalAmount: formatPrice(totalAmount) || '0',
+        discountAmount: formatPrice(toNumber) || '0',
+        totalAmountAfterDiscount: formatPrice(totalAmount) || '0',
+        priceToText: convertNumberToText(totalAmount) || '',
+        createByName: createByName,
+        createAtDateTime: getCurrentDate(),
+    };
 };
 
 const _makeHtmlTableServicesToRender = (payload) => {
-	const products = payload.listSP;
-	if (isEmpty(products)) return '';
+    const products = payload.listSP;
+    if (isEmpty(products)) return '';
 
-	let htmlTable = '';
-	for (const product of products) {
-		const mapProduct = {
-			name: product.tenthaythe || '',
-			quantity: toNumber(product.soluongban) || 0,
-			price: toNumber(unMaskPrice(product.gia)) || 0,
-			discountAmount: 0,
-			totalAmount: toNumber(unMaskPrice(product.thanhtien)) || 0,
-		};
-		htmlTable += makeHtmlTableServiceItemToRender(mapProduct);
-	}
-	return htmlTable;
+    let htmlTable = '';
+    for (const product of products) {
+        const mapProduct = {
+            name: product.tenthaythe || '',
+            quantity: toNumber(product.soluongban) || 0,
+            price: toNumber(unMaskPrice(product.gia)) || 0,
+            discountAmount: 0,
+            totalAmount: toNumber(unMaskPrice(product.thanhtien)) || 0,
+        };
+        htmlTable += makeHtmlTableServiceItemToRender(mapProduct);
+    }
+    return htmlTable;
 };
 
 const makeHtmlTableServiceItemToRender = (serviceItem) => {
-	const rowTableProductItem = ` 
+    const rowTableProductItem = ` 
     <tr class=" border-top-1">
             <td colspan="4">${serviceItem.name}</td>
           </tr>
@@ -73,7 +73,7 @@ const makeHtmlTableServiceItemToRender = (serviceItem) => {
           </tr>
   `;
 
-	return rowTableProductItem;
+    return rowTableProductItem;
 };
 
 module.exports = new OrderService();
