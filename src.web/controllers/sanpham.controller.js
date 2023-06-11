@@ -2,13 +2,12 @@ const sanpham = require('../../database/models/sanpham');
 const nhomsanpham = require('../../database/models/nhomsanpham');
 const donvitinh = require('../../database/models/donvitinh');
 const { ENUM } = require('../../utils/index');
-const { Op, where } = require('sequelize');
+const { Op } = require('sequelize');
 const sequelize = require('sequelize');
 const { localDate } = require('../../utils/localDate');
 const giasuc = require('../../database/models/giasuc');
 
 module.exports = {
-    // Creating sanpham
     create: async (res) => {
         console.log(sanpham);
         try {
@@ -16,7 +15,7 @@ module.exports = {
                 const arr = [];
                 for (let index = 0; index < res.thucung.length; index++) {
                     const element = res.thucung[index];
-                    let obj = {
+                    const obj = {
                         ten: '',
                         ngaytao: '',
                         tuoi: 0,
@@ -30,12 +29,11 @@ module.exports = {
                         chungloai_id: 0,
                         mavach: '',
                     };
-                    obj = new Object();
                     obj.ngaytao = localDate(new Date());
                     obj.ten = element.ten;
                     obj.tuoi = element.tuoi;
                     obj.trongluong = element.trongluong;
-                    obj.khachhang_id = id;
+                    obj.khachhang_id = element.khachhang_id || null;
                     obj.taikham = element.taikham;
                     obj.gioitinh = element.gioitinh;
                     obj.nguoitao_id = element.nguoitao_id;
@@ -54,7 +52,6 @@ module.exports = {
 
     createMulti: async (listSP) => {
         try {
-            const arrUpdate = [];
             const arrNew = [];
             let obj = {
                 ten: '',
@@ -177,13 +174,11 @@ module.exports = {
     getMany: async (body) => {
         const limit = body.limit;
         const offset = body.offset;
-        const quyen = body.quyen;
-        const nhomsanpham_id = body.nhomsanpham_id || '';
+        const productGroupId = body.nhomsanpham_id || '';
         try {
             return await sanpham.findAll({
                 where: {
-                    nhomsanpham_id: nhomsanpham_id,
-                    // trangthai: quyen == "admin" ? "" : ENUM.ENABLE
+                    nhomsanpham_id: productGroupId,
                 },
                 order: [['ngaytao', 'DESC']],
                 offset: offset,
@@ -223,39 +218,46 @@ module.exports = {
     },
     // disable sanpham
     getAll: async (quyen) => {
-        let obj = {};
-        if (quyen.toUpperCase() !== 'ADMIN') {
-            obj = { an: 0 };
-        }
+        const isAdmin = quyen.toUpperCase() === 'ADMIN';
         try {
-            return await sanpham.findAll({
+            const product = await sanpham.findAll({
                 include: [
                     {
                         model: donvitinh,
                         as: 'donvitinh',
                         require: true,
+                        attributes: {
+                            exclude: ['trangthai', 'ngaytao', 'ngaysua'],
+                        },
                     },
                     {
                         model: donvitinh,
                         as: 'donviquydoi',
                         require: true,
+                        attributes: {
+                            exclude: ['trangthai', 'ngaytao', 'ngaysua'],
+                        },
                     },
                     {
                         model: nhomsanpham,
                         require: true,
+                        attributes: {
+                            exclude: ['trangthai', 'ngaytao', 'ngaysua'],
+                        },
                     },
                 ],
                 where: {
-                    trangthai: true,
-                    ...obj,
+                    trangthai: 1,
+                    an: !isAdmin,
                 },
                 order: [['ten', 'ASC']],
             });
+            return product;
         } catch (error) {
             return error;
         }
     },
-    // get hidden product
+
     getAllHiddenProduct: async () => {
         try {
             return await sanpham.findAll({
@@ -330,7 +332,6 @@ module.exports = {
         }
     },
 
-    // update sanpham
     update: async (body) => {
         const data = body;
         try {
@@ -374,10 +375,8 @@ module.exports = {
 
     importData: async (listSP) => {
         try {
-            const arrUpdate = [];
             const arrNew = [];
             const donvitinhArr = await donvitinh.findAll();
-            // console.log(donvitinhArr);
             const nhomthuocArr = await nhomsanpham.findAll();
 
             let obj = {
@@ -467,7 +466,6 @@ module.exports = {
         }
     },
 
-    // create sanpham
     createOne: async (body) => {
         const data = body;
         try {

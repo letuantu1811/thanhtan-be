@@ -18,22 +18,22 @@ const { HttpException } = require('./utils/api.res/api.error');
 const PORT = process.env.PORT || 3001;
 
 app.use(
-  bodyParser.json({
-    limit: '50mb',
-  })
+    bodyParser.json({
+        limit: '50mb',
+    }),
 );
 
 app.use(
-  session({
-    secret: '123',
-    resave: false,
-    httpOnly: true,
-    saveUninitialized: true,
-    cookie: {
-      maxAge: 1000 * 3600,
-      secure: false,
-    },
-  })
+    session({
+        secret: '123',
+        resave: false,
+        httpOnly: true,
+        saveUninitialized: true,
+        cookie: {
+            maxAge: 1000 * 3600,
+            secure: false,
+        },
+    }),
 );
 
 // adding morgan to log HTTP requests
@@ -53,19 +53,18 @@ app.use(
         origin: '*',
         credentials: true,
         exposedHeaders: ['Content-Disposition'],
-    })
+    }),
 );
-
 
 // starting the server
 app.listen(PORT, () => {
-  console.log('Server is running on port ' + PORT);
+    console.log('Server is running on port ' + PORT);
 });
 
 // init db
 db.authenticate()
-  .then(() => console.log('Database Connected'))
-  .catch((err) => console.log('error: ' + err));
+    .then(() => console.log('Database Connected'))
+    .catch((err) => console.log('error: ' + err));
 
 // routes
 initAPI(app);
@@ -73,13 +72,18 @@ initAPI(app);
 app.use(express.static(__dirname + '/public'));
 
 app.use((req, res, next) => {
-  if (req.url === '/') {
-    app.get('/', function (req, res) {
-      res.render('index.html');
-    });
-  } else {
-    next(new HttpException(message.getMessage('status.notfound'), message.getMessage('http.notfound')));
-  }
+    if (req.url === '/') {
+        app.get('/', function (req, res) {
+            res.render('index.html');
+        });
+    } else {
+        next(
+            new HttpException(
+                message.getMessage('status.notfound'),
+                message.getMessage('http.notfound'),
+            ),
+        );
+    }
 });
 
 app.use(errorConverter);

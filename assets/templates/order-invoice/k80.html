@@ -2,461 +2,478 @@
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link
-        href="https://fonts.googleapis.com/css2?family=Barlow:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;1,100;1,200;1,300;1,400;1,600&display=swap"
-        rel="stylesheet">
-    <title>Sales Invoice</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Hóa đơn bán hàng</title>
 
-    <style>
-        @media print {
+  <style>
+    @media print {
 
-            * {
-                box-sizing: border-box;
-            }
+      * {
+        font-family: 'Roboto', sans-serif;
+        box-sizing: border-box;
+      }
 
-            html {
-                font-family: sans-serif;
-                line-height: 1.15;
-                -webkit-text-size-adjust: 100%;
-                -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
-            }
+      html {
+        font-family: 'Roboto', sans-serif;
+        line-height: 1.15;
+      }
 
-            article,
-            aside,
-            figcaption,
-            figure,
-            footer,
-            header,
-            hgroup,
-            main,
-            nav,
-            section {
-                display: block;
-            }
+      article,
+      aside,
+      figcaption,
+      figure,
+      footer,
+      header,
+      hgroup,
+      main,
+      nav,
+      section {
+        display: block;
+      }
 
-            body {
-                margin: 0;
-                font-family: 'Helvetica Neue';
-                font-size: 12px;
-                /* font-weight: 500; */
-                line-height: 1.25rem;
-                color: #212529;
-                text-align: left;
-                background-color: #fff;
-                width: 80mm;
-                height: 100mm;
-                word-wrap: break-word !important;
-            }
+      body {
+        margin: 0;
+        font-family: 'Roboto', sans-serif;
+        -webkit-font-smoothing: antialiased;
+        font-size: 12px;
+        color: #000;
+        font-weight: 500;
+        line-height: 1.25rem;
+        text-align: left;
+        background-color: #fff;
+        width: 75mm;
+        height: 100mm;
+        word-wrap: break-word !important;
+      }
 
-            hr {
-                box-sizing: content-box;
-                height: 0;
-                overflow: visible;
-            }
+      hr {
+        box-sizing: content-box;
+        height: 0;
+        overflow: visible;
+      }
 
-            h1,
-            h2,
-            h3,
-            h4,
-            h5,
-            h6 {
-                margin-top: 0;
-                margin-bottom: 0.2rem;
-            }
+      h1,
+      h2,
+      h3,
+      h4,
+      h5,
+      h6 {
+        margin-top: 0;
+        margin-bottom: 0.2rem;
+      }
+      
+      p {
+        margin-top: 0;
+        margin-bottom: 0;
+        line-height: 1.5rem;
+      }
+      
+      table {
 
-            .font-size-h1 {
-                font-size: 0.9rem;
-            }
+       font-family: 'Roboto', sans-serif;
+        -webkit-font-smoothing: antialiased;
+        color: #000;
+        font-weight: 500;
+       border-collapse: collapse;
+      }
 
-            p {
-                margin-top: 0;
-                margin-bottom: 0;
-                line-height: 1.5rem;
-            }
+      .font-size-h1 {
+        font-size: 0.9rem;
+      }
+      
+      .font-size-sm {
+        font-size: 0.65rem;
+      }
+      
+      .table {
+        font-family: 'Roboto', sans-serif;
+        -webkit-font-smoothing: antialiased;
+        color: #000;
+        font-weight: 500;
+        width: 100%;
+        margin-bottom: 1rem;
+        /* border: 1px dotted #262626ba; */
+      }
 
+      .table th,
+      .table td {
+        font-family: 'Roboto', sans-serif;
+        -webkit-font-smoothing: antialiased;
+        color: #000;
+        font-weight: 500;
+        padding: 0.45rem;
+        vertical-align: top;
+        /* border: 1px dotted #262626ba; */
+      }
 
+      .table td {
+        font-family: 'Roboto', sans-serif;
+        -webkit-font-smoothing: antialiased;
+        color: #000;
+        font-weight: 500;
+        padding: 0.35rem;
 
-            table {
-                border-collapse: collapse;
-            }
+      }
 
+      .table thead th {
+        vertical-align: bottom;
+        /* border: 2px dotted #262626ba; */
+      }
 
-            .table {
-                width: 100%;
-                margin-bottom: 1rem;
-                color: #212529;
-                /* border: 1px dotted #262626ba; */
-            }
-
-            .table th,
-            .table td {
-                padding: 0.45rem;
-                vertical-align: top;
-                /* border: 1px dotted #262626ba; */
-            }
-
-            .table td {
-                padding: 0.35rem;
-
-            }
-
-            .table thead th {
-                vertical-align: bottom;
-                /* border: 2px dotted #262626ba; */
-            }
-
-            /* .table tbody+tbody {
+      /* .table tbody+tbody {
         border: 2px dotted #262626ba;
       } */
 
-            .border-top-1 {
-                border-top: 1px dotted #262626ba;
-            }
+      .border-top-1 {
+        border-top: 1px dotted #262626ba;
+      }
 
-            th {
-                text-align: inherit;
-                text-align: -webkit-match-parent;
-            }
+      th {
+        text-align: inherit;
+        text-align: -webkit-match-parent;
+      }
 
-            .container {
-                width: 100%;
-                padding-right: 1rem;
-                padding-left: 1rem;
-                margin-right: auto;
-                margin-left: auto;
-            }
+      .container {
+        width: 100%;
+        padding-right: 1rem;
+        padding-left: 1rem;
+        margin-right: auto;
+        margin-left: auto;
+      }
 
-            .row {
-                display: -ms-flexbox;
-                display: flex;
-                -ms-flex-wrap: wrap;
-                flex-wrap: wrap;
-                /* margin-right: -7px;
+      .row {
+        display: -ms-flexbox;
+        display: flex;
+        -ms-flex-wrap: wrap;
+        flex-wrap: wrap;
+        /* margin-right: -7px;
   margin-left: -7px; */
-            }
+      }
 
-            .d-flex {
-                display: flex;
-            }
+      .d-flex {
+        display: flex;
+      }
 
 
-            .col-1,
-            .col-2,
-            .col-3,
-            .col-4,
-            .col-5,
-            .col-6,
-            .col-7,
-            .col-8,
-            .col-9,
-            .col-10,
-            .col-11,
-            .col-12 {
-                position: relative;
-                width: 100%;
-                /* padding-right: 7px;
+      .col-1,
+      .col-2,
+      .col-3,
+      .col-4,
+      .col-5,
+      .col-6,
+      .col-7,
+      .col-8,
+      .col-9,
+      .col-10,
+      .col-11,
+      .col-12 {
+        position: relative;
+        width: 100%;
+        /* padding-right: 7px;
   padding-left: 7px; */
-            }
+      }
 
-            .col {
-                -ms-flex-preferred-size: 0;
-                flex-basis: 0;
-                -ms-flex-positive: 1;
-                flex-grow: 1;
-                max-width: 100%;
-            }
+      .col {
+        -ms-flex-preferred-size: 0;
+        flex-basis: 0;
+        -ms-flex-positive: 1;
+        flex-grow: 1;
+        max-width: 100%;
+      }
 
-            .col-1 {
-                -ms-flex: 0 0 8.333333%;
-                flex: 0 0 8.333333%;
-                max-width: 8.333333%;
-            }
+      .col-1 {
+        -ms-flex: 0 0 8.333333%;
+        flex: 0 0 8.333333%;
+        max-width: 8.333333%;
+      }
 
-            .col-2 {
-                -ms-flex: 0 0 16.666667%;
-                flex: 0 0 16.666667%;
-                max-width: 16.666667%;
-            }
+      .col-2 {
+        -ms-flex: 0 0 16.666667%;
+        flex: 0 0 16.666667%;
+        max-width: 16.666667%;
+      }
 
-            .col-3 {
-                -ms-flex: 0 0 25%;
-                flex: 0 0 25%;
-                max-width: 25%;
-            }
+      .col-3 {
+        -ms-flex: 0 0 25%;
+        flex: 0 0 25%;
+        max-width: 25%;
+      }
 
-            .col-4 {
-                -ms-flex: 0 0 33.333333%;
-                flex: 0 0 33.333333%;
-                max-width: 33.333333%;
-            }
+      .col-4 {
+        -ms-flex: 0 0 33.333333%;
+        flex: 0 0 33.333333%;
+        max-width: 33.333333%;
+      }
 
-            .col-5 {
-                -ms-flex: 0 0 41.666667%;
-                flex: 0 0 41.666667%;
-                max-width: 41.666667%;
-            }
+      .col-5 {
+        -ms-flex: 0 0 41.666667%;
+        flex: 0 0 41.666667%;
+        max-width: 41.666667%;
+      }
 
-            .col-6 {
-                -ms-flex: 0 0 50%;
-                flex: 0 0 50%;
-                max-width: 50%;
-            }
+      .col-6 {
+        -ms-flex: 0 0 50%;
+        flex: 0 0 50%;
+        max-width: 50%;
+      }
 
-            .col-7 {
-                -ms-flex: 0 0 58.333333%;
-                flex: 0 0 58.333333%;
-                max-width: 58.333333%;
-            }
+      .col-7 {
+        -ms-flex: 0 0 58.333333%;
+        flex: 0 0 58.333333%;
+        max-width: 58.333333%;
+      }
 
-            .col-8 {
-                -ms-flex: 0 0 66.666667%;
-                flex: 0 0 66.666667%;
-                max-width: 66.666667%;
-            }
+      .col-8 {
+        -ms-flex: 0 0 66.666667%;
+        flex: 0 0 66.666667%;
+        max-width: 66.666667%;
+      }
 
-            .col-9 {
-                -ms-flex: 0 0 75%;
-                flex: 0 0 75%;
-                max-width: 75%;
-            }
+      .col-9 {
+        -ms-flex: 0 0 75%;
+        flex: 0 0 75%;
+        max-width: 75%;
+      }
 
-            .col-10 {
-                -ms-flex: 0 0 83.333333%;
-                flex: 0 0 83.333333%;
-                max-width: 83.333333%;
-            }
+      .col-10 {
+        -ms-flex: 0 0 83.333333%;
+        flex: 0 0 83.333333%;
+        max-width: 83.333333%;
+      }
 
-            .col-11 {
-                -ms-flex: 0 0 91.666667%;
-                flex: 0 0 91.666667%;
-                max-width: 91.666667%;
-            }
+      .col-11 {
+        -ms-flex: 0 0 91.666667%;
+        flex: 0 0 91.666667%;
+        max-width: 91.666667%;
+      }
 
-            .col-12 {
-                -ms-flex: 0 0 100%;
-                flex: 0 0 100%;
-                max-width: 100%;
-            }
+      .col-12 {
+        -ms-flex: 0 0 100%;
+        flex: 0 0 100%;
+        max-width: 100%;
+      }
 
-            .ml-1,
-            .mx-1 {
-                margin-left: 0.25rem !important;
-            }
+      .ml-1,
+      .mx-1 {
+        margin-left: 0.25rem !important;
+      }
+      
+      .mt-0.5rem {
+        margin-top: 0.5rem;
+      }
 
-            .mt-1 {
-                margin-top: 1rem;
-            }
-            .mt-2 {
-                margin-top: 2rem;
-            }
+      .mt-1 {
+        margin-top: 1rem;
+      }
 
-            .mb-1 {
-                margin-bottom: 1rem;
-            }
+      .mb-1 {
+        margin-bottom: 1rem;
+      }
 
-            .my-1 {
-                margin-bottom: 1rem;
-                margin-top: 1rem;
-            }
+      .my-1 {
+        margin-bottom: 1rem;
+        margin-top: 1rem;
+      }
 
-            .font-weigh-bold {
-                font-weight: 600;
-            }
+      .font-weigh-bold {
+        font-weight: 600;
+      }
 
-            .font-size-print {
-                font-size: 7px !important;
-            }
+      .font-size-print {
+        font-size: 7px !important;
+      }
 
-            .font-size-name {
-                font-size: 7px !important;
-            }
+      .font-size-name {
+        font-size: 7px !important;
+      }
 
-            .font-size-warranty {
-                font-size: 18px !important;
-            }
+      .font-size-warranty {
+        font-size: 18px !important;
+      }
 
-            .font-size-product-info {
-                font-size: 7px !important;
-            }
+      .font-size-product-info {
+        font-size: 7px !important;
+      }
 
-            .font-size-price {
-                font-size: 23px !important;
-                font-weight: bold !important;
-            }
+      .font-size-price {
+        font-size: 23px !important;
+        font-weight: bold !important;
+      }
 
-            .text-download-app {
-                font-size: 14px !important;
-                font-weight: 550 !important;
-                margin-top: 4px;
-            }
+      .text-download-app {
+        font-size: 14px !important;
+        font-weight: 550 !important;
+        margin-top: 4px;
+      }
 
-            .item-print {
-                width: 97mm !important;
-                margin-left: 20px !important;
-            }
+      .item-print {
+        width: 97mm !important;
+        margin-left: 20px !important;
+      }
 
-            .content-info {
-                color: black;
-                font-weight: 450;
-            }
+      .content-info {
+        color: black;
+        font-weight: 450;
+      }
 
-            hr {
-                border: none;
-                border-top: 2px dotted #f00;
-                color: #fff;
-                background-color: #fff;
-                height: 2px;
-            }
+      hr {
+        border: none;
+        border-top: 2px dotted #f00;
+        color: #fff;
+        background-color: #fff;
+        height: 2px;
+      }
 
-            p {
-                font-family: Time New Roman, sans-serif;
-            }
+      p {
+        /*font-family: Time New Roman, sans-serif;*/
+      }
 
-            hr.dotted {
-                border: none;
-                border-top: 1px dotted black;
-                color: #fff;
-                background-color: #fff;
-                height: 1px;
-            }
+      hr.dotted {
+        border: none;
+        border-top: 1px dotted black;
+        color: #fff;
+        background-color: #fff;
+        height: 1px;
+      }
 
-            .label-color {
-                color: black;
-                font-weight: 600;
-            }
+      .label-color {
+        color: black;
+        font-weight: 600;
+      }
 
-            .text-center {
-                text-align: center;
-            }
+      .text-center {
+        text-align: center;
+      }
 
-            .text-right {
-                text-align: right;
-            }
+      .text-right {
+        text-align: right;
+      }
 
-            .text-styles {
-                color: black;
-                font-size: 13px
-            }
+      .text-styles {
+        color: black;
+        font-size: 13px
+      }
 
-            .content-info {
-                color: black;
-                font-weight: 450;
-            }
+      .content-info {
+        color: black;
+        font-weight: 450;
+      }
 
-            .font-size-print {
-                font-size: 13px;
-            }
+      .font-size-print {
+        font-size: 13px;
+      }
 
-            .font-size-name {
-                font-size: 13px;
-            }
+      .font-size-name {
+        font-size: 13px;
+      }
 
-            .font-size-warranty {
-                font-size: 13px;
-            }
+      .font-size-warranty {
+        font-size: 13px;
+      }
 
-            .content-product {
-                line-height: 1.375;
-                white-space: pre-wrap;
-                font-size: 13px;
-                margin-top: 4px;
-            }
+      .content-product {
+        line-height: 1.375;
+        white-space: pre-wrap;
+        font-size: 13px;
+        margin-top: 4px;
+      }
 
-            .item-print {
-                width: 97mm !important;
-                margin-left: 30px !important;
-            }
+      .item-print {
+        width: 97mm !important;
+        margin-left: 30px !important;
+      }
 
-            hr {
-                border: none;
-                border-top: 2px dotted black;
-                color: #fff;
-                background-color: #fff;
-                height: 2px;
-            }
+      hr {
+        border: none;
+        border-top: 2px dotted black;
+        color: #fff;
+        background-color: #fff;
+        height: 2px;
+      }
 
-            hr.dotted {
-                border: none;
-                border-top: 1px dotted cadetblue;
-                color: #fff;
-                background-color: #fff;
-                height: 1px;
-            }
+      hr.dotted {
+        border: none;
+        border-top: 2px dotted cadetblue;
+        color: #fff;
+        background-color: #fff;
+        height: 1.5px;
+      }
 
-            .text-download-app {
-                font-size: 14px !important;
-                font-weight: 550 !important;
-                margin-top: 4px;
-            }
+      .text-download-app {
+        font-size: 14px !important;
+        font-weight: 550 !important;
+        margin-top: 4px;
+      }
 
-            .w-10 {
-                width: 10%;
-            }
+      .w-10 {
+        width: 10%;
+      }
 
-            .w-40 {
-                width: 40%;
-            }
+      .w-40 {
+        width: 40%;
+      }
 
-            .img-fluid {
-                max-width: 100%;
-                height: auto;
-            }
+      .img-fluid {
+        max-width: 100%;
+        height: auto;
+      }
 
-            .font-italic {
-                font-style: italic;
-            }
-        }
-    </style>
+      .font-italic {
+        font-style: italic;
+      }
+    }
+  </style>
 </head>
 
 <body onafterprint="self.close()">
-    <header class="text-center">
-        <div class="container text-center">
-            <img src="http://thanhtanvet.com/assets/img/avatars/logo_web.jpg" class="img-fluid w-40" alt="">
-            <p>Phòng Khám Thú Y & Pet Shop Thanh Tân</p>
-            <p>86A Tây Thạnh, Tân Phú, Thành phố Hồ Chí Minh</p>
-            <p>SĐT: 0979557781 (Zalo)</p>
+  <header class="text-center">
+    <div class="container">
+      <!--<img src="http://thanhtanvet.com/assets/img/avatars/logo_web.jpg" class="img-fluid w-40 mt-1" alt="">-->
+      <p>Phòng Khám Thú Y & Pet Shop Thanh Tân</p>
+      <p class="font-size-sm">86A Tây Thạnh, Tân Phú, Thành phố Hồ Chí Minh</p>
+      <p>SĐT: 0979557781 (Zalo)</p>
 
-            <h2 class="font-weigh-bold mt-1">HÓA ĐƠN BÁN HÀNG</h2>
-            <!-- <h3 class="font-weigh-bold mb-1">Số hóa đơn: {numberOfForm}</h3> -->
+      <h2 class="font-weigh-bold mt-1">HÓA ĐƠN</h2>
 
-        </div>
-    </header>
+    </div>
+  </header>
 
-    <section>
-        <div class="container mt-1">
-            <!-- <div class="row">
-                <div class="col-6">
-                    <p>Ngày : {dateOfExamination}</p>
-                </div>
-                <div class="col-6">
-                    <div class="row">
-                        <p>Tái khám: {dateOfReExamination}</p>
-                    </div>
-                </div>
-            </div> -->
-            <p><span class="font-weigh-bold">Tên khách hàng:</span> {customerName}</p>
-            <!-- <p>Tên thú cưng: {petName}</p>
-            <p>Địa chỉ: {customerAddress}</p> -->
-        </div>
-    </section>
+  <section>
+    <div class="container mt-1">
+      <!--<div class="row">-->
+      <!--  <div class="col-6">-->
+      <!--    <p>Ngày khám: {dateOfExamination}</p>-->
+      <!--  </div>-->
+      <!--  <div class="col-6">-->
+      <!--    <div class="row">-->
+      <!--      <p>Tái khám: {dateOfReExamination}</p>-->
+      <!--    </div>-->
+      <!--  </div>-->
+      <!--</div>-->
+      
+      <p><span class="font-weigh-bold">Tên khách hàng:</span> {customerName}</p>
+    </div>
+  </section>
 
-    <section class="mt-1">
-        <div class="container">
-            <table class="table">
-                <thead class="text-center">
-                    <tr class=" border-top-1">
-                        <th class="w-10">SL</th>
-                        <th>Đơn giá</th>
-                        <th>Chiết khấu</th>
-                        <th class="text-right">Thành tiền</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {detailProducts}
-                    <!-- <tr class=" border-top-1">
+  <section class="mt-1">
+    <div class="container">
+      <table class="table">
+        <thead class="text-center">
+          <tr class="font-weigh-bold border-top-1">
+            <th class="w-10"><span class="font-weigh-bold">SL</span></th>
+            <th><span class="font-weigh-bold">Đơn giá</span></th>
+            <th><span class="font-weigh-bold">Chiết khấu</span></th>
+            <th class="text-right"><span class="font-weigh-bold">Thành tiền</span></th>
+          </tr>
+        </thead>
+        <tbody>
+          {detailProducts}
+          <!-- <tr class=" border-top-1">
             <td colspan="4">Bio Dexa 100ml</td>
           </tr>
           <tr class="text-center">
@@ -474,46 +491,46 @@
             <td>0</td>
             <td class="text-right">590.000</td>
           </tr> -->
-                </tbody>
-                <tfoot class="border-top-1">
-                    <tr>
-                        <td colspan="3">Tổng cộng:</td>
-                        <td class="text-right">{totalAmount}</td>
-                    </tr>
-                    <!-- <tr>
-                        <td colspan="3">Chiết khấu:</td>
-                        <td class="text-right">{discountMember}</td>
-                    </tr> -->
-                    <!-- <tr>
-                        <td colspan="3">Giảm giá:</td>
-                        <td class="text-right">{discountAmount}</td>
-                    </tr> -->
-                    <!-- <tr>
-                        <td colspan="3">Tổng tiền (sau CK):</td>
-                        <td class="text-right">{totalAmountAfterDiscount}</td>
-                    </tr> -->
-                    <tr class="font-size-h1 font-weigh-bold">
-                        <td colspan="3">Tổng tiền phải trả:</td>
-                        <td class="text-right">{totalAmountAfterDiscount}</td>
-                    </tr>
-                    <tr>
-                        <td colspan="4">Tổng tiền bằng chữ: {priceToText}</td>
-                    </tr>
-                </tfoot>
-            </table>
-        </div>
-    </section>
+        </tbody>
+        <tfoot class="border-top-1">
+          <tr>
+            <td colspan="3">Tổng cộng:</td>
+            <td class="text-right">{totalAmount}</td>
+          </tr>
+          <tr>
+            <!-- <td colspan="3">Chiết khấu:</td>
+            <td class="text-right">{discountMember}</td>
+          </tr>
+          <tr>
+            <td colspan="3">Giảm giá:</td>
+            <td class="text-right">{discountAmount}</td>
+          </tr>
+          <tr>
+            <td colspan="3">Tổng tiền (sau CK):</td>
+            <td class="text-right">{totalAmountAfterDiscount}</td> -->
+          </tr>
+          <tr class="font-size-h1 font-weigh-bold">
+            <td colspan="3"><span class="font-weigh-bold">Tổng tiền phải trả:</span></td>
+            <td class="text-right"><span class="font-weigh-bold">{totalAmountAfterDiscount}</span></td>
+          </tr>
+          <tr>
+            <td colspan="4">Tổng tiền bằng chữ: {priceToText} đồng</td>
+          </tr>
+        </tfoot>
+      </table>
+    </div>
+  </section>
 
-    <section class="my-1">
-        <div class="container text-center">
-            <p>{createByName}</p>
-            <p>{createAtDateTime}</p>
-        </div>
-    </section>
+  <section class="my-1">
+    <div class="container text-center">
+      <p>{createByName}</p>
+      <p>{createAtDateTime}</p>
+    </div>
+  </section>
 
-    <footer class="text-center">
-        <p class="font-italic">Chúc quý khách và thú cưng sức khỏe!</p>
-    </footer>
+  <footer class="text-center">
+    <p class="font-italic">Chúc quý khách và thú cưng sức khỏe!</p>
+  </footer>
 </body>
 
 </html>
