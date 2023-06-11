@@ -1,11 +1,9 @@
 const nhomsanpham = require('../../database/models/nhomsanpham');
 const { ENUM } = require('../../utils/index');
-const { Op } = require('sequelize');
 const sanpham = require('../../database/models/sanpham');
 const { localDate } = require('../../utils/localDate');
 
 module.exports = {
-    // Creating sanpham
     create: async (res) => {
         try {
             return await nhomsanpham.create({
@@ -18,7 +16,7 @@ module.exports = {
             return error;
         }
     },
-    // Updating sanpham
+
     update: async (res) => {
         try {
             return await nhomsanpham.update(
@@ -37,7 +35,7 @@ module.exports = {
             throw new Error();
         }
     },
-    // get one sanpham
+
     getOne: async (id) => {
         try {
             return await sanpham.findOne({
@@ -49,7 +47,7 @@ module.exports = {
             return error;
         }
     },
-    // get many san pham
+
     getMany: async (id) => {
         try {
             return await nhomsanpham.findAll({
@@ -69,6 +67,7 @@ module.exports = {
             return error;
         }
     },
+
     // disable sanpham
     disable: async (id) => {
         try {
@@ -86,9 +85,8 @@ module.exports = {
             return error;
         }
     },
-    // get many san pham
+
     getAll: async () => {
-        // let nhomsanpham_id = body.nhomsanpham_id || "";
         try {
             return await nhomsanpham.findAll({
                 where: {

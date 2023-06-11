@@ -8,7 +8,7 @@ const { formatPrice, convertNumberToText, unMaskPrice } = require('../../utils/s
 const { getCurrentDate } = require('../../utils/formatDate');
 
 class OrderService {
-    getInvoiceTemplate = async (userId, mode, payload) => {
+    async getInvoiceTemplate(userId, mode, payload) {
         const templateInvoiceByMode = `${templateBillPath}${mode}`;
 
         const invoiceTemplate = await getDataTemplate(templateInvoiceByMode);
@@ -17,7 +17,7 @@ class OrderService {
         const conventedInvoiceTemplate = replaceValueHtml(invoiceTemplate, mappedData);
 
         return conventedInvoiceTemplate;
-    };
+    }
 }
 
 const _mapToBillPrint = async (userId, payload) => {
@@ -50,7 +50,7 @@ const _makeHtmlTableServicesToRender = (payload) => {
     for (const product of products) {
         const mapProduct = {
             name: product.tenthaythe || '',
-            quantity: toNumber(product.soluongban) || 0,
+            quantity: toNumber(product.soluong) || 0,
             price: toNumber(unMaskPrice(product.gia)) || 0,
             discountAmount: 0,
             totalAmount: toNumber(unMaskPrice(product.thanhtien)) || 0,

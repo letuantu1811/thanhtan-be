@@ -2,25 +2,26 @@
 <html lang="en">
 
 <head>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet">
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link
-    href="https://fonts.googleapis.com/css2?family=Barlow:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;1,100;1,200;1,300;1,400;1,600&display=swap"
-    rel="stylesheet">
+  
   <title>Sales Invoice</title>
 
   <style>
     @media print {
 
       * {
+        font-family: 'Roboto', sans-serif;
         box-sizing: border-box;
       }
 
       html {
-        font-family: sans-serif;
+        font-family: 'Roboto', sans-serif;
         line-height: 1.15;
-        -webkit-text-size-adjust: 100%;
-        -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+
       }
 
       article,
@@ -38,14 +39,15 @@
 
       body {
         margin: 0;
-        font-family: 'Helvetica Neue';
+        font-family: 'Roboto', sans-serif;
+        -webkit-font-smoothing: antialiased;
         font-size: 12px;
-        /* font-weight: 500; */
+        color: #000;
+        font-weight: 500;
         line-height: 1.25rem;
-        color: #212529;
         text-align: left;
         background-color: #fff;
-        width: 80mm;
+        width: 75mm;
         height: 100mm;
         word-wrap: break-word !important;
       }
@@ -65,39 +67,56 @@
         margin-top: 0;
         margin-bottom: 0.2rem;
       }
-
-      .font-size-h1 {
-        font-size: 0.9rem;
-      }
-
+      
       p {
         margin-top: 0;
         margin-bottom: 0;
         line-height: 1.5rem;
       }
-
-
-
+      
       table {
-        border-collapse: collapse;
+
+       font-family: 'Roboto', sans-serif;
+        -webkit-font-smoothing: antialiased;
+        color: #000;
+        font-weight: 500;
+       border-collapse: collapse;
       }
 
-
+      .font-size-h1 {
+        font-size: 0.9rem;
+      }
+      
+      .font-size-sm {
+        font-size: 0.65rem;
+      }
+      
       .table {
+        font-family: 'Roboto', sans-serif;
+        -webkit-font-smoothing: antialiased;
+        color: #000;
+        font-weight: 500;
         width: 100%;
         margin-bottom: 1rem;
-        color: #212529;
         /* border: 1px dotted #262626ba; */
       }
 
       .table th,
       .table td {
+        font-family: 'Roboto', sans-serif;
+        -webkit-font-smoothing: antialiased;
+        color: #000;
+        font-weight: 500;
         padding: 0.45rem;
         vertical-align: top;
         /* border: 1px dotted #262626ba; */
       }
 
       .table td {
+        font-family: 'Roboto', sans-serif;
+        -webkit-font-smoothing: antialiased;
+        color: #000;
+        font-weight: 500;
         padding: 0.35rem;
 
       }
@@ -244,6 +263,10 @@
       .mx-1 {
         margin-left: 0.25rem !important;
       }
+      
+      .mt-0.5rem {
+        margin-top: 0.5rem;
+      }
 
       .mt-1 {
         margin-top: 1rem;
@@ -308,7 +331,7 @@
       }
 
       p {
-        font-family: Time New Roman, sans-serif;
+        /*font-family: Time New Roman, sans-serif;*/
       }
 
       hr.dotted {
@@ -376,10 +399,10 @@
 
       hr.dotted {
         border: none;
-        border-top: 1px dotted cadetblue;
+        border-top: 2px dotted cadetblue;
         color: #fff;
         background-color: #fff;
-        height: 1px;
+        height: 1.5px;
       }
 
       .text-download-app {
@@ -411,9 +434,9 @@
 <body onafterprint="self.close()">
   <header class="text-center">
     <div class="container">
-      <img src="http://thanhtanvet.com/assets/img/avatars/logo_web.jpg" class="img-fluid w-40" alt="">
+      <!--<img src="http://thanhtanvet.com/assets/img/avatars/logo_web.jpg" class="img-fluid w-40 mt-1" alt="">-->
       <p>Phòng Khám Thú Y & Pet Shop Thanh Tân</p>
-      <p>86A Tây Thạnh, Tân Phú, Thành phố Hồ Chí Minh</p>
+      <p class="font-size-sm">86A Tây Thạnh, Tân Phú, Thành phố Hồ Chí Minh</p>
       <p>SĐT: 0979557781 (Zalo)</p>
 
       <h2 class="font-weigh-bold mt-1">HÓA ĐƠN</h2>
@@ -424,19 +447,22 @@
 
   <section>
     <div class="container">
-      <div class="row">
-        <div class="col-6">
-          <p>Ngày: {dateOfExamination}</p>
-        </div>
-        <div class="col-6">
-          <div class="row">
-            <p>Tái khám: {dateOfReExamination}</p>
-          </div>
-        </div>
-      </div>
-      <p>Tên chủ: {customerName}</p>
+      <!--<div class="row">-->
+      <!--  <div class="col-6">-->
+      <!--    <p>Ngày khám: {dateOfExamination}</p>-->
+      <!--  </div>-->
+      <!--  <div class="col-6">-->
+      <!--    <div class="row">-->
+      <!--      <p>Tái khám: {dateOfReExamination}</p>-->
+      <!--    </div>-->
+      <!--  </div>-->
+      <!--</div>-->
+      
+      <p class="mt-0.5rem">Tên chủ: {customerName}</p>
       <p>Tên thú cưng: {petName}</p>
       <p>Địa chỉ: {customerAddress}</p>
+      <p>Ngày khám: {dateOfExamination}</p>
+      <p><span class="font-weigh-bold">Tái khám: {dateOfReExamination}</span></p>
     </div>
   </section>
 
@@ -444,11 +470,11 @@
     <div class="container">
       <table class="table">
         <thead class="text-center">
-          <tr class=" border-top-1">
-            <th class="w-10">SL</th>
-            <th>Đơn giá</th>
-            <th>Chiết khấu</th>
-            <th class="text-right">Thành tiền</th>
+          <tr class="font-weigh-bold border-top-1">
+            <th class="w-10"><span class="font-weigh-bold">SL</span></th>
+            <th><span class="font-weigh-bold">Đơn giá</span></th>
+            <th><span class="font-weigh-bold">Chiết khấu</span></th>
+            <th class="text-right"><span class="font-weigh-bold">Thành tiền</span></th>
           </tr>
         </thead>
         <tbody>
@@ -491,11 +517,11 @@
             <td class="text-right">{totalAmountAfterDiscount}</td>
           </tr>
           <tr class="font-size-h1 font-weigh-bold">
-            <td colspan="3">Tổng tiền phải trả:</td>
-            <td class="text-right">{totalAmountAfterDiscount}</td>
+            <td colspan="3"><span class="font-weigh-bold">Tổng tiền phải trả:</span></td>
+            <td class="text-right"><span class="font-weigh-bold">{totalAmountAfterDiscount}</span></td>
           </tr>
           <tr>
-            <td colspan="4">Tổng tiền bằng chữ: {priceToText}</td>
+            <td colspan="4">Tổng tiền bằng chữ: {priceToText} đồng</td>
           </tr>
         </tfoot>
       </table>

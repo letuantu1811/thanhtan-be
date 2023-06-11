@@ -1,7 +1,5 @@
-// const model = require('../../database/models/model');
 const model = require('../../database/models/banle');
 const { ENUM } = require('../../utils/index');
-const { Op, where } = require('sequelize');
 const sanpham = require('../../database/models/sanpham');
 const Donvitinh = require('../../database/models/donvitinh');
 const BL_SP = require('../../database/models/banle_sanpham');
@@ -24,7 +22,7 @@ module.exports = {
             return error;
         }
     },
-    // get many congdichvu
+
     getMany: async (body) => {
         try {
             return await model.findAll({
@@ -37,7 +35,7 @@ module.exports = {
             return error;
         }
     },
-    // disable congdichvu
+
     disable: async (id) => {
         try {
             return await model.update(
@@ -54,7 +52,7 @@ module.exports = {
             return error;
         }
     },
-    // disable congdichvu
+
     getAll: async () => {
         try {
             return await model.findAll({
@@ -88,7 +86,6 @@ module.exports = {
         }
     },
 
-    // disable congdichvu
     createOrders: async (body) => {
         try {
             const date = localDate(new Date());
@@ -142,6 +139,7 @@ module.exports = {
             return error;
         }
     },
+
     printBill: async (userId, mode, payload) => {
         if (![PRINT_MODE.A5, PRINT_MODE.K80].includes(mode)) {
             throw new BadRequestException(
