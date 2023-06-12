@@ -218,7 +218,9 @@ module.exports = {
     },
     // disable sanpham
     getAll: async (quyen) => {
-        const isAdmin = quyen.toUpperCase() === 'ADMIN';
+        const role = quyen ? quyen.toUpperCase() : '';
+        const isViewedNonRestricted = ['ADMIN', 'MANAGER'].includes(role);
+        const an = isViewedNonRestricted ? {} : { an: 1 };
         try {
             const product = await sanpham.findAll({
                 include: [
@@ -248,7 +250,7 @@ module.exports = {
                 ],
                 where: {
                     trangthai: 1,
-                    an: !isAdmin,
+                    ...an,
                 },
                 order: [['ten', 'ASC']],
             });
