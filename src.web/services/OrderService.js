@@ -48,12 +48,14 @@ const _makeHtmlTableServicesToRender = (payload) => {
 
     let htmlTable = '';
     for (const product of products) {
+        const dongiaban = toNumber(unMaskPrice(product.dongiaban)) || 0;
+        const quantity = toNumber(product.soluong) || 0;
         const mapProduct = {
             name: product.tenthaythe || '',
-            quantity: toNumber(product.soluong) || 0,
+            quantity: quantity,
             price: toNumber(unMaskPrice(product.gia)) || 0,
             discountAmount: 0,
-            totalAmount: toNumber(unMaskPrice(product.thanhtien)) || 0,
+            totalAmount: dongiaban * quantity,
         };
         htmlTable += makeHtmlTableServiceItemToRender(mapProduct);
     }
