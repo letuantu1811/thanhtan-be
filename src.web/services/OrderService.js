@@ -1,4 +1,11 @@
-const path = require('path');
+const Order = require('../../database/models/banle');
+const Product = require('../../database/models/sanpham');
+const Unit = require('../../database/models/donvitinh');
+const Customer = require('../../database/models/khachhang');
+const User = require('../../database/models/thanhvien');
+const BL_SP = require('../../database/models/banle_sanpham');
+const sequelize = require('../../database/config');
+
 const { templateBillPath } = require('../../config');
 const { replaceValueHtml } = require('../../utils/template');
 const { getDataTemplate } = require('../../utils/template');
@@ -6,9 +13,143 @@ const { getOneUser } = require('../controllers/thanhvien.controller');
 const { toNumber, isEmpty } = require('lodash');
 const { formatPrice, convertNumberToText, unMaskPrice } = require('../../utils/string');
 const { getCurrentDate } = require('../../utils/formatDate');
+const { ENUM, PRINT_MODE } = require('../../utils');
+const { localDate } = require('../../utils/localDate');
+const { BadRequestException } = require('../../utils/api.res/api.error');
 
 class OrderService {
-    async getInvoiceTemplate(userId, mode, payload) {
+    async getOrderList() {
+        const orderEntityList = await Order.findAll({
+            include: [
+                {
+                    model: Product,
+                    as: 'sanpham',
+                    include: {
+                        model: Unit,
+                        as: 'donvitinh',
+                        attributes: { include: ['id', 'ten'] },
+                    },
+                    attributes: { exclude: ['nhacungcap', 'nguoitao_id', 'trangthai'] },
+                },
+                {
+                    model: Customer,
+                    as: 'khachhang',
+                },
+                {
+                    attributes: { include: ['id', 'tendaydu', 'quyen'] },
+                    model: User,
+                    as: 'nguoiban',
+                },
+            ],
+            attributes: { exclude: ['ngaysua', 'trangthai'] },
+            order: [['ngaytao', 'DESC']],
+            where: {
+                trangthai: ENUM.ENABLE,
+            },
+        });
+
+        const rawOrderList = orderEntityList.map((orderEntity) => {
+            const rawOrder = orderEntity.toJSON();
+            const products = rawOrder.sanpham.map((product) => {
+                const banle_sanpham = product.banle_sanpham || {};
+                const convertedProduct = {
+                    productPrice: toNumber(banle_sanpham.productPrice) || 0,
+                    discountAmount: toNumber(banle_sanpham.discountAmount) || 0,
+                };
+                return {
+                    ...product,
+                    banle_sanpham: Object.assign(banle_sanpham, convertedProduct),
+                };
+            });
+            return {
+                ...rawOrder,
+                discountAmount: toNumber(rawOrder.discountAmount) || 0,
+                sanpham: products,
+            };
+        });
+
+        return rawOrderList;
+    }
+
+    convertDetails(details, banleID) {
+        return details.reduce((result, item) => {
+            result.push({
+                sanpham_id: item.id,
+                banle_id: banleID,
+                soluong: toNumber(item.soluong) || 1,
+                dongiaban: toNumber(item.dongiaban) || 0,
+                discountAmount: toNumber(item.discountAmount) || 0,
+            });
+            return result;
+        }, []);
+    }
+
+    async createOrder(body) {
+        let transaction = null;
+        try {
+            if (!body.listSP || !body.listSP.length) {
+                throw new BadRequestException('Không có sản phẩm nào được chọn');
+            }
+
+            const date = localDate(new Date());
+
+            transaction = await sequelize.transaction();
+            await Promise.all(
+                body.listSP.map(async (item) => {
+                    const product = await Product.findOne({
+                        where: {
+                            id: item.id,
+                            trangthai: ENUM.ENABLE,
+                        },
+                        attributes: ['id', 'soluong'],
+                    });
+                    if (!product) {
+                        throw new BadRequestException(`Không tìm thấy sản phẩm với id ${item.id}`);
+                    }
+                    if (!product.soluong) return;
+
+                    const soluong = toNumber(product.soluong) || 0;
+                    const soluongban = toNumber(item.soluong) || 0;
+                    const remainQuantity = soluong - soluongban;
+                    await Product.update(
+                        { soluong: remainQuantity > 0 ? remainQuantity : 0 },
+                        {
+                            where: {
+                                id: item.id,
+                            },
+                        },
+                    );
+                }),
+            );
+
+            const rowcreated = await Order.create({
+                ngaytao: date,
+                ten: body.ten ? body.ten.trim() : '',
+                ghichu: body.ghichu ? body.ghichu.trim() : '',
+                nguoitao_id: body.nguoitao_id,
+                trangthai: ENUM.ENABLE,
+                tongdonhang: toNumber(body.tongdonhang) || 0,
+                discountAmount: toNumber(body.discountAmount) || 0,
+            });
+
+            const banleID = rowcreated.id;
+            const banle_sanpham = this.convertDetails(body.listSP, banleID);
+            await BL_SP.bulkCreate(banle_sanpham);
+
+            await transaction.commit();
+            return rowcreated;
+        } catch (error) {
+            if (transaction) await transaction.rollback();
+            throw error;
+        }
+    }
+
+    async printBill(userId, mode, payload) {
+        if (![PRINT_MODE.A5, PRINT_MODE.K80].includes(mode)) {
+            throw new BadRequestException(
+                `Định dạng ${mode} không được hỗ trợ. Vui lòng chọn khổ K80 hoặc A5.`,
+            );
+        }
         const templateInvoiceByMode = `${templateBillPath}${mode}`;
 
         const invoiceTemplate = await getDataTemplate(templateInvoiceByMode);
@@ -27,16 +168,23 @@ const _mapToBillPrint = async (userId, payload) => {
     const createByName = user ? user.tendaydu : '';
     const customerName = payload.ten || 'Khách lẻ';
 
-    const totalAmount = toNumber(unMaskPrice(payload.tongdonhang)) || 0;
+    const totalAmount = (payload.listSP || []).reduce((sum, item) => {
+        const price = toNumber(item.gia) || 0;
+        const quantity = toNumber(item.soluong) || 0;
+        const discountAmount = toNumber(item.discountAmount) || 0;
+        return sum + price * quantity - discountAmount;
+    }, 0);
+    const discountAmount = toNumber(unMaskPrice(payload.discountAmount)) || 0;
     const detailProducts = _makeHtmlTableServicesToRender(payload);
+    const totalAmountAfterDiscount = totalAmount - discountAmount;
 
     return {
         customerName: customerName,
         detailProducts: detailProducts,
         totalAmount: formatPrice(totalAmount) || '0',
-        discountAmount: formatPrice(toNumber) || '0',
-        totalAmountAfterDiscount: formatPrice(totalAmount) || '0',
-        priceToText: convertNumberToText(totalAmount) || '',
+        discountAmount: formatPrice(discountAmount) || '0',
+        totalAmountAfterDiscount: formatPrice(totalAmountAfterDiscount) || '0',
+        priceToText: convertNumberToText(totalAmountAfterDiscount) || '',
         createByName: createByName,
         createAtDateTime: getCurrentDate(),
     };
@@ -48,14 +196,15 @@ const _makeHtmlTableServicesToRender = (payload) => {
 
     let htmlTable = '';
     for (const product of products) {
-        const dongiaban = toNumber(unMaskPrice(product.dongiaban)) || 0;
         const quantity = toNumber(product.soluong) || 0;
+        const discountAmount = toNumber(product.discountAmount) || 0;
+        const price = toNumber(product.gia) || 0;
         const mapProduct = {
             name: product.tenthaythe || '',
             quantity: quantity,
-            price: toNumber(unMaskPrice(product.gia)) || 0,
-            discountAmount: 0,
-            totalAmount: dongiaban * quantity,
+            price: price,
+            discountAmount: discountAmount,
+            totalAmount: price * quantity - discountAmount,
         };
         htmlTable += makeHtmlTableServiceItemToRender(mapProduct);
     }
@@ -70,7 +219,7 @@ const makeHtmlTableServiceItemToRender = (serviceItem) => {
           <tr class="text-center">
             <td>${serviceItem.quantity}</td>
             <td>${formatPrice(serviceItem.price)}</td>
-            <td>${serviceItem.discountAmount}</td>
+            <td>${formatPrice(serviceItem.discountAmount)}</td>
             <td class="text-right">${formatPrice(serviceItem.totalAmount)}</td>
           </tr>
   `;

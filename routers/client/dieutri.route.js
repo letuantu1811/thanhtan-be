@@ -1,14 +1,13 @@
 const express = require('express');
+
 const router = express.Router();
 const dieutri = require('../../src.web/controllers/dieutri.controller');
 const truyxuatbenhan = require('../../src.web/controllers/truyxuatbenhan.controller');
 const response = require('../../utils/api.res/response');
-const fs = require('fs');
-const { getInvoiceTemplateByMode } = require("../../src.web/controllers/TreatmentFormController");
+const { getInvoiceTemplateByMode } = require('../../src.web/controllers/TreatmentFormController');
 
-// Getting many khachhang
 router.get('/notification', async (req, res) => {
-    let role = req.header('quyen');
+    const role = req.header('quyen');
     try {
         const result = await dieutri.getNotification(role);
 
@@ -20,15 +19,14 @@ router.get('/notification', async (req, res) => {
 });
 
 router.get('/', async (req, res) => {
-    // let body = req.body;
-    let role = req.header('quyen');
+    const role = req.header('quyen');
     const isAdmin = ['ADMIN', 'MANAGER'].includes(role.toUpperCase());
-    let dateselect = req.query.date;
+    const dateselect = req.query.date;
     console.log(req);
     try {
         const result = await dieutri.getAllToday(dateselect, isAdmin);
 
-        let arr = [];
+        const arr = [];
         if (!isAdmin) {
             for (let index = 0; index < result.length; index++) {
                 const element = result[index];
@@ -46,7 +44,7 @@ router.get('/', async (req, res) => {
 });
 
 router.get('/detail/:id', async (req, res) => {
-    let id = req.params.id;
+    const id = req.params.id;
     try {
         const result = await dieutri.getOne(id);
 
@@ -76,13 +74,12 @@ router.get('/reexam', async (req, res) => {
         response.success(res, 'Lấy dữ liệu thành công', !isAdmin ? arr : result);
     } catch (err) {
         console.log('Error at dieutri.router >> /reexam:', err.message);
-        response.error(res, err.message , 500);
+        response.error(res, err.message, 500);
     }
 });
 
-// Creating khachhang
 router.post('/create', async (req, res) => {
-    let body = req.body;
+    const body = req.body;
     try {
         const result = await dieutri.create(body);
 
@@ -92,9 +89,9 @@ router.post('/create', async (req, res) => {
         response.error(res, 'failed', 500);
     }
 });
-// Creating khachhang
+
 router.post('/createHoSo', async (req, res) => {
-    let body = req.body;
+    const body = req.body;
     try {
         const result = await dieutri.createHoSo(body);
         console.log(result);
@@ -104,8 +101,9 @@ router.post('/createHoSo', async (req, res) => {
         response.error(res, err.message, 500);
     }
 });
+
 router.post('/importEXAM', async (req, res) => {
-    let body = req.body;
+    const body = req.body;
     try {
         const result = await dieutri.importEXAM(body);
         response.success(res, 'success', result);
@@ -115,7 +113,7 @@ router.post('/importEXAM', async (req, res) => {
     }
 });
 router.post('/importSP', async (req, res) => {
-    let body = req.body;
+    const body = req.body;
     try {
         const result = await dieutri.importServicePlus(body);
         response.success(res, 'success', result);
@@ -125,9 +123,8 @@ router.post('/importSP', async (req, res) => {
     }
 });
 
-// Getting many khachhang
 router.get('/all', async (req, res) => {
-    let role = req.header('quyen');
+    const role = req.header('quyen');
     try {
         const result = await dieutri.getAll(role);
         response.success(res, 'success', result);
@@ -137,13 +134,12 @@ router.get('/all', async (req, res) => {
     }
 });
 
-// Getting many exam by pet id
 router.get('/examByPetId', async (req, res) => {
     try {
         const role = req.header('quyen');
         const isViewedNonRestricted = ['ADMIN', 'MANAGER'].includes(role.toUpperCase());
-        let id = req.query.id;
-        let phieudieutriid = req.query.phieudieutriid;
+        const id = req.query.id;
+        const phieudieutriid = req.query.phieudieutriid;
         console.log(phieudieutriid + '123');
         const result = await dieutri.getAllExamByPetId(id, isViewedNonRestricted);
         response.success(res, 'success', result);
@@ -153,9 +149,8 @@ router.get('/examByPetId', async (req, res) => {
     }
 });
 
-// Update many exam by pet id
 router.put('/updateHSBA', async (req, res) => {
-    let data = req.body;
+    const data = req.body;
     try {
         const result = await dieutri.updateHSBA(data);
         response.success(res, 'success', result);
@@ -165,9 +160,8 @@ router.put('/updateHSBA', async (req, res) => {
     }
 });
 
-// Update pet by pet id
 router.put('/updatePet', async (req, res) => {
-    let data = req.body;
+    const data = req.body;
     try {
         const result = await dieutri.updatePet(data);
         response.success(res, 'success', result);
@@ -177,9 +171,8 @@ router.put('/updatePet', async (req, res) => {
     }
 });
 
-// delete pet by pet id
 router.delete('/deletePet', async (req, res) => {
-    let data = req.query.id;
+    const data = req.query.id;
     try {
         const result = await dieutri.deletePet(data);
         response.success(res, 'success', result);
@@ -188,9 +181,9 @@ router.delete('/deletePet', async (req, res) => {
         response.error(res, 'failed', 500);
     }
 });
-// deleteDT by pet id
+
 router.delete('/deleteDT', async (req, res) => {
-    let data = req.query.id;
+    const data = req.query.id;
     try {
         const result = await dieutri.deleteDT(data);
         response.success(res, 'success', result);
@@ -199,7 +192,7 @@ router.delete('/deleteDT', async (req, res) => {
         response.error(res, 'failed', 500);
     }
 });
-// Getting many exam by pet id
+
 router.get('/getExaminationWithRabisin', async (req, res) => {
     try {
         const result = await truyxuatbenhan.getExaminationWithRabisin();
@@ -210,9 +203,8 @@ router.get('/getExaminationWithRabisin', async (req, res) => {
     }
 });
 
-// Getting many exam by pet id
 router.get('/getExaminationWithMedicin/:id', async (req, res) => {
-    let id = req.params.id;
+    const id = req.params.id;
     try {
         const result = await truyxuatbenhan.getExaminationWithMedicinName(id);
         response.success(res, 'success', result);
@@ -222,10 +214,9 @@ router.get('/getExaminationWithMedicin/:id', async (req, res) => {
     }
 });
 
-//get pets examination
 router.get('/getPetExamination', async (req, res) => {
-    let role = req.header('quyen');
-    let arr = [];
+    const role = req.header('quyen');
+    const arr = [];
     try {
         const result = await dieutri.getPetExamination();
         if (role.toUpperCase() === 'USER') {
@@ -245,11 +236,10 @@ router.get('/getPetExamination', async (req, res) => {
     }
 });
 
-//get pets examination
 router.get('/getPetMedicalHistory/:id', async (req, res) => {
     const role = req.header('quyen');
     const isAdmin = role.toUpperCase() === 'ADMIN';
-    let petID = req.params.id;
+    const petID = req.params.id;
     try {
         const result = await dieutri.getPetMedicalHistory(petID, isAdmin);
         response.success(res, 'success', result);
@@ -259,9 +249,8 @@ router.get('/getPetMedicalHistory/:id', async (req, res) => {
     }
 });
 
-//get existed cur date
 router.get('/isExisted/:id', async (req, res) => {
-    let petID = req.params.id;
+    const petID = req.params.id;
     try {
         const result = await dieutri.isExisted(petID);
         response.success(res, 'success', result);

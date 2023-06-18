@@ -160,7 +160,7 @@ module.exports = {
                 });
             }
 
-            const currentDateTreetments = await model.findAll({
+            const currentDateTreatments = await model.findAll({
                 include: [...defaultIncludes],
                 where: {
                     where: sequelize.where(
@@ -172,7 +172,7 @@ module.exports = {
                 },
                 order: [['ngaytao', 'DESC']],
             });
-            return currentDateTreetments.map((treetMent) => {
+            return currentDateTreatments.map((treetMent) => {
                 const rawTreetMent = treetMent.toJSON();
                 const discountAmount = toNumber(rawTreetMent.discountAmount) || 0;
                 const addedDiscountAmount = toNumber(rawTreetMent.addedDiscountAmount) || 0;
