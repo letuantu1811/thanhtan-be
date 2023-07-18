@@ -606,19 +606,26 @@ module.exports = {
 
     getPetExamination: async () => {
         try {
-            return await giasuc.findAll({
+            const data = await giasuc.findAll({
                 include: [
                     {
                         model: khachhang,
                         as: 'khachhang',
+                        attributes: ['ten', 'sodienthoai', 'diachi'],
                     },
                     {
                         model: phieudieutri,
+                        attributes: ['sophieudieutri'],
                     },
                     {
                         model: Giong,
                         as: 'giong',
-                        include: { model: Chungloai, as: 'chungloai' },
+                        include: {
+                            model: Chungloai,
+                            as: 'chungloai',
+                            attributes: ['id', 'ten', 'nguoitao_id'],
+                        },
+                        attributes: ['id', 'nguoitao_id', 'ngaytao', 'taikham', 'chungloai_id'],
                     },
                 ],
                 where: {
@@ -626,6 +633,7 @@ module.exports = {
                 },
                 order: [['ngaytao', 'DESC']],
             });
+            return data.map((item) => item.toJSON());
         } catch (error) {
             console.log(error);
             throw new Error();
@@ -677,6 +685,7 @@ module.exports = {
                     where: {
                         an: 1,
                     },
+                    attributes: ['id'],
                 },
                 where: {
                     id: pddID,
