@@ -16,6 +16,25 @@ router.get("/", async(req, res) => {
     }
 });
 
+// pagination customers
+router.get("/v2", async(req, res) => {    
+    const role = req.header('quyen');
+    const isAdmin = role.toUpperCase() === 'ADMIN';
+    const pageSize = parseInt(req.query.pageSize) || 20;
+    const pageNum = parseInt(req.query.pageNum) || 1;
+    const nameCustomer = req.query.nameCustomer;
+    const phoneCustomer = req.query.phoneCustomer;
+    const addressCustomer = req.query.addressCustomer;
+//3224
+    try {
+        const results = await CustomerController.getCustomers_v2(pageSize, pageNum, nameCustomer, phoneCustomer, addressCustomer);
+        response.success_v2(res, 'success', results.customers, results.pagination);
+    } catch (err) {
+        console.log('Error at getCustomers:', err.message);
+        response.error(res, err.message, 500);
+    }
+});
+
 router.post("/", async(req, res) => {
     let body = req.body;
     try {

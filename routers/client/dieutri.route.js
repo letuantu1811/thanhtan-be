@@ -236,6 +236,56 @@ router.get('/getPetExamination', async (req, res) => {
     }
 });
 
+// Paging Pet Examination 
+router.get('/getPetExamination_v2', async (req, res) => {
+    const role = req.header('quyen');
+    const pageSize = parseInt(req.query.pageSize) || 20;
+    const pageNum = parseInt(req.query.pageNum) || 1;
+    const fromDate = req.query.fromDate;
+    const toDate = req.query.toDate;
+    const nameCustomer = req.query.nameCustomer;
+    const phoneCustomer = req.query.phoneCustomer;
+    const addressCustomer = req.query.addressCustomer;
+
+    try {
+        if (role.toUpperCase() === 'USER') {
+            const arr = [];
+            const temp = await dieutri.getPetExaminationPaging(150, 1, fromDate, toDate, nameCustomer, phoneCustomer, addressCustomer);
+            const results = temp.data;
+            for (let index = 0; index < results.length; index++) {
+                let count = 0;
+                for (let index2 = 0; index2 < results[index].phieudieutris.length; index2++) {
+                    const element2 = results[index].phieudieutris[index2];
+                    if ((await dieutri.filterBlockedInExam(element2.id)) === 0) {
+                        count++; 
+                    }
+                }
+                count > 1 && arr.push(results[index]);
+            }
+            const totalItems = arr.length; 
+            const totalPages =  Math.ceil(totalItems / pageSize);
+            const start = (pageNum - 1) * pageSize;
+            const end = pageSize * pageNum - 1;
+            const data = arr.slice(start, end);
+
+            const pagination = {
+                totalPages,
+                currentPage: pageNum,
+                pageSize,
+                totalItems,
+            };           
+            response.success_v2(res, 'success', data, pagination);
+            return;
+        }
+
+        const result = await dieutri.getPetExaminationPaging(pageSize, pageNum, fromDate, toDate, nameCustomer, phoneCustomer, addressCustomer);        
+        response.success_v2(res, 'success', result.data, result.pagination);
+    } catch (err) {
+        console.log(err.message);
+        response.error(res, 'failed', 500);
+    }
+});
+
 router.get('/getPetMedicalHistory/:id', async (req, res) => {
     const role = req.header('quyen');
     const isAdmin = role.toUpperCase() === 'ADMIN';

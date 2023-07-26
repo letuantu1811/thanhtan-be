@@ -632,6 +632,102 @@ module.exports = {
         }
     },
 
+    // Paging Pet Examination
+    getPetExaminationPaging: async (pageSize, pageNum, fromDate, toDate, nameCustomer, phoneCustomer, addressCustomer) => {
+        const limit = pageSize;
+        const offset = (pageNum - 1) * limit;
+
+        let from_date = moment().startOf('day').subtract(3, 'months').format('YYYY-MM-DD HH:mm:ss');
+        let to_date = moment().format('YYYY-MM-DD HH:mm:ss');
+        if (fromDate && toDate) {
+            from_date = moment(fromDate).startOf('day').format('YYYY-MM-DD HH:mm:ss');
+            to_date = moment(toDate).format('YYYY-MM-DD HH:mm:ss');
+        }
+        const name = nameCustomer ? nameCustomer : '';
+        const phone = phoneCustomer ? phoneCustomer : '';
+        const address = addressCustomer ? addressCustomer : '';
+
+        try {
+            const data = await giasuc.findAll({
+                include: [
+                    {
+                        model: khachhang,
+                        as: 'khachhang',
+                        where: {
+                            sodienthoai: {
+                                [Op.like]: `%${phone}%`,
+                            },
+                            ten: {
+                                [Op.like]: `%${name}%`,
+                            },
+                            diachi: {
+                                [Op.like]: `%${address}%`,
+                            }
+                        }
+                    },
+                    {
+                        model: phieudieutri
+                    },
+                    {
+                        model: Giong,
+                        as: 'giong',
+                        include: { model: Chungloai, as: 'chungloai' },
+                    },
+                ],
+                where: {
+                    trangthai: 1,
+                    ngaytao: {
+                        [Op.gte]: from_date,
+                        [Op.lte]: to_date,
+                    }
+                },
+                order: [['ngaytao', 'DESC']],
+                limit,
+                offset
+            });
+
+            const total = await giasuc.count({
+                include: [
+                    {
+                        model: khachhang,
+                        as: 'khachhang',
+                        where: {
+                            sodienthoai: {
+                                [Op.like]: `%${phone}%`,
+                            },
+                            ten: {
+                                [Op.like]: `%${name}%`,
+                            },
+                            diachi: {
+                                [Op.like]: `%${address}%`,
+                            }
+                        }
+                    }],
+                where: {
+                    trangthai: 1,
+                    ngaytao: {
+                        [Op.gte]: from_date,
+                        [Op.lte]: to_date,
+                    }
+                }
+            });
+
+            const totalItems = total; 
+            const totalPages = Math.ceil(totalItems / pageSize);
+    
+            const pagination = {
+                totalPages,
+                currentPage: pageNum,
+                pageSize,
+                totalItems,
+            };   
+            return { data, pagination };
+        } catch (error) {
+            console.log(error);
+            throw new Error();
+        }
+    },
+
     // get medical history
     getPetMedicalHistory: async (id) => {
         try {

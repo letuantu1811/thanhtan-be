@@ -154,6 +154,92 @@ class CustomerController {
         }
     }
 
+    // Pagination customers
+    async getCustomers_v2(pageSize, pageNum, nameCustomer, phoneCustomer, addressCustomer) {
+        const limit = pageSize;
+        const offset = (pageNum - 1) * limit;
+        const name = nameCustomer ? nameCustomer : '';
+        const phone = phoneCustomer ? phoneCustomer : '';
+        const address = addressCustomer ? addressCustomer : '';
+        try {
+            const customers = await khachhang.findAll({
+                include: [
+                    {
+                        model: giasuc,
+                        as: 'giasuc',
+                        where: {
+                            trangthai: 1,
+                        },
+                        required: false,
+                        include: {
+                            model: chungloai,
+                            attributes: ['id', 'ten'],
+                            as: 'chungloai',
+                        },
+                        include: {
+                            model: Giong,
+                            attributes: ['id', 'ten'],
+                            as: 'giong',
+                            include: {
+                                attributes: ['id', 'ten'],
+                                model: chungloai,
+                            },
+                        },
+                    },
+                    {
+                        model: Nhomkhachhang,
+                        as: 'nhomkhachhang',
+                    },
+                ],
+                order: [['ngaytao', 'DESC']],
+                limit,
+                offset,
+                where: {
+                    trangthai: true,
+                    sodienthoai: {
+                        [Op.like]: `%${phone}%`,
+                    },
+                    ten: {
+                        [Op.like]: `%${name}%`,
+                    },
+                    diachi: {
+                        [Op.like]: `%${address}%`,
+                    }
+                },
+            })
+                .map((customer) => customer.toJSON());
+
+            const total = await khachhang.count({
+                where: {
+                    trangthai: true,
+                    sodienthoai: {
+                        [Op.like]: `%${phone}%`,
+                    },
+                    ten: {
+                        [Op.like]: `%${name}%`,
+                    },
+                    diachi: {
+                        [Op.like]: `%${address}%`,
+                    }
+                }
+            });
+    
+            const totalItems = total; 
+            const totalPages = Math.ceil(totalItems / pageSize);
+    
+            const pagination = {
+                totalPages,
+                currentPage: pageNum,
+                pageSize,
+                totalItems,
+            };   
+            return { customers, pagination };
+
+        } catch (error) {
+            return error;
+        }
+    }
+
     async deleteCustomer(id) {
         try {
             return await khachhang.update(
