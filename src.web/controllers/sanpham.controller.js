@@ -6,6 +6,9 @@ const { Op } = require('sequelize');
 const sequelize = require('sequelize');
 const { localDate } = require('../../utils/localDate');
 const giasuc = require('../../database/models/giasuc');
+const { generateBarcode } = require('../services/productService');
+const response = require('../../utils/api.res/response');
+const { getMessage } = require('../../utils/api.res/message');
 
 module.exports = {
     create: async (res) => {
@@ -534,7 +537,7 @@ module.exports = {
         }
     },
 
-    addbarcode: async (body) => {
+    addBarcode: async (body) => {
         const data = body;
         try {
             return sanpham.sequelize.transaction().then(async (t) => {
@@ -560,6 +563,16 @@ module.exports = {
             });
         } catch (error) {
             throw new Error(error);
+        }
+    },
+
+    generateBarcode: async (req, res) => {
+        try {
+            const id = req.params.id;
+            const updatedProduct = await generateBarcode(id);
+            return response.success(res, getMessage('http.created'), updatedProduct);
+        } catch (error) {
+            return response.error(res, error.message, error.statusCode);
         }
     },
 };

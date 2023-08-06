@@ -1,13 +1,27 @@
 const express = require('express');
 
 const router = express.Router();
-const controller = require('../../src.web/controllers/sanpham.controller');
+const {
+    getAll,
+    getInventory,
+    getAllMedicines,
+    create,
+    createMulti,
+    getMany,
+    disable,
+    update,
+    importData,
+    createOne,
+    getAllForBarCode,
+    addBarcode,
+    generateBarcode,
+} = require('../../src.web/controllers/sanpham.controller');
 const response = require('../../utils/api.res/response');
 
 router.get('/', async (req, res) => {
     const quyen = req.header('quyen');
     try {
-        const result = await controller.getAll(quyen);
+        const result = await getAll(quyen);
         //
         response.success(res, 'success', result);
     } catch (err) {
@@ -18,7 +32,7 @@ router.get('/', async (req, res) => {
 
 router.get('/inventory', async (req, res) => {
     try {
-        const result = await controller.getInventory();
+        const result = await getInventory();
 
         response.success(res, 'success', result);
     } catch (err) {
@@ -30,7 +44,7 @@ router.get('/medicines', async (req, res) => {
     const role = req.header('quyen');
     console.log(role);
     try {
-        const result = await controller.getAllMedicines(role);
+        const result = await getAllMedicines(role);
         response.success(res, 'success', result);
     } catch (err) {
         console.log(err.message);
@@ -41,7 +55,7 @@ router.get('/medicines', async (req, res) => {
 router.post('/create', async (req, res) => {
     const body = req.body;
     try {
-        const result = await controller.create(body);
+        const result = await create(body);
 
         response.success(res, 'success', result);
     } catch (err) {
@@ -53,7 +67,7 @@ router.post('/create', async (req, res) => {
 router.post('/createMulti', async (req, res) => {
     const body = req.body;
     try {
-        const result = await controller.createMulti(body);
+        const result = await createMulti(body);
 
         response.success(res, 'success', result);
     } catch (err) {
@@ -63,7 +77,7 @@ router.post('/createMulti', async (req, res) => {
 
 router.post('/', async (req, res) => {
     try {
-        const result = await controller.getMany(req.body);
+        const result = await getMany(req.body);
 
         response.success(res, 'success', result);
     } catch (err) {
@@ -75,7 +89,7 @@ router.post('/', async (req, res) => {
 router.delete('/:id', async (req, res) => {
     const id = req.params.id;
     try {
-        const result = await controller.disable(id);
+        const result = await disable(id);
 
         response.success(res, 'success', result);
     } catch (err) {
@@ -87,7 +101,7 @@ router.delete('/:id', async (req, res) => {
 router.put('/', async (req, res) => {
     const data = req.body;
     try {
-        const result = await controller.update(data);
+        const result = await update(data);
 
         response.success(res, 'success', result);
     } catch (err) {
@@ -98,7 +112,7 @@ router.put('/', async (req, res) => {
 router.post('/import', async (req, res) => {
     const data = req.body;
     try {
-        const result = await controller.importData(data);
+        const result = await importData(data);
 
         response.success(res, 'success', result);
     } catch (err) {
@@ -110,7 +124,7 @@ router.post('/import', async (req, res) => {
 router.post('/createOne', async (req, res) => {
     const body = req.body;
     try {
-        const result = await controller.createOne(body);
+        const result = await createOne(body);
         response.success(res, 'success', result);
     } catch (err) {
         console.log(err.message);
@@ -122,7 +136,7 @@ router.get('/barcode', async (req, res) => {
     const quyen = req.header('quyen');
     console.log(quyen);
     try {
-        const result = await controller.getAllForBarCode(quyen);
+        const result = await getAllForBarCode(quyen);
         response.success(res, 'success', result);
     } catch (err) {
         console.log(err.message);
@@ -135,12 +149,14 @@ router.post('/addbarcode', async (req, res) => {
     const data = req.body;
     console.log(quyen);
     try {
-        const result = await controller.addbarcode(data);
+        const result = await addBarcode(data);
         response.success(res, 'success', result);
     } catch (err) {
         console.log(err.message);
         response.error(res, 'failed', 500);
     }
 });
+
+router.patch('/:id/gen-barcode', generateBarcode);
 
 module.exports = router;
