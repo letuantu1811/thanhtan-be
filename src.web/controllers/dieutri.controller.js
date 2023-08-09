@@ -194,6 +194,81 @@ module.exports = {
         }
     },
 
+    getAllToday_v2: async (pageSize, pageNum, date, isAdmin) => {
+        const limit = pageSize;
+        const offset = (pageNum - 1) * limit;
+        try {
+            const today = date || tzSaiGon();
+            const defaultIncludes = [
+                { model: giasuc, as: 'giasuc' },
+                { model: khachhang, as: 'khachhang' },
+            ];
+            if (!isAdmin) {
+                defaultIncludes.push({
+                    model: sanpham,
+                    where: { an: 0 },
+                });
+            }
+
+            const currentDateTreatments = await model.findAll({
+                include: [...defaultIncludes],
+                where: {
+                    where: sequelize.where(
+                        sequelize.fn('date', sequelize.col('phieudieutri.ngaytao')),
+                        '=',
+                        today,
+                    ),
+                    trangthai: 1,
+                },
+                order: [['ngaytao', 'DESC']],
+                limit,
+                offset
+            });
+
+            const total = await model.count({
+                include: [...defaultIncludes],
+                where: {
+                    where: sequelize.where(
+                        sequelize.fn('date', sequelize.col('phieudieutri.ngaytao')),
+                        '=',
+                        today,
+                    ),
+                    trangthai: 1,
+                }
+            });
+
+            const totalItems = total; 
+            const totalPages = Math.ceil(totalItems / pageSize);
+            const pagination = {
+                totalPages,
+                currentPage: pageNum,
+                pageSize,
+                totalItems,
+            }; 
+
+            const data = currentDateTreatments.map((treetMent) => {
+                const rawTreetMent = treetMent.toJSON();
+                const discountAmount = toNumber(rawTreetMent.discountAmount) || 0;
+                const addedDiscountAmount = toNumber(rawTreetMent.addedDiscountAmount) || 0;
+                const thanhtien = toNumber(rawTreetMent.thanhtien) || 0;
+
+                const orginTotalAmount =
+                    (thanhtien + discountAmount) / (1 - addedDiscountAmount / 100);
+
+                const reCalculateAmountExamForm = {
+                    ...rawTreetMent,
+                    discountAmount: 0,
+                    addedDiscountAmount: 0,
+                    thanhtien: orginTotalAmount,
+                };
+                return reCalculateAmountExamForm;
+            });
+            return { data, pagination };
+        } catch (error) {
+            return error;
+        }
+    },
+
     getAll: async (role) => {
         const obj = {
             limit: null,
@@ -270,6 +345,84 @@ module.exports = {
                 };
                 return reCalculateAmountExamForm;
             });
+        } catch (error) {
+            return error;
+        }
+    },
+
+    getReExamByDate_v2: async (pageSize, pageNum, date, isAdmin) => {
+        const limit = pageSize;
+        const offset = (pageNum - 1) * limit;
+        try {
+            const selectedDate = date || tzSaiGon();
+
+            const defaultIncludes = [
+                { model: giasuc, as: 'giasuc' },
+                { model: khachhang, as: 'khachhang' },
+            ];
+            if (!isAdmin) {
+                defaultIncludes.push({
+                    model: sanpham,
+                    where: { an: 0 },
+                });
+            }
+
+            const treetments = await model.findAll({
+                include: [...defaultIncludes],
+                where: {
+                    where: sequelize.where(
+                        sequelize.fn('date', sequelize.col('ngaytaikham')),
+                        '=',
+                        selectedDate,
+                    ),
+                    trangthai: 1,
+                },
+                order: [['ngaytao', 'DESC']],
+                limit,
+                offset
+            });
+
+            const total = await model.count({
+                include: [...defaultIncludes],
+                where: {
+                    where: sequelize.where(
+                        sequelize.fn('date', sequelize.col('ngaytaikham')),
+                        '=',
+                        selectedDate,
+                    ),
+                    trangthai: 1,
+                }
+            });
+
+            const totalItems = total; 
+            const totalPages = Math.ceil(totalItems / pageSize);
+    
+            const pagination = {
+                totalPages,
+                currentPage: pageNum,
+                pageSize,
+                totalItems,
+            }; 
+
+            const data = treetments.map((treetMent) => {
+                const rawTreetMent = treetMent.toJSON();
+                const discountAmount = toNumber(rawTreetMent.discountAmount) || 0;
+                const addedDiscountAmount = toNumber(rawTreetMent.addedDiscountAmount) || 0;
+                const thanhtien = toNumber(rawTreetMent.thanhtien) || 0;
+
+                const orginTotalAmount =
+                    (thanhtien + discountAmount) / (1 - addedDiscountAmount / 100);
+
+                const reCalculateAmountExamForm = {
+                    ...rawTreetMent,
+                    discountAmount: 0,
+                    addedDiscountAmount: 0,
+                    thanhtien: orginTotalAmount,
+                };
+
+                return reCalculateAmountExamForm;
+            });
+            return { data, pagination };
         } catch (error) {
             return error;
         }
@@ -641,7 +794,7 @@ module.exports = {
     },
 
     // Paging Pet Examination
-    getPetExaminationPaging: async (pageSize, pageNum, fromDate, toDate, nameCustomer, phoneCustomer, addressCustomer) => {
+    getPetExaminationPaging: async (pageSize, pageNum, fromDate, toDate, nameCustomer, phoneCustomer, addressCustomer, petName) => {
         const limit = pageSize;
         const offset = (pageNum - 1) * limit;
 
@@ -654,6 +807,7 @@ module.exports = {
         const name = nameCustomer ? nameCustomer : '';
         const phone = phoneCustomer ? phoneCustomer : '';
         const address = addressCustomer ? addressCustomer : '';
+        const pet = petName ? petName : '';
 
         try {
             const data = await giasuc.findAll({
@@ -687,7 +841,10 @@ module.exports = {
                     ngaytao: {
                         [Op.gte]: from_date,
                         [Op.lte]: to_date,
-                    }
+                    },
+                    ten: {
+                        [Op.like]: `%${pet}%`
+                    },
                 },
                 order: [['ngaytao', 'DESC']],
                 limit,
@@ -716,7 +873,10 @@ module.exports = {
                     ngaytao: {
                         [Op.gte]: from_date,
                         [Op.lte]: to_date,
-                    }
+                    },
+                    ten: {
+                        [Op.like]: `%${pet}%`
+                    },
                 }
             });
 

@@ -155,12 +155,18 @@ class CustomerController {
     }
 
     // Pagination customers
-    async getCustomers_v2(pageSize, pageNum, nameCustomer, phoneCustomer, addressCustomer) {
+    async getCustomers_v2(pageSize, pageNum, nameCustomer, phoneCustomer, addressCustomer, clienteles) {
         const limit = pageSize;
         const offset = (pageNum - 1) * limit;
         const name = nameCustomer ? nameCustomer : '';
         const phone = phoneCustomer ? phoneCustomer : '';
         const address = addressCustomer ? addressCustomer : '';
+        let clientelesParam = {};
+        if (clienteles) {
+            clientelesParam = {
+                nhomkhachhang_id: clienteles
+            }
+        }
         try {
             const customers = await khachhang.findAll({
                 include: [
@@ -204,7 +210,8 @@ class CustomerController {
                     },
                     diachi: {
                         [Op.like]: `%${address}%`,
-                    }
+                    },
+                    ...clientelesParam
                 },
             })
                 .map((customer) => customer.toJSON());
@@ -220,7 +227,8 @@ class CustomerController {
                     },
                     diachi: {
                         [Op.like]: `%${address}%`,
-                    }
+                    },
+                    ...clientelesParam
                 }
             });
     
