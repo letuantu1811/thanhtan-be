@@ -22,13 +22,11 @@ router.get("/v2", async(req, res) => {
     const isAdmin = role.toUpperCase() === 'ADMIN';
     const pageSize = parseInt(req.query.pageSize) || 20;
     const pageNum = parseInt(req.query.pageNum) || 1;
-    const nameCustomer = req.query.nameCustomer;
-    const phoneCustomer = req.query.phoneCustomer;
-    const addressCustomer = req.query.addressCustomer;
+    const paramsCustomer = req.query.paramsCustomer;
     const clienteles = req.query.clienteles;
 //3224
     try {
-        const results = await CustomerController.getCustomers_v2(pageSize, pageNum, nameCustomer, phoneCustomer, addressCustomer, clienteles);
+        const results = await CustomerController.getCustomers_v2(pageSize, pageNum, paramsCustomer, clienteles);
         response.success_v2(res, 'success', results.customers, results.pagination);
     } catch (err) {
         console.log('Error at getCustomers:', err.message);

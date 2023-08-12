@@ -794,7 +794,7 @@ module.exports = {
     },
 
     // Paging Pet Examination
-    getPetExaminationPaging: async (pageSize, pageNum, fromDate, toDate, nameCustomer, phoneCustomer, addressCustomer, petName) => {
+    getPetExaminationPaging: async (pageSize, pageNum, fromDate, toDate, paramsCustomer, petName) => {
         const limit = pageSize;
         const offset = (pageNum - 1) * limit;
 
@@ -804,9 +804,7 @@ module.exports = {
             from_date = moment(fromDate).startOf('day').format('YYYY-MM-DD HH:mm:ss');
             to_date = moment(toDate).format('YYYY-MM-DD HH:mm:ss');
         }
-        const name = nameCustomer ? nameCustomer : '';
-        const phone = phoneCustomer ? phoneCustomer : '';
-        const address = addressCustomer ? addressCustomer : '';
+        const customer = paramsCustomer ? paramsCustomer : '';
         const pet = petName ? petName : '';
 
         try {
@@ -816,15 +814,17 @@ module.exports = {
                         model: khachhang,
                         as: 'khachhang',
                         where: {
-                            sodienthoai: {
-                                [Op.like]: `%${phone}%`,
-                            },
-                            ten: {
-                                [Op.like]: `%${name}%`,
-                            },
-                            diachi: {
-                                [Op.like]: `%${address}%`,
-                            }
+                            [Op.or]: [
+                                {
+                                    sodienthoai: { [Op.like]: `%${customer}%` }
+                                },
+                                {
+                                    ten: { [Op.like]: `%${customer}%` }
+                                },
+                                {
+                                    diachi: { [Op.like]: `%${customer}%` }
+                                },
+                            ],
                         }
                     },
                     {
@@ -857,15 +857,17 @@ module.exports = {
                         model: khachhang,
                         as: 'khachhang',
                         where: {
-                            sodienthoai: {
-                                [Op.like]: `%${phone}%`,
-                            },
-                            ten: {
-                                [Op.like]: `%${name}%`,
-                            },
-                            diachi: {
-                                [Op.like]: `%${address}%`,
-                            }
+                            [Op.or]: [
+                                {
+                                    sodienthoai: { [Op.like]: `%${customer}%` }
+                                },
+                                {
+                                    ten: { [Op.like]: `%${customer}%` }
+                                },
+                                {
+                                    diachi: { [Op.like]: `%${customer}%` }
+                                },
+                            ],
                         }
                     }],
                 where: {
