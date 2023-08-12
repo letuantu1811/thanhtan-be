@@ -801,8 +801,8 @@ module.exports = {
         let from_date = moment().startOf('day').subtract(3, 'months').format('YYYY-MM-DD HH:mm:ss');
         let to_date = moment().format('YYYY-MM-DD HH:mm:ss');
         if (fromDate && toDate) {
-            from_date = moment(fromDate).startOf('day').format('YYYY-MM-DD HH:mm:ss');
-            to_date = moment(toDate).format('YYYY-MM-DD HH:mm:ss');
+            from_date = moment(parseInt(fromDate)).startOf('day').format('YYYY-MM-DD HH:mm:ss');
+            to_date = moment(parseInt(toDate)).format('YYYY-MM-DD HH:mm:ss');
         }
         const customer = paramsCustomer ? paramsCustomer : '';
         const pet = petName ? petName : '';
