@@ -194,14 +194,37 @@ module.exports = {
         }
     },
 
-    getAllToday_v2: async (pageSize, pageNum, date, isAdmin) => {
+    getAllToday_v2: async (pageSize, pageNum, date, paramsCustomer, petName, isAdmin) => {
         const limit = pageSize;
         const offset = (pageNum - 1) * limit;
+        const customer = paramsCustomer ? paramsCustomer : '';
+        const pet = petName ? petName : '';
         try {
             const today = date || tzSaiGon();
             const defaultIncludes = [
-                { model: giasuc, as: 'giasuc' },
-                { model: khachhang, as: 'khachhang' },
+                { model: giasuc,
+                    as: 'giasuc',
+                    where: {
+                        ten: { [Op.like]: `%${pet}%` },
+                    }
+                },
+                { 
+                    model: khachhang, 
+                    as: 'khachhang',
+                    where: {
+                        [Op.or]: [
+                            {
+                                sodienthoai: { [Op.like]: `%${customer}%` }
+                            },
+                            {
+                                ten: { [Op.like]: `%${customer}%` }
+                            },
+                            {
+                                diachi: { [Op.like]: `%${customer}%` }
+                            }
+                        ],
+                    }                
+                },
             ];
             if (!isAdmin) {
                 defaultIncludes.push({
@@ -350,15 +373,37 @@ module.exports = {
         }
     },
 
-    getReExamByDate_v2: async (pageSize, pageNum, date, isAdmin) => {
+    getReExamByDate_v2: async (pageSize, pageNum, date, isAdmin, paramsCustomer, petName) => {
+        const customer = paramsCustomer ? paramsCustomer : '';
+        const pet = petName ? petName : '';
         const limit = pageSize;
         const offset = (pageNum - 1) * limit;
         try {
             const selectedDate = date || tzSaiGon();
-
             const defaultIncludes = [
-                { model: giasuc, as: 'giasuc' },
-                { model: khachhang, as: 'khachhang' },
+                { model: giasuc,
+                    as: 'giasuc',
+                    where: {
+                        ten: { [Op.like]: `%${pet}%` },
+                    }
+                },
+                { 
+                    model: khachhang, 
+                    as: 'khachhang',
+                    where: {
+                        [Op.or]: [
+                            {
+                                sodienthoai: { [Op.like]: `%${customer}%` }
+                            },
+                            {
+                                ten: { [Op.like]: `%${customer}%` }
+                            },
+                            {
+                                diachi: { [Op.like]: `%${customer}%` }
+                            }
+                        ],
+                    }                
+                },
             ];
             if (!isAdmin) {
                 defaultIncludes.push({

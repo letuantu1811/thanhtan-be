@@ -48,11 +48,13 @@ router.get('/v2', async (req, res) => {
     const role = req.header('quyen');
     const isAdmin = ['ADMIN', 'MANAGER'].includes(role.toUpperCase());
     const dateselect = req.query.date;
+    const paramsCustomer = req.query.paramsCustomer;
+    const petName = req.query.petName;
     const pageSize = parseInt(req.query.pageSize) || 10;
     const pageNum = parseInt(req.query.pageNum) || 1;
 
     try {
-        const result = await dieutri.getAllToday_v2(pageSize, pageNum, dateselect, isAdmin);
+        const result = await dieutri.getAllToday_v2(pageSize, pageNum, dateselect, paramsCustomer, petName, isAdmin);
 
         const arr = [];
         if (!isAdmin) {
@@ -124,12 +126,14 @@ router.get('/reexam', async (req, res) => {
 router.get('/reexam_v2', async (req, res) => {
     const pageSize = parseInt(req.query.pageSize) || 10;
     const pageNum = parseInt(req.query.pageNum) || 1;
+    const paramsCustomer = req.query.paramsCustomer;
+    const petName = req.query.petName;
 
     const role = req.header('quyen');
     const isAdmin = ['ADMIN', 'MANAGER'].includes(role.toUpperCase());
     const date = req.query.date;
     try {
-        const result = await dieutri.getReExamByDate_v2(pageSize, pageNum, date, isAdmin);
+        const result = await dieutri.getReExamByDate_v2(pageSize, pageNum, date, isAdmin, paramsCustomer, petName);
         const arr = [];
         if (!isAdmin) {
             for (let index = 0; index < result.data.length; index++) {
