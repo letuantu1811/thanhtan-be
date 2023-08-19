@@ -7,6 +7,7 @@ const phieudieutri = require("../../database/models/phieudieutri");
 const Thanhvien = require("../../database/models/thanhvien");
 const Donvitinh = require("../../database/models/donvitinh");
 const Nhomsanpham = require("../../database/models/nhomsanpham");
+const { Op } = require('sequelize');
 
 router.get("/", async(req, res) => {
     try {
@@ -32,6 +33,84 @@ router.get("/", async(req, res) => {
         response.error(res, "failed", 500)
     }
 });
+
+// Pagination setting
+router.get("/v2", async(req, res) => {
+    const pageNum = parseInt(req.query.pageNum) || 1;
+
+    const limit = parseInt(req.query.pageSize) || 20;
+    const offset = (parseInt(pageNum) - 1) * limit;
+    const product_name = req.query.productName || '';
+    const category_id = !req.query.category ? {} : {nhomsanpham_id: parseInt(req.query.category)};
+
+    try {
+        const result = await sanpham.findAll({
+            include: [{
+                    attributes: ['id', 'ten'],
+                    model: Donvitinh,
+                    as: 'donvitinh'
+                },
+                {
+                    attributes: ['id', 'ten'],
+                    model: Nhomsanpham
+                }
+            ],
+            where: {
+                trangthai: true,
+                [Op.or]: [
+                    {
+                        ten: { [Op.like]: `%${product_name}%` }
+                    },
+                    {
+                        tenthaythe: { [Op.like]: `%${product_name}%` }
+                    }
+                ],
+                ...category_id,
+            },
+            limit,
+            offset
+        });
+        const total = await sanpham.count({
+            include: [{
+                    attributes: ['id', 'ten'],
+                    model: Donvitinh,
+                    as: 'donvitinh'
+                },
+                {
+                    attributes: ['id', 'ten'],
+                    model: Nhomsanpham
+                }
+            ],
+            where: {
+                trangthai: true,
+                [Op.or]: [
+                    {
+                        ten: { [Op.like]: `%${product_name}%` }
+                    },
+                    {
+                        tenthaythe: { [Op.like]: `%${product_name}%` }
+                    }
+                ],
+                ...category_id
+            }
+        });
+
+        const totalItems = total; 
+        const totalPages = Math.ceil(totalItems / limit);
+        const pagination = {
+            totalPages,
+            currentPage: pageNum,
+            limit,
+            totalItems,
+        }; 
+
+        response.success_v2(res, "success", result, pagination)
+    } catch (err) {
+        console.log(err.message);
+        response.error(res, "failed", 500)
+    }
+});
+
 router.get("/shows", async(req, res) => {
     try {
         const result = await sanpham.findAll({

@@ -3,6 +3,7 @@ const express = require('express');
 const router = express.Router();
 const {
     getAll,
+    getAll_v2,
     getInventory,
     getAllMedicines,
     create,
@@ -24,6 +25,23 @@ router.get('/', async (req, res) => {
         const result = await getAll(quyen);
         //
         response.success(res, 'success', result);
+    } catch (err) {
+        console.log(err.message);
+        response.error(res, 'failed', 500);
+    }
+});
+
+//Pagination Products
+router.get('/v2', async (req, res) => {
+    const quyen = req.header('quyen');
+    const pageSize = parseInt(req.query.pageSize) || 20;
+    const pageNum = parseInt(req.query.pageNum) || 1;
+    const productName = req.query.productName;
+    const category = req.query.category;
+    try {
+        const result = await getAll_v2(quyen, pageSize, pageNum, productName, category);
+        //
+        response.success_v2(res, 'success', result.product, result.pagination);
     } catch (err) {
         console.log(err.message);
         response.error(res, 'failed', 500);

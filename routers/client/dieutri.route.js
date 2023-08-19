@@ -291,6 +291,25 @@ router.get('/getExaminationWithRabisin', async (req, res) => {
     }
 });
 
+// Pagination getExaminationWithRabisin
+router.get('/getExaminationWithRabisin_v2', async (req, res) => {
+    const pageSize = parseInt(req.query.pageSize) || 20;
+    const pageNum = parseInt(req.query.pageNum) || 1;
+    const fromDate = req.query.fromDate;
+    const toDate = req.query.toDate;
+    const paramsCustomer = req.query.paramsCustomer;
+    const petName = req.query.petName;
+
+    try {
+        const result = await truyxuatbenhan.getExaminationWithRabisin_v2(pageSize, pageNum, fromDate, toDate, paramsCustomer, petName);
+
+        response.success_v2(res, 'success', result.data, result.pagination);
+    } catch (err) {
+        console.log(err.message);
+        response.error(res, 'failed', 500);
+    }
+});
+
 router.get('/getExaminationWithMedicin/:id', async (req, res) => {
     const id = req.params.id;
     try {

@@ -263,6 +263,91 @@ module.exports = {
         }
     },
 
+    // pagination products
+    getAll_v2: async (quyen, pageSize, pageNum, productName, category) => {
+        const role = quyen ? quyen.toUpperCase() : '';
+        const isViewedNonRestricted = ['ADMIN', 'MANAGER'].includes(role);
+        const an = isViewedNonRestricted ? {} : { an: 1 };
+        const limit = pageSize;
+        const offset = (pageNum - 1) * limit;
+        const product_name = productName ? productName : '';       
+        const category_id = !category ? {} : { nhomsanpham_id: parseInt(category) };
+        const defaultIncludes = [
+            {
+                model: donvitinh,
+                as: 'donvitinh',
+                require: true,
+                attributes: {
+                    exclude: ['trangthai', 'ngaytao', 'ngaysua'],
+                },
+            },
+            {
+                model: donvitinh,
+                as: 'donviquydoi',
+                require: true,
+                attributes: {
+                    exclude: ['trangthai', 'ngaytao', 'ngaysua'],
+                },
+            },
+            {
+                model: nhomsanpham,
+                require: true,
+                attributes: {
+                    exclude: ['trangthai', 'ngaytao', 'ngaysua'],
+                },
+            },
+        ]
+        try {
+            const product = await sanpham.findAll({
+                include: [...defaultIncludes],
+                where: {
+                    trangthai: 1,
+                    ...an,
+                    [Op.or]: [
+                        {
+                            ten: { [Op.like]: `%${product_name}%` }
+                        },
+                        {
+                            tenthaythe: { [Op.like]: `%${product_name}%` }
+                        }
+                    ],
+                    ...category_id
+                },
+                order: [['ten', 'ASC']],
+                limit,
+                offset
+            });
+            const total = await sanpham.count({
+                include: [...defaultIncludes],
+                where: {
+                    trangthai: 1,
+                    ...an,
+                    [Op.or]: [
+                        {
+                            ten: { [Op.like]: `%${product_name}%` }
+                        },
+                        {
+                            tenthaythe: { [Op.like]: `%${product_name}%` }
+                        }
+                    ],
+                    ...category_id
+                },
+            });
+            const totalItems = total; 
+            const totalPages = Math.ceil(totalItems / pageSize);
+            const pagination = {
+                totalPages,
+                currentPage: pageNum,
+                pageSize,
+                totalItems,
+            }; 
+            return { product, pagination };
+        } catch (error) {
+            return error;
+        }
+    },
+
+
     getAllHiddenProduct: async () => {
         try {
             return await sanpham.findAll({
