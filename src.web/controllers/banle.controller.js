@@ -11,6 +11,22 @@ const getOrderList = async (req, res) => {
     }
 };
 
+// list order paginantion
+const getOrderList_v2 = async (req, res) => {
+    const pageSize = parseInt(req.query.pageSize) || 20;
+    const pageNum = parseInt(req.query.pageNum) || 1;
+    const customerName = req.query.customerName;
+    const fromDate = req.query.fromDate;
+    const toDate = req.query.toDate;
+    try {
+        const result = await OrderService.getOrderList_v2(pageSize, pageNum, customerName, fromDate, toDate);
+        return response.success_v2(res, 'success', result.rawOrderList, result.pagination);
+    } catch (error) {
+        console.log('Error at get getOrderList', error);
+        return response.error(res, error.message, 500);
+    }
+};
+
 const createOrder = async (req, res) => {
     try {
         const result = await OrderService.createOrder(req.body);
@@ -37,5 +53,6 @@ const printBill = async (req, res) => {
 };
 
 module.exports.getOrderList = getOrderList;
+module.exports.getOrderList_v2 = getOrderList_v2;
 module.exports.createOrder = createOrder;
 module.exports.printBill = printBill;
