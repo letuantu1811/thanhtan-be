@@ -16,6 +16,8 @@ const { getCurrentDate } = require('../../utils/formatDate');
 const { ENUM, PRINT_MODE } = require('../../utils');
 const { localDate } = require('../../utils/localDate');
 const { BadRequestException } = require('../../utils/api.res/api.error');
+const moment = require('moment');
+const { Op } = require('sequelize');
 
 class OrderService {
     async getOrderList() {
@@ -69,6 +71,104 @@ class OrderService {
         });
 
         return rawOrderList;
+    }
+
+    // list order pagination
+    async getOrderList_v2(pageSize, pageNum, customerName, fromDate, toDate) {
+        const limit = pageSize;
+        const offset = (pageNum - 1) * limit;
+        const customer = customerName ? customerName : '';
+
+        let from_date = moment().startOf('day').subtract(3, 'months').format('YYYY-MM-DD HH:mm:ss');
+        let to_date = moment().format('YYYY-MM-DD HH:mm:ss');
+        if (fromDate && toDate) {
+            from_date = moment(parseInt(fromDate)).startOf('day').format('YYYY-MM-DD HH:mm:ss');
+            to_date = moment(parseInt(toDate)).format('YYYY-MM-DD HH:mm:ss');
+        }
+
+        const defaultIncludes = [
+            {
+                model: Product,
+                as: 'sanpham',
+                include: {
+                    model: Unit,
+                    as: 'donvitinh',
+                    attributes: { include: ['id', 'ten'] },
+                },
+                attributes: { exclude: ['nhacungcap', 'nguoitao_id', 'trangthai'] },
+            },
+            {
+                model: Customer,
+                as: 'khachhang',
+            },
+            {
+                attributes: { include: ['id', 'tendaydu', 'quyen'] },
+                model: User,
+                as: 'nguoiban',
+            }
+        ];
+        try {
+            const orderEntityList = await Order.findAll({
+                include: [...defaultIncludes],
+                attributes: { exclude: ['ngaysua', 'trangthai'] },
+                order: [['ngaytao', 'DESC']],
+                where: {
+                    ten: { [Op.like]: `%${customer}%`},
+                    trangthai: ENUM.ENABLE,
+                    ngaytao: {
+                        [Op.gte]: from_date,
+                        [Op.lte]: to_date,
+                    },
+                },
+                limit,
+                offset
+            });
+
+            const total = await Order.count({
+                include: [...defaultIncludes],
+                where: {
+                    trangthai: ENUM.ENABLE,
+                    ten: { [Op.like]: `%${customer}%`},
+                    ngaytao: {
+                        [Op.gte]: from_date,
+                        [Op.lte]: to_date,
+                    },
+                }
+            });
+
+            const totalItems = total; 
+            const totalPages = Math.ceil(totalItems / pageSize);
+            const pagination = {
+                totalPages,
+                currentPage: pageNum,
+                pageSize,
+                totalItems,
+            }; 
+    
+            const rawOrderList = orderEntityList.map((orderEntity) => {
+                const rawOrder = orderEntity.toJSON();
+                const products = rawOrder.sanpham.map((product) => {
+                    const banle_sanpham = product.banle_sanpham || {};
+                    const convertedProduct = {
+                        productPrice: toNumber(banle_sanpham.productPrice) || 0,
+                        discountAmount: toNumber(banle_sanpham.discountAmount) || 0,
+                    };
+                    return {
+                        ...product,
+                        banle_sanpham: Object.assign(banle_sanpham, convertedProduct),
+                    };
+                });
+                return {
+                    ...rawOrder,
+                    discountAmount: toNumber(rawOrder.discountAmount) || 0,
+                    sanpham: products,
+                };
+            }); 
+            return { rawOrderList, pagination };
+        } catch(error) {
+            console.log(error);
+            throw new Error();
+        }
     }
 
     convertDetails(details, banleID) {

@@ -155,12 +155,16 @@ class CustomerController {
     }
 
     // Pagination customers
-    async getCustomers_v2(pageSize, pageNum, nameCustomer, phoneCustomer, addressCustomer) {
+    async getCustomers_v2(pageSize, pageNum, paramsCustomer, clienteles) {
         const limit = pageSize;
         const offset = (pageNum - 1) * limit;
-        const name = nameCustomer ? nameCustomer : '';
-        const phone = phoneCustomer ? phoneCustomer : '';
-        const address = addressCustomer ? addressCustomer : '';
+        const customer = paramsCustomer ? paramsCustomer : '';
+        let clientelesParam = {};
+        if (clienteles) {
+            clientelesParam = {
+                nhomkhachhang_id: clienteles
+            }
+        }
         try {
             const customers = await khachhang.findAll({
                 include: [
@@ -196,15 +200,18 @@ class CustomerController {
                 offset,
                 where: {
                     trangthai: true,
-                    sodienthoai: {
-                        [Op.like]: `%${phone}%`,
-                    },
-                    ten: {
-                        [Op.like]: `%${name}%`,
-                    },
-                    diachi: {
-                        [Op.like]: `%${address}%`,
-                    }
+                    [Op.or]: [
+                        {
+                            sodienthoai: { [Op.like]: `%${customer}%` }
+                        },
+                        {
+                            ten: { [Op.like]: `%${customer}%` }
+                        },
+                        {
+                            diachi: { [Op.like]: `%${customer}%` }
+                        },
+                    ],              
+                    ...clientelesParam
                 },
             })
                 .map((customer) => customer.toJSON());
@@ -212,15 +219,18 @@ class CustomerController {
             const total = await khachhang.count({
                 where: {
                     trangthai: true,
-                    sodienthoai: {
-                        [Op.like]: `%${phone}%`,
-                    },
-                    ten: {
-                        [Op.like]: `%${name}%`,
-                    },
-                    diachi: {
-                        [Op.like]: `%${address}%`,
-                    }
+                    [Op.or]: [
+                        {
+                            sodienthoai: { [Op.like]: `%${customer}%` }
+                        },
+                        {
+                            ten: { [Op.like]: `%${customer}%` }
+                        },
+                        {
+                            diachi: { [Op.like]: `%${customer}%` }
+                        },
+                    ],  
+                    ...clientelesParam
                 }
             });
     
