@@ -348,15 +348,13 @@ router.get('/getPetExamination_v2', async (req, res) => {
     const role = req.header('quyen');
     const pageSize = parseInt(req.query.pageSize) || 20;
     const pageNum = parseInt(req.query.pageNum) || 1;
-    const fromDate = req.query.fromDate;
-    const toDate = req.query.toDate;
     const paramsCustomer = req.query.paramsCustomer;
     const petName = req.query.petName;
 
     try {
         if (role.toUpperCase() === 'USER') {
             const arr = [];
-            const temp = await dieutri.getPetExaminationPaging(150, 1, fromDate, toDate, paramsCustomer, petName);
+            const temp = await dieutri.getPetExaminationPaging(150, 1, paramsCustomer, petName);
             const results = temp.data;
             for (let index = 0; index < results.length; index++) {
                 let count = 0;
@@ -384,7 +382,7 @@ router.get('/getPetExamination_v2', async (req, res) => {
             return;
         }
 
-        const result = await dieutri.getPetExaminationPaging(pageSize, pageNum, fromDate, toDate, paramsCustomer, petName);        
+        const result = await dieutri.getPetExaminationPaging(pageSize, pageNum, paramsCustomer, petName);        
         response.success_v2(res, 'success', result.data, result.pagination);
     } catch (err) {
         console.log(err.message);

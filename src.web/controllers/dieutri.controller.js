@@ -839,16 +839,10 @@ module.exports = {
     },
 
     // Paging Pet Examination
-    getPetExaminationPaging: async (pageSize, pageNum, fromDate, toDate, paramsCustomer, petName) => {
+    getPetExaminationPaging: async (pageSize, pageNum, paramsCustomer, petName) => {
         const limit = pageSize;
         const offset = (pageNum - 1) * limit;
 
-        let from_date = moment().startOf('day').subtract(3, 'months').format('YYYY-MM-DD HH:mm:ss');
-        let to_date = moment().format('YYYY-MM-DD HH:mm:ss');
-        if (fromDate && toDate) {
-            from_date = moment(parseInt(fromDate)).startOf('day').format('YYYY-MM-DD HH:mm:ss');
-            to_date = moment(parseInt(toDate)).format('YYYY-MM-DD HH:mm:ss');
-        }
         const customer = paramsCustomer ? paramsCustomer : '';
         const pet = petName ? petName : '';
 
@@ -883,10 +877,6 @@ module.exports = {
                 ],
                 where: {
                     trangthai: 1,
-                    ngaytao: {
-                        [Op.gte]: from_date,
-                        [Op.lte]: to_date,
-                    },
                     ten: {
                         [Op.like]: `%${pet}%`
                     },
@@ -917,10 +907,6 @@ module.exports = {
                     }],
                 where: {
                     trangthai: 1,
-                    ngaytao: {
-                        [Op.gte]: from_date,
-                        [Op.lte]: to_date,
-                    },
                     ten: {
                         [Op.like]: `%${pet}%`
                     },
