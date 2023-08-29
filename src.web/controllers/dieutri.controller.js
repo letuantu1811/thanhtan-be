@@ -839,11 +839,13 @@ module.exports = {
     },
 
     // Paging Pet Examination
-    getPetExaminationPaging: async (pageSize, pageNum, paramsCustomer, petName) => {
+    getPetExaminationPaging: async (pageSize, pageNum, phone, name, address, petName) => {
         const limit = pageSize;
         const offset = (pageNum - 1) * limit;
 
-        const customer = paramsCustomer ? paramsCustomer : '';
+        const phoneParam = phone ? phone : '';
+        const nameParam = name ? name : '';
+        const addressParam = address ? address : '';
         const pet = petName ? petName : '';
 
         try {
@@ -852,20 +854,18 @@ module.exports = {
                     {
                         model: khachhang,
                         as: 'khachhang',
-                        where: {
-                            [Op.or]: [
+                        where: [
                                 {
-                                    sodienthoai: { [Op.like]: `%${customer}%` }
+                                    sodienthoai: { [Op.like]: `%${phoneParam}%` }
                                 },
                                 {
-                                    ten: { [Op.like]: `%${customer}%` }
+                                    ten: { [Op.like]: `%${nameParam}%` }
                                 },
                                 {
-                                    diachi: { [Op.like]: `%${customer}%` }
-                                },
+                                    diachi: { [Op.like]: `%${addressParam}%` }
+                                },              
                             ],
-                        }
-                    },
+                        },
                     {
                         model: phieudieutri
                     },
@@ -891,19 +891,17 @@ module.exports = {
                     {
                         model: khachhang,
                         as: 'khachhang',
-                        where: {
-                            [Op.or]: [
-                                {
-                                    sodienthoai: { [Op.like]: `%${customer}%` }
-                                },
-                                {
-                                    ten: { [Op.like]: `%${customer}%` }
-                                },
-                                {
-                                    diachi: { [Op.like]: `%${customer}%` }
-                                },
-                            ],
-                        }
+                        where: [
+                            {
+                                sodienthoai: { [Op.like]: `%${phoneParam}%` }
+                            },
+                            {
+                                ten: { [Op.like]: `%${nameParam}%` }
+                            },
+                            {
+                                diachi: { [Op.like]: `%${addressParam}%` }
+                            },              
+                        ],
                     }],
                 where: {
                     trangthai: 1,
