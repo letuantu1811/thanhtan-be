@@ -155,10 +155,12 @@ class CustomerController {
     }
 
     // Pagination customers
-    async getCustomers_v2(pageSize, pageNum, paramsCustomer, clienteles) {
+    async getCustomers_v2(pageSize, pageNum, phone, name, address, clienteles) {
         const limit = pageSize;
         const offset = (pageNum - 1) * limit;
-        const customer = paramsCustomer ? paramsCustomer : '';
+        const phoneParam = phone ? phone : '';
+        const nameParam = name ? name : '';
+        const addressParam = address ? address : '';
         let clientelesParam = {};
         if (clienteles) {
             clientelesParam = {
@@ -200,17 +202,9 @@ class CustomerController {
                 offset,
                 where: {
                     trangthai: true,
-                    [Op.or]: [
-                        {
-                            sodienthoai: { [Op.like]: `%${customer}%` }
-                        },
-                        {
-                            ten: { [Op.like]: `%${customer}%` }
-                        },
-                        {
-                            diachi: { [Op.like]: `%${customer}%` }
-                        },
-                    ],              
+                    sodienthoai: { [Op.like]: `%${phoneParam}%` },
+                    ten: { [Op.like]: `%${nameParam}%` },
+                    diachi: { [Op.like]: `%${addressParam}%` },                         
                     ...clientelesParam
                 },
             })
@@ -219,17 +213,9 @@ class CustomerController {
             const total = await khachhang.count({
                 where: {
                     trangthai: true,
-                    [Op.or]: [
-                        {
-                            sodienthoai: { [Op.like]: `%${customer}%` }
-                        },
-                        {
-                            ten: { [Op.like]: `%${customer}%` }
-                        },
-                        {
-                            diachi: { [Op.like]: `%${customer}%` }
-                        },
-                    ],  
+                    sodienthoai: { [Op.like]: `%${phoneParam}%` },
+                    ten: { [Op.like]: `%${nameParam}%` },
+                    diachi: { [Op.like]: `%${addressParam}%` },                          
                     ...clientelesParam
                 }
             });
