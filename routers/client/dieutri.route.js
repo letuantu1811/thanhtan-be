@@ -321,6 +321,21 @@ router.get('/getExaminationWithMedicin/:id', async (req, res) => {
     }
 });
 
+router.get('/getExaminationWithMedicin_v2/:id', async (req, res) => {
+    const id = req.params.id;
+    const pageSize = parseInt(req.query.pageSize) || 10;
+    const pageNum = parseInt(req.query.pageNum) || 1;
+    const fromDate = req.query.fromDate;
+    const toDate = req.query.toDate;
+    try {
+        const result = await truyxuatbenhan.getExaminationWithMedicinName_v2(id, pageSize, pageNum, fromDate, toDate);
+        response.success_v2(res, 'success', result.data, result.pagination);
+    } catch (err) {
+        console.log(err.message);
+        response.error(res, 'failed', 500);
+    }
+});
+
 router.get('/getPetExamination', async (req, res) => {
     const role = req.header('quyen');
     const arr = [];

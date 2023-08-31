@@ -270,7 +270,19 @@ module.exports = {
         const an = isViewedNonRestricted ? {} : { an: 1 };
         const limit = pageSize;
         const offset = (pageNum - 1) * limit;
-        const product_name = productName ? productName : '';       
+        const product_name = productName ? productName : ''; 
+        const product_name_by_rule = isViewedNonRestricted ? {
+            [Op.or]: [
+                {
+                    ten: { [Op.like]: `%${product_name}%` }
+                },
+                {
+                    tenthaythe: { [Op.like]: `%${product_name}%` }
+                }
+            ],
+        } : {
+            tenthaythe: { [Op.like]: `%${product_name}%` }
+        };      
         const category_id = !category ? {} : { nhomsanpham_id: parseInt(category) };
         const defaultIncludes = [
             {
@@ -303,14 +315,7 @@ module.exports = {
                 where: {
                     trangthai: 1,
                     ...an,
-                    [Op.or]: [
-                        {
-                            ten: { [Op.like]: `%${product_name}%` }
-                        },
-                        {
-                            tenthaythe: { [Op.like]: `%${product_name}%` }
-                        }
-                    ],
+                    ...product_name_by_rule,
                     ...category_id
                 },
                 order: [['ten', 'ASC']],
@@ -322,14 +327,7 @@ module.exports = {
                 where: {
                     trangthai: 1,
                     ...an,
-                    [Op.or]: [
-                        {
-                            ten: { [Op.like]: `%${product_name}%` }
-                        },
-                        {
-                            tenthaythe: { [Op.like]: `%${product_name}%` }
-                        }
-                    ],
+                    ...product_name_by_rule,
                     ...category_id
                 },
             });

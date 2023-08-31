@@ -155,4 +155,79 @@ module.exports = {
             throw new Error();
         }
     },
+
+    getExaminationWithMedicinName_v2: async (id, pageSize, pageNum, fromDate, toDate) => {
+        const limit = pageSize;
+        const offset = (pageNum - 1) * limit;
+        let from_date = moment().startOf('day').subtract(1, 'months').format('YYYY-MM-DD HH:mm:ss');
+        let to_date = moment().format('YYYY-MM-DD HH:mm:ss');
+        if (fromDate && toDate) {
+            from_date = moment(parseInt(fromDate)).startOf('day').format('YYYY-MM-DD HH:mm:ss');
+            to_date = moment(parseInt(toDate)).format('YYYY-MM-DD HH:mm:ss');
+        }
+        let object = {};
+        if (id !== 'null') {
+            object = {
+                where: {
+                    id: id,
+                },
+            };
+        }
+        try {
+            const data = await phieudieutri.findAll({
+                include: [
+                    {
+                        model: giasuc,
+                    },
+                    {
+                        model: sanpham,
+                        ...object,
+                        require: true,
+                    },
+                ],
+                where: {
+                    trangthai: 1,
+                    ngaytao: {
+                        [Op.gte]: from_date,
+                        [Op.lte]: to_date,
+                    },
+                },
+                order: [['ngaytao', 'DESC']],
+                limit,
+                offset
+            });
+            const total = await phieudieutri.count({
+                include: [
+                    {
+                        model: giasuc,
+                    },
+                    {
+                        model: sanpham,
+                        ...object,
+                        require: true,
+                    },
+                ],
+                where: {
+                    trangthai: 1,
+                    ngaytao: {
+                        [Op.gte]: from_date,
+                        [Op.lte]: to_date,
+                    },
+                },
+            });
+
+            const totalItems = total; 
+            const totalPages = Math.ceil(totalItems / pageSize);
+            const pagination = {
+                totalPages,
+                currentPage: pageNum,
+                pageSize,
+                totalItems,
+            }; 
+            return { data, pagination };           
+        } catch (error) {
+            console.log(error);
+            throw new Error();
+        }
+    },
 };
