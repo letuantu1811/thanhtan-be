@@ -13,14 +13,14 @@ const getOrderList = async (req, res) => {
 
 // list order paginantion
 const getOrderList_v2 = async (req, res) => {
-    const pageSize = parseInt(req.query.pageSize) || 20;
+    const pageSize = parseInt(req.query.pageSize) || 10;
     const pageNum = parseInt(req.query.pageNum) || 1;
     const customerName = req.query.customerName;
     const fromDate = req.query.fromDate;
     const toDate = req.query.toDate;
     try {
         const result = await OrderService.getOrderList_v2(pageSize, pageNum, customerName, fromDate, toDate);
-        return response.success_v2(res, 'success', result.rawOrderList, result.pagination);
+        return response.success_v2(res, 'success', result.data, result.pagination);
     } catch (error) {
         console.log('Error at get getOrderList', error);
         return response.error(res, error.message, 500);

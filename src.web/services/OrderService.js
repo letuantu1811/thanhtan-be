@@ -75,8 +75,6 @@ class OrderService {
 
     // list order pagination
     async getOrderList_v2(pageSize, pageNum, customerName, fromDate, toDate) {
-        const limit = pageSize;
-        const offset = (pageNum - 1) * limit;
         const customer = customerName ? customerName : '';
 
         let from_date = moment().startOf('day').subtract(3, 'months').format('YYYY-MM-DD HH:mm:ss');
@@ -119,32 +117,9 @@ class OrderService {
                         [Op.gte]: from_date,
                         [Op.lte]: to_date,
                     },
-                },
-                limit,
-                offset
-            });
-
-            const total = await Order.count({
-                include: [...defaultIncludes],
-                where: {
-                    trangthai: ENUM.ENABLE,
-                    ten: { [Op.like]: `%${customer}%`},
-                    ngaytao: {
-                        [Op.gte]: from_date,
-                        [Op.lte]: to_date,
-                    },
                 }
             });
-
-            const totalItems = total; 
-            const totalPages = Math.ceil(totalItems / pageSize);
-            const pagination = {
-                totalPages,
-                currentPage: pageNum,
-                pageSize,
-                totalItems,
-            }; 
-    
+  
             const rawOrderList = orderEntityList.map((orderEntity) => {
                 const rawOrder = orderEntity.toJSON();
                 const products = rawOrder.sanpham.map((product) => {
@@ -164,7 +139,19 @@ class OrderService {
                     sanpham: products,
                 };
             }); 
-            return { rawOrderList, pagination };
+            const totalItems = rawOrderList.length; 
+            const totalPages =  Math.ceil(totalItems / pageSize);
+            const start = (pageNum - 1) * pageSize;
+            const end = pageSize * pageNum - 1;
+            const data = rawOrderList.slice(start, end);
+
+            const pagination = {
+                totalPages,
+                currentPage: pageNum,
+                pageSize,
+                totalItems,
+            };  
+            return { data, pagination };
         } catch(error) {
             console.log(error);
             throw new Error();
