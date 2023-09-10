@@ -21,6 +21,9 @@ const phieudieutri = db.define(
         khachhang_id: {
             type: Sequelize.INTEGER,
         },
+        typedieutri_id: {
+            type: Sequelize.INTEGER,
+        },
         bacsi_id: {
             type: Sequelize.INTEGER,
         },
@@ -34,6 +37,9 @@ const phieudieutri = db.define(
             type: Sequelize.STRING,
         },
         chandoan: {
+            type: Sequelize.STRING,
+        },
+        tiensubenh: {
             type: Sequelize.STRING,
         },
         ghichu: {
@@ -61,7 +67,9 @@ const phieudieutri = db.define(
             default: 0,
             allowNull: true,
         },
-
+        payment_id: {
+            type: Sequelize.INTEGER,
+        },
         thanhtien: {
             type: Sequelize.DECIMAL,
         },

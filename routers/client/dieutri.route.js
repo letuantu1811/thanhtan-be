@@ -420,6 +420,19 @@ router.get('/getPetMedicalHistory/:id', async (req, res) => {
     }
 });
 
+router.get('/getPetMedicalHistory_v2/:id', async (req, res) => {
+    const role = req.header('quyen');
+    const isAdmin = role.toUpperCase() === 'ADMIN';
+    const petID = req.params.id;
+    try {
+        const result = await dieutri.getPetMedicalHistory_v2(petID, isAdmin);
+        response.success(res, 'success', result);
+    } catch (err) {
+        console.log(err.message);
+        response.error(res, 'failed', 500);
+    }
+});
+
 router.get('/isExisted/:id', async (req, res) => {
     const petID = req.params.id;
     try {

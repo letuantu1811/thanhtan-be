@@ -162,6 +162,8 @@ async function create_phieudieutri(body) {
             dataikham: body.taikham ? 1 : null,
             trieuchung: body.trieuchung ? body.trieuchung.trim() : '',
             chandoan: body.chandoan,
+            tiensubenh: body.tiensubenh,
+            typedieutri_id: body.typeDieuTriID,
             ghichu: body.ghichu,
             thanhtien: body.thanhtien,
             ngaytaikham: body.ngaytaikham,
@@ -170,6 +172,7 @@ async function create_phieudieutri(body) {
             bacsi_id: body.bacsiID,
             noidung: JSON.stringify(body),
             ngaytao: body.ngaykham,
+            payment_id: body.paymentId,
             discountAmount: toNumber(body.discountAmount) || 0,
             addedDiscountAmount: toNumber(body.addedDiscountAmount) || 0,
         })

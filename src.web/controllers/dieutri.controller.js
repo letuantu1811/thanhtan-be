@@ -738,6 +738,9 @@ module.exports = {
                     ghichu: data.ghichu,
                     ngaytao: data.ngaykham,
                     ngaytaikham: data.ngaytaikham,
+                    tiensubenh: data.tiensubenh,
+                    payment_id: data.paymentId,
+                    typedieutri_id: data.typeDieuTriID
                 },
                 {
                     where: {
@@ -939,6 +942,26 @@ module.exports = {
                     where: {
                         id: id,
                     },
+                },
+            });
+        } catch (error) {
+            return error;
+        }
+    },
+
+    // get medical history v2 pagination
+    getPetMedicalHistory_v2: async (id) => {
+        try {
+            return await model.findAll({
+                attributes: ['tiensubenh', 'trieuchung', 'chandoan', 'ghichu', 'ngaytao'],
+                include: {
+                    attributes: ['id'],
+                    required: true,
+                    model: giasuc,
+                    where: {
+                        id: id,
+                    },
+                order: [['ngaytao', 'DESC']]
                 },
             });
         } catch (error) {
