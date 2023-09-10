@@ -739,6 +739,7 @@ module.exports = {
                     ngaytao: data.ngaykham,
                     ngaytaikham: data.ngaytaikham,
                     tiensubenh: data.tiensubenh,
+                    khambenh: data.khambenh,
                     payment_id: data.paymentId,
                     typedieutri_id: data.typeDieuTriID
                 },
@@ -961,8 +962,8 @@ module.exports = {
                     where: {
                         id: id,
                     },
-                order: [['ngaytao', 'DESC']]
                 },
+                order: [['ngaytao', 'DESC']]
             });
         } catch (error) {
             return error;

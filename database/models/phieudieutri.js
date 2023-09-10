@@ -42,6 +42,9 @@ const phieudieutri = db.define(
         tiensubenh: {
             type: Sequelize.STRING,
         },
+        khambenh: {
+            type: Sequelize.STRING,
+        },
         ghichu: {
             type: Sequelize.STRING,
         },
