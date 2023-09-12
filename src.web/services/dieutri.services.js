@@ -11,6 +11,14 @@ module.exports = {
     existed: async (body) => {
         const res = body;
         const healthFormId = await create_phieudieutri(res);
+        let chungloai_id = null;
+        if (res.thucung.chungloai && res.thucung.chungloai.id) {
+            if (res.thucung.chungloai.id !== 0) {
+                chungloai_id = res.thucung.chungloai.id
+            }
+        } else if (res.thucung.giong.chungloai_id) {
+            chungloai_id = res.thucung.giong.chungloai_id
+        }
         // update khach hang
         await khachhang
             .update(
@@ -38,7 +46,7 @@ module.exports = {
                     dacdiem: res.thucung.dacdiem,
                     tuoi: res.thucung.tuoi,
                     gioitinh: res.thucung.gioitinh,
-                    chungloai_id: res.thucung.chungloai.id === 0 ? null : res.thucung.chungloai.id,
+                    chungloai_id: chungloai_id,
                     giong_id: res.thucung.giong.id === 0 ? null : res.thucung.giong.id,
                 },
                 {
