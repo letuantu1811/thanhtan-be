@@ -321,6 +321,7 @@ class CustomerController {
                             nguoitao_id: 0,
                             trangthai: 1,
                             dacdiem: '',
+                            giong_id: 0,
                             chungloai_id: 0,
                         };
                         obj = new Object();
@@ -332,6 +333,7 @@ class CustomerController {
                         obj.nguoitao_id = element.nguoitao_id;
                         obj.trangthai = element.trangthai;
                         obj.dacdiem = element.dacdiem;
+                        obj.giong_id = element.giong_id;
                         obj.chungloai_id = element.chungloai_id;
                         arr.push(obj);
                     }
