@@ -8,6 +8,7 @@ const Giong = require('../../database/models/giong');
 const { localDate } = require('../../utils/localDate');
 const phieudieutri = require('../../database/models/phieudieutri');
 const sanpham = require('../../database/models/sanpham');
+const { error } = require('../../utils/api.res/response');
 
 class CustomerController {
     async create(body) {
@@ -306,10 +307,10 @@ class CustomerController {
     async createNewPet(body) {
         let res = body;
         try {
-            if (res.thucung.length !== 0 || res.thucung.length !== '') {
+            if (res.giasuc.length !== 0 || res.giasuc.length !== '') {
                 let arr = [];
-                for (let index = 0; index < res.thucung.length; index++) {
-                    const element = res.thucung[index];
+                for (let index = 0; index < res.giasuc.length; index++) {
+                    const element = res.giasuc[index];
                     if (element.id === 0) {
                         let obj = {
                             ten: '',
@@ -324,7 +325,6 @@ class CustomerController {
                             giong_id: 0,
                             chungloai_id: 0,
                         };
-                        obj = new Object();
                         obj.ten = element.ten;
                         obj.tuoi = element.tuoi;
                         obj.trongluong = element.trongluong;
@@ -338,17 +338,26 @@ class CustomerController {
                         arr.push(obj);
                     }
                 }
-                return sangiasucpham.sequelize.transaction().then(async (t) => {
-                    return await giasuc
-                        .bulkCreate(arr, { transaction: t })
-                        .then(() => {
-                            t.commit();
-                        })
-                        .catch((err) => {
-                            t.rollback();
-                            throw new Error(err);
-                        });
-                });
+                // return giasuc.sequelize.transaction().then(async (t) => {
+                //     return await giasuc
+                //         .bulkCreate(arr, { transaction: t })
+                //         .then(() => {
+                //             console.log('committtttt');
+                //             t.commit();
+                //         })
+                //         .catch((err) => {
+                //             console.log('roll backkkkkk');
+                //             t.rollback();
+                //             throw new Error(err);
+                //         });
+                // });
+                giasuc.bulkCreate(arr)
+                .then(() => {
+                    console.log('Dữ liệu đã được chèn thành công.');                  
+                })
+                .catch((error) => {
+                    throw new Error(error);
+                });   
             }
         } catch (error) {
             throw new Error();
