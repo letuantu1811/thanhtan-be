@@ -1,6 +1,7 @@
 const khachhang = require('./../../database/models/khachhang');
 const giasuc = require('./../../database/models/giasuc');
 const nhomsanpham = require('./../../database/models/nhomsanpham');
+const sanpham = require('../controllers/sanpham.controller');
 const phieudieutri_congdichvu = require('./../../database/models/phieudieutri_congdichvu');
 const phieudieutri_sanpham = require('./../../database/models/phieudieutri_sanpham');
 const phieudieutri = require('./../../database/models/phieudieutri');
@@ -200,13 +201,13 @@ async function create_phieudieutri_sanpham(healthFormId, listSP) {
                 sanpham_id: 0,
                 ngaytao: localDate(new Date()),
             };
+            await sanpham.updateSoLuong(element.id, element.soluong)
             obj = new Object();
             obj.phieudieutri_id = healthFormId;
             obj.sanpham_id = element.id;
             obj.ngaytao = localDate(new Date());
             arr.push(obj);
         }
-
         await phieudieutri_sanpham.bulkCreate(arr);
     } catch (error) {
         console.log(error);

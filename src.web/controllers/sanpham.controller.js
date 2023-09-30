@@ -345,6 +345,265 @@ module.exports = {
         }
     },
 
+    // almost out products
+    almostOut: async (quyen, pageSize, pageNum, barcode, productName, category) => {
+        const role = quyen ? quyen.toUpperCase() : '';
+        const isViewedNonRestricted = ['ADMIN', 'MANAGER'].includes(role);
+        const an = isViewedNonRestricted ? {} : { an: 1 };
+        const limit = pageSize;
+        const offset = (pageNum - 1) * limit;
+        const product_name = productName ? productName : ''; 
+        const bar_code = !barcode ? {} : { mavach: barcode };
+        const product_name_by_rule = isViewedNonRestricted ? {
+            [Op.or]: [
+                {
+                    ten: { [Op.like]: `%${product_name}%` }
+                },
+                {
+                    tenthaythe: { [Op.like]: `%${product_name}%` }
+                }
+            ],
+        } : {
+            tenthaythe: { [Op.like]: `%${product_name}%` }
+        };      
+        const category_id = !category ? {} : { nhomsanpham_id: parseInt(category) };
+        const defaultIncludes = [
+            {
+                model: donvitinh,
+                as: 'donvitinh',
+                require: true,
+                attributes: {
+                    exclude: ['trangthai', 'ngaytao', 'ngaysua'],
+                },
+            },
+            {
+                model: donvitinh,
+                as: 'donviquydoi',
+                require: true,
+                attributes: {
+                    exclude: ['trangthai', 'ngaytao', 'ngaysua'],
+                },
+            },
+            {
+                model: nhomsanpham,
+                require: true,
+                attributes: {
+                    exclude: ['trangthai', 'ngaytao', 'ngaysua'],
+                },
+            },
+        ]
+        try {
+            const product = await sanpham.findAll({
+                include: [...defaultIncludes],
+                where: {
+                    trangthai: 1,
+                    soluongconlai: { [Op.lt]: sequelize.col('soluongtoithieu') },
+                    ...an,
+                    ...bar_code,
+                    ...product_name_by_rule,
+                    ...category_id
+                },
+                order: [['ten', 'ASC']],
+                limit,
+                offset
+            });
+            const total = await sanpham.count({
+                include: [...defaultIncludes],
+                where: {
+                    trangthai: 1,
+                    soluongconlai: { [Op.lt]: sequelize.col('soluongtoithieu') },
+                    ...an,
+                    ...bar_code,
+                    ...product_name_by_rule,
+                    ...category_id
+                },
+            });
+            const totalItems = total; 
+            const totalPages = Math.ceil(totalItems / pageSize);
+            const pagination = {
+                totalPages,
+                currentPage: pageNum,
+                pageSize,
+                totalItems,
+            }; 
+            return { product, pagination };
+        } catch (error) {
+            return error;
+        }
+    },
+  
+    // almost out products
+    thanQuantity: async (quyen, pageSize, pageNum, barcode, productName, category) => {
+        const role = quyen ? quyen.toUpperCase() : '';
+        const isViewedNonRestricted = ['ADMIN', 'MANAGER'].includes(role);
+        const an = isViewedNonRestricted ? {} : { an: 1 };
+        const limit = pageSize;
+        const offset = (pageNum - 1) * limit;
+        const product_name = productName ? productName : ''; 
+        const bar_code = !barcode ? {} : { mavach: barcode };
+        const product_name_by_rule = isViewedNonRestricted ? {
+            [Op.or]: [
+                {
+                    ten: { [Op.like]: `%${product_name}%` }
+                },
+                {
+                    tenthaythe: { [Op.like]: `%${product_name}%` }
+                }
+            ],
+        } : {
+            tenthaythe: { [Op.like]: `%${product_name}%` }
+        };      
+        const category_id = !category ? {} : { nhomsanpham_id: parseInt(category) };
+        const defaultIncludes = [
+            {
+                model: donvitinh,
+                as: 'donvitinh',
+                require: true,
+                attributes: {
+                    exclude: ['trangthai', 'ngaytao', 'ngaysua'],
+                },
+            },
+            {
+                model: donvitinh,
+                as: 'donviquydoi',
+                require: true,
+                attributes: {
+                    exclude: ['trangthai', 'ngaytao', 'ngaysua'],
+                },
+            },
+            {
+                model: nhomsanpham,
+                require: true,
+                attributes: {
+                    exclude: ['trangthai', 'ngaytao', 'ngaysua'],
+                },
+            },
+        ]
+        try {
+            const product = await sanpham.findAll({
+                include: [...defaultIncludes],
+                where: {
+                    trangthai: 1,
+                    soluongconlai: { [Op.gte]: sequelize.col('soluongtoithieu') },
+                    ...an,
+                    ...bar_code,
+                    ...product_name_by_rule,
+                    ...category_id
+                },
+                order: [['ten', 'ASC']],
+                limit,
+                offset
+            });
+            const total = await sanpham.count({
+                include: [...defaultIncludes],
+                where: {
+                    trangthai: 1,
+                    soluongconlai: { [Op.lt]: sequelize.col('soluongtoithieu') },
+                    ...an,
+                    ...bar_code,
+                    ...product_name_by_rule,
+                    ...category_id
+                },
+            });
+            const totalItems = total; 
+            const totalPages = Math.ceil(totalItems / pageSize);
+            const pagination = {
+                totalPages,
+                currentPage: pageNum,
+                pageSize,
+                totalItems,
+            }; 
+            return { product, pagination };
+        } catch (error) {
+            return error;
+        }
+    },
+
+    // statistic products
+    statistic: async (quyen, pageSize, pageNum, barcode, productName, category) => {
+        const role = quyen ? quyen.toUpperCase() : '';
+        const isViewedNonRestricted = ['ADMIN', 'MANAGER'].includes(role);
+        const an = isViewedNonRestricted ? {} : { an: 1 };
+        const limit = pageSize;
+        const offset = (pageNum - 1) * limit;
+        const product_name = productName ? productName : ''; 
+        const bar_code = !barcode ? {} : { mavach: barcode };
+        const product_name_by_rule = isViewedNonRestricted ? {
+            [Op.or]: [
+                {
+                    ten: { [Op.like]: `%${product_name}%` }
+                },
+                {
+                    tenthaythe: { [Op.like]: `%${product_name}%` }
+                }
+            ],
+        } : {
+            tenthaythe: { [Op.like]: `%${product_name}%` }
+        };      
+        const category_id = !category ? {} : { nhomsanpham_id: parseInt(category) };
+        const defaultIncludes = [
+            {
+                model: donvitinh,
+                as: 'donvitinh',
+                require: true,
+                attributes: {
+                    exclude: ['trangthai', 'ngaytao', 'ngaysua'],
+                },
+            },
+            {
+                model: donvitinh,
+                as: 'donviquydoi',
+                require: true,
+                attributes: {
+                    exclude: ['trangthai', 'ngaytao', 'ngaysua'],
+                },
+            },
+            {
+                model: nhomsanpham,
+                require: true,
+                attributes: {
+                    exclude: ['trangthai', 'ngaytao', 'ngaysua'],
+                },
+            },
+        ]
+        try {
+            const product = await sanpham.findAll({
+                include: [...defaultIncludes],
+                where: {
+                    trangthai: 1,
+                    ...an,
+                    ...bar_code,
+                    ...product_name_by_rule,
+                    ...category_id
+                },
+                order: [['ten', 'ASC']],
+                limit,
+                offset
+            });
+            const total = await sanpham.count({
+                include: [...defaultIncludes],
+                where: {
+                    trangthai: 1,
+                    ...an,
+                    ...bar_code,
+                    ...product_name_by_rule,
+                    ...category_id
+                },
+            });
+            const totalItems = total; 
+            const totalPages = Math.ceil(totalItems / pageSize);
+            const pagination = {
+                totalPages,
+                currentPage: pageNum,
+                pageSize,
+                totalItems,
+            }; 
+            return { product, pagination };
+        } catch (error) {
+            return error;
+        }
+    },
+
 
     getAllHiddenProduct: async () => {
         try {
@@ -417,6 +676,44 @@ module.exports = {
             });
         } catch (error) {
             return error;
+        }
+    },
+
+    updateSoLuong: async (id, soluong) => {
+        const resOne = await sanpham.findOne({
+            where: {
+                id: id,
+            },
+        });
+        if (!resOne) return;      
+        let soluongconlai;
+        soluongconlai = !resOne.soluongconlai || resOne.soluongconlai == 0
+        ? resOne.soluong - parseInt(soluong) : resOne.soluongconlai - parseInt(soluong);
+
+        try {
+            return sanpham.sequelize.transaction().then(async (t) => {
+                return await sanpham
+                    .update(
+                        {
+                            soluongconlai: soluongconlai,
+                        },
+                        {
+                            where: {
+                                id: id,
+                            },
+                        },
+                        { transaction: t },
+                    )
+                    .then(() => {
+                        t.commit();
+                    })
+                    .catch((err) => {
+                        t.rollback();
+                        throw new Error(err);
+                    });
+            });
+        } catch (error) {
+            throw new Error(error);
         }
     },
 

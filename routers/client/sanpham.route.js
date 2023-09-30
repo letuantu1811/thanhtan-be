@@ -16,6 +16,9 @@ const {
     getAllForBarCode,
     addBarcode,
     generateBarcode,
+    almostOut,
+    statistic,
+    thanQuantity
 } = require('../../src.web/controllers/sanpham.controller');
 const response = require('../../utils/api.res/response');
 
@@ -40,6 +43,60 @@ router.get('/v2', async (req, res) => {
     const category = req.query.category;
     try {
         const result = await getAll_v2(quyen, pageSize, pageNum, productName, category);
+        //
+        response.success_v2(res, 'success', result.product, result.pagination);
+    } catch (err) {
+        console.log(err.message);
+        response.error(res, 'failed', 500);
+    }
+});
+
+//Almost Out Products
+router.get('/almost-out', async (req, res) => {
+    const quyen = req.header('quyen');
+    const pageSize = parseInt(req.query.pageSize) || 20;
+    const pageNum = parseInt(req.query.pageNum) || 1;
+    const barcode = req.query.barcode;
+    const productName = req.query.productName;
+    const category = req.query.category;
+    try {
+        const result = await almostOut(quyen, pageSize, pageNum, barcode, productName, category);
+        //
+        response.success_v2(res, 'success', result.product, result.pagination);
+    } catch (err) {
+        console.log(err.message);
+        response.error(res, 'failed', 500);
+    }
+});
+
+//Almost Out Products
+router.get('/than-quantity', async (req, res) => {
+    const quyen = req.header('quyen');
+    const pageSize = parseInt(req.query.pageSize) || 20;
+    const pageNum = parseInt(req.query.pageNum) || 1;
+    const barcode = req.query.barcode;
+    const productName = req.query.productName;
+    const category = req.query.category;
+    try {
+        const result = await thanQuantity(quyen, pageSize, pageNum, barcode, productName, category);
+        //
+        response.success_v2(res, 'success', result.product, result.pagination);
+    } catch (err) {
+        console.log(err.message);
+        response.error(res, 'failed', 500);
+    }
+});
+
+//statistic Products
+router.get('/statistic', async (req, res) => {
+    const quyen = req.header('quyen');
+    const pageSize = parseInt(req.query.pageSize) || 20;
+    const pageNum = parseInt(req.query.pageNum) || 1;
+    const barcode = req.query.barcode;
+    const productName = req.query.productName;
+    const category = req.query.category;
+    try {
+        const result = await statistic(quyen, pageSize, pageNum, barcode, productName, category);
         //
         response.success_v2(res, 'success', result.product, result.pagination);
     } catch (err) {
