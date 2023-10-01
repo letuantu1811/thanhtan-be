@@ -69,6 +69,7 @@ module.exports = {
                 gianhap: 0,
                 soluong: 0,
                 soluongtoithieu: 0,
+                soluongconlai: 0,
                 gia: 0,
                 ngaytao: '',
             };
@@ -117,6 +118,8 @@ module.exports = {
                     obj.gianhap = Number.parseInt(res.gianhap.split(',').join(''));
                     obj.gia = Number.parseInt(res.gia.split(',').join(''));
                     obj.soluong = res.soluong + Number.parseInt(res.soluongthem);
+                    obj.soluongconlai = res.soluongconlai + Number.parseInt(res.soluongthem);
+
                     await sanpham.sequelize.transaction().then(async (t) => {
                         return await sanpham
                             .update(
@@ -736,6 +739,7 @@ module.exports = {
                             soluongtoithieu: data.soluongtoithieu,
                             soluong: data.soluong,
                             soluongquydoiton: data.soluongquydoiton,
+                            soluongconlai: data.soluongconlai,
                             mavach: data.mavach,
                         },
                         {
@@ -869,6 +873,7 @@ module.exports = {
                             gianhap: data.gianhap != null ? data.gianhap : 0,
                             soluongtoithieu: data.soluongtoithieu,
                             soluong: data.soluong,
+                            soluongconlai: data.soluong,
                             soluongquydoiton: data.soluongquydoiton,
                             mavach: data.mavach || '',
                         },
