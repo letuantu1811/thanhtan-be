@@ -806,6 +806,29 @@ module.exports = {
         }
     },
 
+    deleteDTMulti: async (data) => {
+        const t = await phieudieutri.sequelize.transaction();
+        try {
+          for (const id of data) {
+            await phieudieutri.update(
+                {
+                    trangthai: 0,
+                },
+                {
+                    where: {
+                        id: id,
+                    },
+                },
+                { transaction: t },
+            )
+          }
+          await t.commit();
+        } catch (error) {
+          await t.rollback();
+          throw new Error(err);
+        }
+    },
+
     getPetExamination: async () => {
         try {
             const data = await giasuc.findAll({
@@ -871,7 +894,10 @@ module.exports = {
                             ],
                         },
                     {
-                        model: phieudieutri
+                        model: phieudieutri,
+                        where: {
+                            trangthai: 1
+                        }
                     },
                     {
                         model: Giong,

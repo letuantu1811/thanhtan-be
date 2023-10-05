@@ -281,6 +281,17 @@ router.delete('/deleteDT', async (req, res) => {
     }
 });
 
+router.put('/deleteDTMulti', async (req, res) => {
+    const data = req.body;
+    try {
+        const result = await dieutri.deleteDTMulti(data);
+        response.success(res, 'success', result);
+    } catch (err) {
+        console.log(err.message);
+        response.error(res, 'failed', 500);
+    }
+});
+
 router.get('/getExaminationWithRabisin', async (req, res) => {
     try {
         const result = await truyxuatbenhan.getExaminationWithRabisin();
