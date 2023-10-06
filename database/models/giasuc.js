@@ -44,6 +44,9 @@ const giasuc = db.define(
         chungloai_id: {
             type: Sequelize.INTEGER,
         },
+        trangthai_song: {
+            type: Sequelize.BOOLEAN,
+        },
         ngaytao: {
             type: Sequelize.DATE,
         },

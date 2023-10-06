@@ -760,6 +760,7 @@ module.exports = {
                 {
                     ten: data.ten,
                     tuoi: data.tuoi,
+                    trangthai_song: data.trangthai_song
                 },
                 {
                     where: {
