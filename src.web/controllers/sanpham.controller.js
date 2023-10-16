@@ -501,7 +501,7 @@ module.exports = {
                 include: [...defaultIncludes],
                 where: {
                     trangthai: 1,
-                    soluongconlai: { [Op.lt]: sequelize.col('soluongtoithieu') },
+                    soluongconlai: { [Op.gte]: sequelize.col('soluongtoithieu') },
                     ...an,
                     ...bar_code,
                     ...product_name_by_rule,
