@@ -78,10 +78,10 @@ class OrderService {
         const customer = customerName ? customerName : '';
 
         let from_date = moment().startOf('day').subtract(3, 'months').format('YYYY-MM-DD HH:mm:ss');
-        let to_date = moment().format('YYYY-MM-DD HH:mm:ss');
+        let to_date = moment().endOf('day').format('YYYY-MM-DD HH:mm:ss');
         if (fromDate && toDate) {
             from_date = moment(parseInt(fromDate)).startOf('day').format('YYYY-MM-DD HH:mm:ss');
-            to_date = moment(parseInt(toDate)).format('YYYY-MM-DD HH:mm:ss');
+            to_date = moment(parseInt(toDate)).endOf('day').format('YYYY-MM-DD HH:mm:ss');
         }
 
         const defaultIncludes = [
@@ -112,7 +112,7 @@ class OrderService {
                 order: [['ngaytao', 'DESC']],
                 where: {
                     ten: { [Op.like]: `%${customer}%`},
-                    trangthai: ENUM.ENABLE,
+                    trangthai: 1,
                     ngaytao: {
                         [Op.gte]: from_date,
                         [Op.lte]: to_date,
@@ -188,7 +188,7 @@ class OrderService {
                             id: item.id,
                             trangthai: ENUM.ENABLE,
                         },
-                        attributes: ['id', 'soluong'],
+                        attributes: ['id', 'soluong', 'soluongconlai'],
                     });
                     if (!product) {
                         throw new BadRequestException(`Không tìm thấy sản phẩm với id ${item.id}`);
@@ -197,9 +197,11 @@ class OrderService {
 
                     const soluong = toNumber(product.soluong) || 0;
                     const soluongban = toNumber(item.soluong) || 0;
-                    const remainQuantity = soluong - soluongban;
+                    const soluongconlai = !product.soluongconlai || product.soluongconlai == 0
+                    ? soluong - soluongban : product.soluongconlai - soluongban;
+                    // const remainQuantity = soluong - soluongban;
                     await Product.update(
-                        { soluong: remainQuantity > 0 ? remainQuantity : 0 },
+                        { soluongconlai: soluongconlai },
                         {
                             where: {
                                 id: item.id,
