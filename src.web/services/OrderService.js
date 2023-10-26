@@ -188,20 +188,23 @@ class OrderService {
                             id: item.id,
                             trangthai: ENUM.ENABLE,
                         },
-                        attributes: ['id', 'soluong', 'soluongconlai'],
+                        attributes: ['id', 'soluong', 'soluongquydoiton'],
                     });
                     if (!product) {
                         throw new BadRequestException(`Không tìm thấy sản phẩm với id ${item.id}`);
                     }
-                    if (!product.soluong) return;
+                    if (!product.soluong || !product.soluongquydoiton) return;
 
                     const soluong = toNumber(product.soluong) || 0;
                     const soluongban = toNumber(item.soluong) || 0;
-                    const soluongconlai = !product.soluongconlai || product.soluongconlai == 0
-                    ? soluong - soluongban : product.soluongconlai - soluongban;
-                    // const remainQuantity = soluong - soluongban;
+                
+                    const soluongconlai = soluong - Math.floor(soluongban / product.soluongtoithieu);
+                    const soluongquydoiton = product.soluongquydoiton - soluongban;
                     await Product.update(
-                        { soluongconlai: soluongconlai },
+                        {
+                            soluong: soluongconlai,
+                            soluongquydoiton: soluongquydoiton
+                        },
                         {
                             where: {
                                 id: item.id,
