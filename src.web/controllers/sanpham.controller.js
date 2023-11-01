@@ -69,7 +69,7 @@ module.exports = {
                 gianhap: 0,
                 soluong: 0,
                 soluongtoithieu: 0,
-                // soluongconlai: 0,
+                soluongquydoiton: 0,
                 gia: 0,
                 ngaytao: '',
             };
@@ -95,10 +95,11 @@ module.exports = {
                     obj.donviquydoi_id = Number.parseInt(res.donviquydoi_id);
                     obj.giatriquydoi = Number.parseInt(res.giatriquydoi);
                     obj.gianhap = res.gianhap
-                        ? Number.parseInt(res.gianhap.split(',').join(''))
+                        ? Number.parseInt(res.gianhap)
                         : 0;
-                    obj.gia = Number.parseInt(res.gia.split(',').join(''));
+                    obj.gia = Number.parseInt(res.gia);
                     obj.soluong = res.soluong + Number.parseInt(res.soluongthem);
+                    obj.soluongquydoiton = Number.parseInt(res.soluongquydoiton) + res.soluongthem * res.giatriquydoi;
                     arrNew.push(obj);
                 } else {
                     obj = new Object();
@@ -115,10 +116,10 @@ module.exports = {
                     obj.donvitinh_id = Number.parseInt(res.donvitinh.id);
                     obj.donviquydoi_id = Number.parseInt(res.donviquydoi.id);
                     obj.giatriquydoi = Number.parseInt(res.giatriquydoi);
-                    obj.gianhap = Number.parseInt(res.gianhap.split(',').join(''));
-                    obj.gia = Number.parseInt(res.gia.split(',').join(''));
+                    obj.gianhap = Number.parseInt(res.gianhap);
+                    obj.gia = Number.parseInt(res.gia);
                     obj.soluong = res.soluong + Number.parseInt(res.soluongthem);
-                    // obj.soluongconlai = res.soluongconlai + Number.parseInt(res.soluongthem);
+                    obj.soluongquydoiton = Number.parseInt(res.soluongquydoiton) + res.soluongthem * res.giatriquydoi;
 
                     await sanpham.sequelize.transaction().then(async (t) => {
                         return await sanpham
@@ -872,7 +873,7 @@ module.exports = {
                             gianhap: data.gianhap != null ? data.gianhap : 0,
                             soluongtoithieu: data.soluongtoithieu,
                             soluong: data.soluong,
-                            soluongquydoiton: data.soluongquydoiton,
+                            soluongquydoiton: data.soluong * data.giatriquydoi,
                             mavach: data.mavach || '',
                         },
                         { transaction: t },
