@@ -311,6 +311,9 @@ module.exports = {
                 attributes: {
                     exclude: ['trangthai', 'ngaytao', 'ngaysua'],
                 },
+                where: {
+                    trangthai: 1
+                }
             },
         ]
         try {
