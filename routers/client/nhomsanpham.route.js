@@ -41,6 +41,18 @@ router.put('/', async (req, res) => {
 router.delete('/:id', async (req, res) => {
     const body = req.params.id;
     try {
+        const result = await controller.deleteCategory(body);
+
+        response.success(res, 'success', result);
+    } catch (err) {
+        console.log(err.message);
+        response.error(res, 'failed', 500);
+    }
+});
+
+router.post('/disable/:id', async (req, res) => {
+    const body = req.params.id;
+    try {
         const result = await controller.disable(body);
 
         response.success(res, 'success', result);

@@ -16,6 +16,9 @@ const Nhomsanpham = db.define("nhomsanpham", {
     trangthai: {
         type: Sequelize.BOOLEAN
     },
+    trangthai_xoa: {
+        type: Sequelize.BOOLEAN
+    },
     ngaytao: {
         type: Sequelize.DATE
     },

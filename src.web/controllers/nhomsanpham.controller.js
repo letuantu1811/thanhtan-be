@@ -69,11 +69,35 @@ module.exports = {
     },
 
     // disable sanpham
-    disable: async (id) => {
+    disable: async (id) => {   
+        try {
+            let trangthai = await nhomsanpham.findOne({ where: { id: id } });
+            if (trangthai.trangthai) {
+                trangthai = 0;
+            } else {
+                trangthai = 1;
+            }
+            const result = await nhomsanpham.update({
+                trangthai: trangthai
+            }, {
+                where: {
+                    id: id
+                },
+            });
+    
+           return result;
+        } catch (err) {
+            return err;
+
+        }
+    },
+
+    deleteCategory: async (id) => {
         try {
             return await nhomsanpham.update(
                 {
-                    trangthai: 0,
+                    trangthai_xoa: 1,
+                    trangthai: ENUM.DISABLE
                 },
                 {
                     where: {
@@ -90,7 +114,7 @@ module.exports = {
         try {
             return await nhomsanpham.findAll({
                 where: {
-                    trangthai: ENUM.ENABLE,
+                    trangthai_xoa: ENUM.DISABLE,
                 },
                 order: [['ngaytao', 'DESC']],
             });
