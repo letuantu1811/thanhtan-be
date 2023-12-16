@@ -185,6 +185,7 @@ async function create_phieudieutri(body) {
             payment_id: body.paymentId,
             discountAmount: toNumber(body.discountAmount) || 0,
             addedDiscountAmount: toNumber(body.addedDiscountAmount) || 0,
+            option: body.option
         })
         .then((res) => {
             return res.dataValues.id;

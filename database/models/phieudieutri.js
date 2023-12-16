@@ -85,6 +85,9 @@ const phieudieutri = db.define(
         sophieudieutri: {
             type: Sequelize.INTEGER,
         },
+        option: {
+            type: Sequelize.BOOLEAN,
+        },
     },
     {
         timestamps: false,
