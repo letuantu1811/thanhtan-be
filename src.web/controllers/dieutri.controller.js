@@ -741,8 +741,7 @@ module.exports = {
                     tiensubenh: data.tiensubenh,
                     khambenh: data.khambenh,
                     payment_id: data.paymentId,
-                    typedieutri_id: data.typeDieuTriID,
-                    option: data.option
+                    typedieutri_id: data.typeDieuTriID
                 },
                 {
                     where: {

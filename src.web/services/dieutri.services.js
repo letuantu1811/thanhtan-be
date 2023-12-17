@@ -63,6 +63,11 @@ module.exports = {
         await create_phieudieutri_sanpham(healthFormId, res.dsSP).then(async (res) => {
             console.log(res + ' tại create_phieudieutri_sanpham');
         });
+
+        await create_phieudieutri_sanpham(healthFormId, res.dsSPDB).then(async (res) => {
+            console.log(res + ' tại create_phieudieutri_sanpham_DB');
+        });
+
         await create_phieudieutri_congdichvu(healthFormId, res.dsCDV).then((res) => {
             console.log(res + ' tại create_phieudieutri_congdichvu ');
         });
@@ -113,6 +118,9 @@ module.exports = {
             await create_phieudieutri_sanpham(healthFormId, res.dsSP).then(async (res) => {
                 console.log(res + ' tại create_phieudieutri_sanpham');
             });
+            await create_phieudieutri_sanpham(healthFormId, res.dsSPDB).then(async (res) => {
+                console.log(res + ' tại create_phieudieutri_sanpha_DB');
+            });
             await create_phieudieutri_congdichvu(healthFormId, res.dsCDV).then((res) => {
                 console.log(res + ' tại create_phieudieutri_congdichvu ');
             });
@@ -157,6 +165,7 @@ module.exports = {
 
             const healthFormId = await create_phieudieutri(res);
             await create_phieudieutri_sanpham(healthFormId, res.dsSP);
+            await create_phieudieutri_sanpham(healthFormId, res.dsSPDB);
             await create_phieudieutri_congdichvu(healthFormId, res.dsCDV);
         } catch (error) {
             throw error;
@@ -184,8 +193,7 @@ async function create_phieudieutri(body) {
             ngaytao: body.ngaykham,
             payment_id: body.paymentId,
             discountAmount: toNumber(body.discountAmount) || 0,
-            addedDiscountAmount: toNumber(body.addedDiscountAmount) || 0,
-            option: body.option
+            addedDiscountAmount: toNumber(body.addedDiscountAmount) || 0
         })
         .then((res) => {
             return res.dataValues.id;
