@@ -56,6 +56,9 @@ const giasuc = db.define(
         phieudieutriid: {
             type: Sequelize.STRING,
         },
+        tiensubenh: {
+            type: Sequelize.TEXT,
+        },
     },
     {
         timestamps: false,

@@ -156,7 +156,7 @@ module.exports = {
         }
     },
 
-    getExaminationWithMedicinName_v2: async (id, pageSize, pageNum, fromDate, toDate) => {
+    getExaminationWithMedicinName_v2: async (id, pageSize, pageNum, fromDate, toDate, isAdmin) => {
         const limit = pageSize;
         const offset = (pageNum - 1) * limit;
         let from_date = moment().startOf('day').subtract(1, 'months').format('YYYY-MM-DD HH:mm:ss');
@@ -172,6 +172,10 @@ module.exports = {
                     id: id,
                 },
             };
+        }
+        let option = {};
+        if (!isAdmin) {
+            option.option = 0;
         }
         try {
             const data = await phieudieutri.findAll({
@@ -191,6 +195,7 @@ module.exports = {
                         [Op.gte]: from_date,
                         [Op.lte]: to_date,
                     },
+                    ...option
                 },
                 order: [['ngaytao', 'DESC']],
                 limit,
@@ -213,6 +218,7 @@ module.exports = {
                         [Op.gte]: from_date,
                         [Op.lte]: to_date,
                     },
+                    ...option
                 },
             });
 

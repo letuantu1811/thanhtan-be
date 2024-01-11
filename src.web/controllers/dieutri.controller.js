@@ -199,6 +199,7 @@ module.exports = {
         const offset = (pageNum - 1) * limit;
         const customer = paramsCustomer ? paramsCustomer : '';
         const pet = petName ? petName : '';
+        let option = {};
         try {
             const today = date || tzSaiGon();
             const defaultIncludes = [
@@ -231,6 +232,7 @@ module.exports = {
                     model: sanpham,
                     where: { an: 0 },
                 });
+                option.option = 0;
             }
 
             const currentDateTreatments = await model.findAll({
@@ -242,6 +244,7 @@ module.exports = {
                         today,
                     ),
                     trangthai: 1,
+                    ...option
                 },
                 order: [['ngaytao', 'DESC']],
                 limit,
@@ -257,6 +260,7 @@ module.exports = {
                         today,
                     ),
                     trangthai: 1,
+                    ...option
                 }
             });
 
@@ -378,6 +382,7 @@ module.exports = {
         const pet = petName ? petName : '';
         const limit = pageSize;
         const offset = (pageNum - 1) * limit;
+        let option = {};
         try {
             const selectedDate = date || tzSaiGon();
             const defaultIncludes = [
@@ -410,6 +415,7 @@ module.exports = {
                     model: sanpham,
                     where: { an: 0 },
                 });
+                option.option = 0;
             }
 
             const treetments = await model.findAll({
@@ -421,6 +427,7 @@ module.exports = {
                         selectedDate,
                     ),
                     trangthai: 1,
+                    ...option
                 },
                 order: [['ngaytao', 'DESC']],
                 limit,
@@ -436,6 +443,7 @@ module.exports = {
                         selectedDate,
                     ),
                     trangthai: 1,
+                    ...option
                 }
             });
 
@@ -703,6 +711,7 @@ module.exports = {
                 { model: giasuc },
                 { model: khachhang, as: 'khachhang' },
             ];
+            let option = {};
             if (isViewedNonRestricted) {
                 defaultIncludes.push({
                     model: sanpham,
@@ -712,6 +721,7 @@ module.exports = {
                     model: sanpham,
                     where: { an: 0 },
                 });
+                option.option = 0;
             }
 
             return await model.findAll({
@@ -719,6 +729,7 @@ module.exports = {
                 where: {
                     trangthai: 1,
                     giasuc_id: id,
+                    ...option
                 },
                 order: [['ngaytao', 'DESC']],
             });
@@ -867,7 +878,7 @@ module.exports = {
     },
 
     // Paging Pet Examination
-    getPetExaminationPaging: async (pageSize, pageNum, phone, name, address, petName) => {
+    getPetExaminationPaging: async (pageSize, pageNum, phone, name, address, petName, isAdmin) => {
         const limit = pageSize;
         const offset = (pageNum - 1) * limit;
 
@@ -875,6 +886,10 @@ module.exports = {
         const nameParam = name ? name : '';
         const addressParam = address ? address : '';
         const pet = petName ? petName : '';
+        let option = {};
+        if (!isAdmin) {
+            option.option = 0;
+        }
 
         try {
             const data = await giasuc.findAll({
@@ -897,7 +912,8 @@ module.exports = {
                     {
                         model: phieudieutri,
                         where: {
-                            trangthai: 1
+                            trangthai: 1,
+                            ...option
                         }
                     },
                     {
@@ -933,7 +949,15 @@ module.exports = {
                                 diachi: { [Op.like]: `%${addressParam}%` }
                             },              
                         ],
-                    }],
+                    },
+                    {
+                        model: phieudieutri,
+                        where: {
+                            trangthai: 1,
+                            ...option
+                        }
+                    },
+                ],
                 where: {
                     trangthai: 1,
                     ten: {

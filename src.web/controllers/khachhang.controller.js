@@ -89,6 +89,18 @@ class CustomerController {
         }
     }
 
+    async getOnePet(id) {
+        try {
+            return await giasuc.findOne({
+                where: {
+                    id: id,
+                }
+            });
+        } catch (error) {
+            return error;
+        }
+    }
+
     async getMany(body) {
         try {
             return await khachhang.findAll({
@@ -546,6 +558,7 @@ class CustomerController {
                 {
                     ten: data.ten,
                     tuoi: data.tuoi,
+                    tiensubenh: data.tiensubenh ? JSON.stringify(data.tiensubenh) : ''
                 },
                 {
                     where: {

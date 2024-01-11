@@ -84,6 +84,18 @@ router.delete("/:id", async(req, res) => {
     }
 });
 
+router.get("/pet/:id", async(req, res) => {
+    let id = req.params.id;
+    try {
+        const result = await CustomerController.getOnePet(id);
+
+        response.success(res, "success", result)
+    } catch (err) {
+        console.log('Error at deleteCustomer:', err.message);
+        response.error(res, err.message, 500);
+    }
+});
+
 router.post("/newpet", async(req, res) => {
     try {
         const result = await CustomerController.createNewPet(req.body);
@@ -91,6 +103,21 @@ router.post("/newpet", async(req, res) => {
         response.success(res, "success", result)
     } catch (err) {
         console.log('Error at createNewPet:', err.message);
+        response.error(res, err.message, 500);
+    }
+});
+
+/*
+@param id:  the id of the pet
+*/
+router.put("/pet", async(req, res) => {
+    let body = req.body;
+    try {
+        console.log(body);
+        const result = await CustomerController.editPet(body);
+        response.success(res, "success", result)
+    } catch (err) {
+        console.log('Error at editPet:', err.message);
         response.error(res, err.message, 500);
     }
 });
@@ -147,19 +174,5 @@ router.get("/filter", async(req, res) => {
     }
 });
 
-/*
-@param id:  the id of the pet
-*/
-router.put("/pet", async(req, res) => {
-    let body = req.body;
-    try {
-        console.log(body);
-        const result = await CustomerController.editPet(body);
-        response.success(res, "success", result)
-    } catch (err) {
-        console.log('Error at editPet:', err.message);
-        response.error(res, err.message, 500);
-    }
-});
 
 module.exports = router;
