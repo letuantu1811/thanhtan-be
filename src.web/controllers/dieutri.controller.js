@@ -767,12 +767,18 @@ module.exports = {
 
     updatePet: async (data) => {
         try {
-            await giasuc.update(
-                {
-                    ten: data.ten,
-                    tuoi: data.tuoi,
-                    trangthai_song: data.trangthai_song
-                },
+            let temp = {};
+            if (data.ngaytao || data.ngaysua) {
+                temp.ngaytao = data.ngaytao
+                temp.ngaysua = data.ngaysua
+            }
+            const params = {
+                ten: data.ten,
+                tuoi: data.tuoi,
+                trangthai_song: data.trangthai_song,
+                ...temp
+            }
+            await giasuc.update( params ,
                 {
                     where: {
                         id: data.id,
