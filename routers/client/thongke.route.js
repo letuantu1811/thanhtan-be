@@ -114,13 +114,13 @@ router.get("/thongkedoanhthu", async(req, res) => {
         let endDate = req.query.endDate;
 
         if (startDate && endDate) {
-            startDate = moment(startDate).startOf('day').format('YYYY-MM-DD HH:mm:ss');
-            endDate = moment(endDate).endOf('day').format('YYYY-MM-DD HH:mm:ss');
+            startDate = moment(startDate).format('YYYY-MM-DD');
+            endDate = moment(endDate).format('YYYY-MM-DD');
         }
 
         let dt_dieutri = await controller.thongKeDoanhThuTheoNgay(startDate, endDate);
         let chart_dieutri = await controller.chartDieuTri(startDate, endDate);
-
+        
         const dt_banle = await controller.thongKeDoanhThuBanLeTheoNgay(startDate, endDate);
         const chart_banle = await controller.chartBanLe(startDate, endDate);
 

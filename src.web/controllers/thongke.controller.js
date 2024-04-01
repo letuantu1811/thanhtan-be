@@ -72,19 +72,28 @@ module.exports = {
         try {
             console.log(startDate + ' ' + endDate);
             return await phieudieutri.sequelize.query(
-                `
-            SELECT
-                YEAR(ngaytao) AS year,
-                MONTH(ngaytao) AS month,
-                SUM(thanhtien) AS thanhtien
-            FROM
-                phieudieutri
-            where
-                ngaytao BETWEEN '${startDate}' and '${endDate}' 
-            GROUP BY
-                YEAR(ngaytao),
-                MONTH(ngaytao)
-            `,
+            `WITH RECURSIVE months AS (
+                SELECT '${startDate}' AS month_date
+                UNION ALL
+                SELECT DATE_FORMAT(DATE_ADD(month_date, INTERVAL 1 MONTH), '%Y-%m-01')
+                FROM months
+                WHERE month_date < '${endDate}'
+              )
+              SELECT
+                YEAR(m.month_date) AS year,
+                MONTH(m.month_date) AS month,
+                COALESCE(SUM(pd.thanhtien), 0) AS thanhtien
+              FROM
+                months m
+              LEFT JOIN
+                phieudieutri pd ON YEAR(pd.ngaytao) = YEAR(m.month_date) AND MONTH(pd.ngaytao) = MONTH(m.month_date)
+              GROUP BY
+                YEAR(m.month_date),
+                MONTH(m.month_date)
+              ORDER BY
+                YEAR(m.month_date),
+                MONTH(m.month_date);
+              `,
                 { type: QueryTypes.SELECT },
             );
         } catch (error) {
@@ -94,21 +103,29 @@ module.exports = {
 
     chartBanLe: async (startDate, endDate) => {
         try {
-            console.log(startDate + ' ' + endDate);
             return await phieudieutri.sequelize.query(
-                `
-            SELECT
-                YEAR(ngaytao) AS year,
-                MONTH(ngaytao) AS month,
-                SUM(tongdonhang) AS thanhtien
-            FROM
-                banle
-            where
-                ngaytao BETWEEN '${startDate}' and '${endDate}' 
-            GROUP BY
-                YEAR(ngaytao),
-                MONTH(ngaytao)
-            `,
+            `WITH RECURSIVE months AS (
+                SELECT '${startDate}' AS month_date
+                UNION ALL
+                SELECT DATE_FORMAT(DATE_ADD(month_date, INTERVAL 1 MONTH), '%Y-%m-01')
+                FROM months
+                WHERE month_date < '${endDate}'
+              )
+              SELECT
+                YEAR(m.month_date) AS year,
+                MONTH(m.month_date) AS month,
+                COALESCE(SUM(bl.tongdonhang), 0) AS thanhtien
+              FROM
+                months m
+              LEFT JOIN
+                banle bl ON YEAR(bl.ngaytao) = YEAR(m.month_date) AND MONTH(bl.ngaytao) = MONTH(m.month_date)
+              GROUP BY
+                YEAR(m.month_date),
+                MONTH(m.month_date)
+              ORDER BY
+                YEAR(m.month_date),
+                MONTH(m.month_date);              
+              `,   
                 { type: QueryTypes.SELECT },
             );
         } catch (error) {
@@ -228,7 +245,7 @@ module.exports = {
 
     topProductSeller: async (startDate, endDate) => {
         try {
-            return await sanpham.sequelize.query(
+            return await phieudieutri.sequelize.query(
             `
             SELECT s.id, s.ten, s.tenthaythe, COUNT(ps.sanpham_id) AS soluong
             FROM
