@@ -282,7 +282,7 @@ router.get('/phieudieutri', async (req, res) => {
         startDate = moment(startDate).startOf('day').format('YYYY-MM-DD HH:mm:ss');
         endDate = moment(endDate).endOf('day').format('YYYY-MM-DD HH:mm:ss');
     }
-    const pageSize = parseInt(req.query.pageSize) || 1;
+    const pageSize = parseInt(req.query.pageSize) || 10;
     const pageNum = parseInt(req.query.pageNum) || 1;
     try {
         const result = await controller.getPhieuDieuTri(pageSize, pageNum, startDate, endDate, typeDieutrId);
@@ -290,6 +290,171 @@ router.get('/phieudieutri', async (req, res) => {
     } catch (err) {
         console.log(err.message);
         response.error(res, 'failed', 500);
+    }
+});
+
+router.get("/thongkenhanvien", async(req, res) => {
+    try {
+        let startDate = req.query.startDate;
+        let endDate = req.query.endDate;
+        let empID = req.query.empID;
+
+        if (startDate && endDate) {
+            startDate = moment(startDate).format('YYYY-MM-DD');
+            endDate = moment(endDate).format('YYYY-MM-DD');
+        }
+
+        let dt_dieutri = await controller.thongKeDoanhThuNhanVienTheoNgay(startDate, endDate, empID);        
+        const dt_banle = await controller.thongKeDoanhThuBanLeNhanVienTheoNgay(startDate, endDate, empID);
+
+        response.success(res, "success", 
+        { 
+            dieutri: dt_dieutri[0],
+            banle: dt_banle[0]
+            
+        })
+    } catch (err) {
+        console.log(err.message);
+        response.error(res, "failed", 500)
+    }
+});
+
+router.get("/chartnhanvien", async(req, res) => {
+    try {
+        let startDate = req.query.startDate;
+        let endDate = req.query.endDate;     
+        if (startDate && endDate) {
+            startDate = moment(startDate).startOf('day').format('YYYY-MM-DD HH:mm:ss');
+            endDate = moment(endDate).endOf('day').format('YYYY-MM-DD HH:mm:ss');
+        }
+
+        let arr1 = await controller.thongKeBanLeTheoNhanVien(startDate, endDate);
+        let arr2 = await controller.thongKePhieuDieuTriTheoNhanVien(startDate, endDate);
+
+        const arr2Map = {};
+        arr2.forEach(item => {
+            arr2Map[item.id] = item;
+        });
+
+        const mergedArray = arr1.map(item1 => {
+            const matchingItem = arr2Map[item1.id];
+            if (matchingItem) {
+                return {
+                    id: item1.id,
+                    tendaydu: item1.tendaydu,
+                    total_banle: item1.total_banle,
+                    total_phieudieutri: matchingItem.total_phieudieutri,
+                    total: parseInt(matchingItem.total_phieudieutri || 0) +  item1.total_banle,
+                };
+            } else {
+                return {
+                    id: item1.id,
+                    tendaydu: item1.tendaydu,
+                    total_banle: item1.total_banle,
+                    total_phieudieutri: 0,
+                    total: item1.total_banle
+                }; 
+            }
+        });
+        response.success(res, "success", mergedArray);      
+    } catch (err) {
+        console.log(err.message);
+        response.error(res, "failed", 500)
+    }
+});
+
+router.get("/thongkekhachhang", async(req, res) => {
+    try {
+        let startDate = req.query.startDate;
+        let endDate = req.query.endDate;
+        let customerID = req.query.customerID;
+
+        if (startDate && endDate) {
+            startDate = moment(startDate).format('YYYY-MM-DD');
+            endDate = moment(endDate).format('YYYY-MM-DD');
+        }
+
+        let dt_dieutri = await controller.khachHangPhieuDieuTri(startDate, endDate, customerID);        
+        const dt_banle = await controller.khachHangBanLe(startDate, endDate, customerID);
+
+        response.success(res, "success", 
+        { 
+            dieutri: dt_dieutri[0],
+            banle: dt_banle[0]
+            
+        })
+    } catch (err) {
+        console.log(err.message);
+        response.error(res, "failed", 500)
+    }
+});
+
+router.get("/topkhachhangbanle", async(req, res) => {
+    try {
+        let startDate = req.query.startDate;
+        let endDate = req.query.endDate;     
+        if (startDate && endDate) {
+            startDate = moment(startDate).startOf('day').format('YYYY-MM-DD HH:mm:ss');
+            endDate = moment(endDate).endOf('day').format('YYYY-MM-DD HH:mm:ss');
+        }
+        let result = await controller.topKhachHangBanLe(startDate, endDate);
+        response.success(res, "success", result);      
+    } catch (err) {
+        console.log(err.message);
+        response.error(res, "failed", 500)
+    }
+});
+
+router.get("/danhsachkhachhangphieudieutri", async(req, res) => {
+    try {
+        let startDate = req.query.startDate;
+        let endDate = req.query.endDate;     
+        if (startDate && endDate) {
+            startDate = moment(startDate).startOf('day').format('YYYY-MM-DD HH:mm:ss');
+            endDate = moment(endDate).endOf('day').format('YYYY-MM-DD HH:mm:ss');
+        }
+        const pageSize = parseInt(req.query.pageSize) || 10;
+        const pageNum = parseInt(req.query.pageNum) || 1;
+        let customerID = req.query.customerID || null;     
+
+        let result = await controller.danhSachThongKeKhachHangPhieuDieuTri(startDate, endDate, pageSize, pageNum, customerID);
+        const pagination = {
+            totalPages: Math.ceil(result.total[0].totalResults / pageSize),
+            currentPage: pageNum,
+            pageSize,
+            totalItems: result.total[0].totalResults,
+        }; 
+        response.success_v2(res, 'Lấy dữ liệu thành công', result.data, pagination);   
+    } catch (err) {
+        console.log(err.message);
+        response.error(res, "failed", 500)
+    }
+});
+
+router.get("/danhsachkhachhangbanle", async(req, res) => {
+    try {
+        let startDate = req.query.startDate;
+        let endDate = req.query.endDate;     
+        if (startDate && endDate) {
+            startDate = moment(startDate).startOf('day').format('YYYY-MM-DD HH:mm:ss');
+            endDate = moment(endDate).endOf('day').format('YYYY-MM-DD HH:mm:ss');
+        }
+        const pageSize = parseInt(req.query.pageSize) || 10;
+        const pageNum = parseInt(req.query.pageNum) || 1;
+        let customerID = req.query.customerID || null;     
+
+        let result = await controller.danhSachThongKeKhachHangBanLe(startDate, endDate, pageSize, pageNum, customerID);
+
+        const pagination = {
+            totalPages: Math.ceil(result.total[0].totalResults / pageSize),
+            currentPage: pageNum,
+            pageSize,
+            totalItems: result.total[0].totalResults,
+        }; 
+        response.success_v2(res, 'Lấy dữ liệu thành công', result.data, pagination);   
+    } catch (err) {
+        console.log(err.message);
+        response.error(res, "failed", 500)
     }
 });
 

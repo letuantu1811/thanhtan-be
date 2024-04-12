@@ -336,6 +336,8 @@ module.exports = {
             JOIN banle AS bl ON tv.id = bl.nguoitao_id
             where
                 bl.ngaytao BETWEEN '${startDate}' and '${endDate}' 
+                AND bl.trangthai = 1
+                AND tv.trangthai = 1
             GROUP BY tv.id
             ORDER BY soluongdon DESC
             LIMIT 10;
@@ -418,5 +420,343 @@ module.exports = {
         } catch (error) {
             return error;
         }
-    }
+    },
+    thongKeDoanhThuNhanVienTheoNgay: async (startDate, endDate, empID) => {
+        try {
+            let obj = {};
+            if (empID) {
+                obj.nguoitao_id = parseInt(empID)            
+            }
+            return await phieudieutri.findAll({
+                attributes: [
+                    [sequelize.fn('sum', sequelize.col('thanhtien')), 'thanhtien'],
+                    [sequelize.fn('count', sequelize.col('thanhtien')), 'soluong'],
+                ],
+                where: {
+                    ngaytao: {
+                        [Op.between]: [startDate, endDate],
+                    },
+                    trangthai: 1,
+                    ...obj
+                },
+            });
+        } catch (error) {
+            return error;
+        }
+    },
+    thongKeDoanhThuBanLeNhanVienTheoNgay: async (startDate, endDate, empID) => {
+        try {
+            let obj = {};
+            if (empID) {
+                obj.nguoitao_id = parseInt(empID)
+            }
+            return await banle.findAll({
+                attributes: [
+                    [sequelize.fn('sum', sequelize.col('tongdonhang')), 'thanhtien'],
+                    [sequelize.fn('count', sequelize.col('tongdonhang')), 'soluong'],
+                ],
+                where: {
+                    ngaytao: {
+                        [Op.between]: [startDate, endDate],
+                    },
+                    trangthai: 1,
+                    ...obj
+                },
+            });
+        } catch (error) {
+            return error;
+        }
+    },
+
+    thongKeBanLeTheoNhanVien: async (startDate, endDate) => {
+        try {
+            return await banle.sequelize.query(
+            `
+            SELECT
+                thanhvien.id,
+                thanhvien.tendaydu,
+                SUM(banle.tongdonhang - banle.discountAmount) AS total_banle
+            FROM
+                thanhvien
+            LEFT JOIN
+                banle ON thanhvien.id = banle.nguoitao_id
+            WHERE
+                banle.ngaytao BETWEEN '${startDate}' AND '${endDate}' 
+                AND banle.trangthai = 1
+                AND thanhvien.trangthai = 1
+            GROUP BY
+                thanhvien.id, thanhvien.tendaydu;
+                `,
+                { type: QueryTypes.SELECT },
+            );
+        } catch (error) {
+            return error;
+        }
+    },
+
+    thongKePhieuDieuTriTheoNhanVien: async (startDate, endDate) => {
+        try {
+            return await phieudieutri.sequelize.query(
+            `
+            SELECT
+                thanhvien.id,
+                thanhvien.tendaydu,
+                SUM(phieudieutri.thanhtien) AS total_phieudieutri
+            FROM
+                thanhvien
+            LEFT JOIN
+                phieudieutri ON thanhvien.id = phieudieutri.nguoitao_id
+            WHERE
+                phieudieutri.ngaytao BETWEEN '${startDate}' AND '${endDate}' 
+                AND phieudieutri.trangthai = 1
+                AND thanhvien.trangthai = 1
+            GROUP BY
+                thanhvien.id, thanhvien.tendaydu;
+                `,
+                { type: QueryTypes.SELECT },
+            );
+        } catch (error) {
+            return error;
+        }
+    },
+
+    khachHangPhieuDieuTri: async (startDate, endDate, customerID) => {
+        try {
+            let obj = {};
+            if (customerID) {
+                obj.khachhang_id = parseInt(customerID)            
+            }
+            return await phieudieutri.findAll({
+                attributes: [
+                    [sequelize.fn('sum', sequelize.col('thanhtien')), 'thanhtien'],
+                    [sequelize.fn('count', sequelize.col('thanhtien')), 'soluong'],
+                ],
+                where: {
+                    ngaytao: {
+                        [Op.between]: [startDate, endDate],
+                    },
+                    trangthai: 1,
+                    ...obj
+                },
+            });
+        } catch (error) {
+            return error;
+        }
+    },
+
+    khachHangBanLe: async (startDate, endDate, customerID) => {
+        try {
+            let obj = {};
+            if (customerID) {
+                obj.khachhang_id = parseInt(customerID)
+            }
+            return await banle.findAll({
+                attributes: [
+                    [sequelize.fn('sum', sequelize.col('tongdonhang')), 'thanhtien'],
+                    [sequelize.fn('count', sequelize.col('tongdonhang')), 'soluong'],
+                ],
+                where: {
+                    ngaytao: {
+                        [Op.between]: [startDate, endDate],
+                    },
+                    trangthai: 1,
+                    ...obj
+                },
+            });
+        } catch (error) {
+            return error;
+        }
+    },
+
+    topKhachHangPhieuDieuTri: async (startDate, endDate) => {
+        try {
+            return await phieudieutri.sequelize.query(
+            `
+            SELECT
+                khachhang.id,
+                khachhang.ten,
+                khachhang.sodienthoai,
+                SUM(phieudieutri.thanhtien) AS total_thanhtien,
+                COUNT(phieudieutri.id) as soluong
+            FROM
+                khachhang
+            JOIN
+                phieudieutri ON khachhang.id = phieudieutri.khachhang_id
+            WHERE
+                phieudieutri.ngaytao BETWEEN '${startDate}' AND '${endDate}' 
+                AND phieudieutri.trangthai = 1
+                AND khachhang.trangthai = 1 
+            GROUP BY
+                khachhang.id, khachhang.ten, khachhang.sodienthoai
+            ORDER BY
+                total_thanhtien DESC
+            LIMIT
+                10;
+                `,
+                { type: QueryTypes.SELECT },
+            );
+        } catch (error) {
+            return error;
+        }
+    },
+
+    topKhachHangBanLe: async (startDate, endDate) => {
+        try {
+            return await banle.sequelize.query(
+            `
+            SELECT
+                khachhang.id,
+                khachhang.ten,
+                khachhang.sodienthoai,
+                SUM(banle.tongdonhang - banle.discountAmount) AS total_banle,
+                COUNT(banle.id) as soluong
+            FROM
+                khachhang
+            JOIN
+                banle ON khachhang.id = banle.khachhang_id
+            WHERE
+                banle.ngaytao BETWEEN '${startDate}' AND '${endDate}' 
+                AND banle.trangthai = 1
+                AND khachhang.trangthai = 1 
+            GROUP BY
+                khachhang.id, khachhang.ten, khachhang.sodienthoai
+            ORDER BY
+                total_banle DESC
+            LIMIT
+                10;
+                `,
+                { type: QueryTypes.SELECT },
+            );
+        } catch (error) {
+            return error;
+        }
+    },
+
+    danhSachThongKeKhachHangPhieuDieuTri: async (startDate, endDate, pageSize, pageNum, customerID) => {
+        try {
+            let str = '';
+            if (customerID) {
+                str = `AND khachhang.id = ${customerID}`;
+            }
+            const data = await phieudieutri.sequelize.query(
+            `
+            SELECT
+                khachhang.id,
+                khachhang.ten,
+                khachhang.sodienthoai,
+                SUM(phieudieutri.thanhtien) AS total_thanhtien,
+                COUNT(phieudieutri.id) as soluong
+            FROM
+                khachhang
+            JOIN
+                phieudieutri ON khachhang.id = phieudieutri.khachhang_id
+            WHERE
+                phieudieutri.ngaytao BETWEEN '${startDate}' AND '${endDate}' 
+                AND phieudieutri.trangthai = 1
+                AND khachhang.trangthai = 1
+                ${str}
+            GROUP BY
+                khachhang.id, khachhang.ten, khachhang.sodienthoai
+            ORDER BY
+                total_thanhtien DESC
+            LIMIT ${pageSize} OFFSET ${pageSize * (pageNum - 1)};
+            `,
+                { type: QueryTypes.SELECT },
+            );
+
+            const total = await phieudieutri.sequelize.query(
+                `
+                SELECT COUNT(*) AS totalResults
+                FROM (
+                    SELECT
+                        khachhang.id,
+                        khachhang.ten,
+                        khachhang.sodienthoai,
+                        SUM(phieudieutri.thanhtien) AS total_thanhtien,
+                        COUNT(phieudieutri.id) AS soluong
+                    FROM
+                        khachhang
+                    JOIN
+                        phieudieutri ON khachhang.id = phieudieutri.khachhang_id
+                    WHERE
+                        phieudieutri.ngaytao BETWEEN '${startDate}' AND '${endDate}' 
+                        AND phieudieutri.trangthai = 1
+                        AND khachhang.trangthai = 1
+                        ${str}
+                    GROUP BY
+                        khachhang.id, khachhang.ten, khachhang.sodienthoai
+                ) AS subquery;
+                `, 
+                { type: QueryTypes.SELECT }
+            );
+
+            return {data, total};
+        } catch (error) {
+            return error;
+        }
+    },
+
+    danhSachThongKeKhachHangBanLe: async (startDate, endDate, pageSize, pageNum, customerID) => {
+        try {
+            let str = '';
+            if (customerID) {
+                str = `AND khachhang.id = ${customerID}`;
+            }
+            const data = await banle.sequelize.query(
+            `
+            SELECT
+                khachhang.id,
+                khachhang.ten,
+                khachhang.sodienthoai,
+                SUM(banle.tongdonhang - banle.discountAmount) AS total_banle,
+                COUNT(banle.id) as soluong
+            FROM
+                khachhang
+            JOIN
+                banle ON khachhang.id = banle.khachhang_id
+            WHERE
+                banle.ngaytao BETWEEN '${startDate}' AND '${endDate}' 
+                AND banle.trangthai = 1
+                AND khachhang.trangthai = 1
+                ${str}
+            GROUP BY
+                khachhang.id, khachhang.ten, khachhang.sodienthoai
+            ORDER BY
+                total_banle DESC
+            LIMIT ${pageSize} OFFSET ${pageSize * (pageNum - 1)};
+            `,
+                { type: QueryTypes.SELECT },
+            );
+
+            const total = await banle.sequelize.query(
+                `
+                SELECT COUNT(*) AS totalResults
+                FROM (
+                    SELECT
+                        khachhang.id,
+                        khachhang.ten,
+                        khachhang.sodienthoai,
+                        SUM(banle.tongdonhang - banle.discountAmount) AS total_banle,
+                        COUNT(banle.id) AS soluong
+                    FROM
+                        khachhang
+                    JOIN
+                        banle ON khachhang.id = banle.khachhang_id
+                    WHERE
+                        banle.ngaytao BETWEEN '${startDate}' AND '${endDate}' 
+                        AND banle.trangthai = 1
+                        AND khachhang.trangthai = 1
+                        ${str}
+                    GROUP BY
+                        khachhang.id, khachhang.ten, khachhang.sodienthoai
+                ) AS subquery;
+                `, 
+                { type: QueryTypes.SELECT }
+            );
+
+            return {data, total};
+        } catch (error) {
+            return error;
+        }
+    },
 };
