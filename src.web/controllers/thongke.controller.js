@@ -759,4 +759,242 @@ module.exports = {
             return error;
         }
     },
+
+    thongkeSanPhamBanLe: async (startDate, endDate, nhomSanPhamId, sanPhamId) => {
+        try {
+            let query = `
+            SELECT
+                SUM(bl.soluong) AS tong_soluong,
+                SUM(bl.dongiaban) AS tong_tien
+            FROM
+                banle_sanpham bl
+            INNER JOIN
+                banle ON bl.banle_id = banle.id
+            WHERE
+                banle.trangthai = 1 AND
+                bl.ngaytao BETWEEN '${startDate}' AND '${endDate}';`;
+
+            if (nhomSanPhamId) {
+                nhomSanPhamId = parseInt(nhomSanPhamId);
+                query = `
+                SELECT
+                    sp.nhomsanpham_id,
+                    SUM(bl.soluong) AS tong_soluong,
+                    SUM(bl.dongiaban) AS tong_tien
+                FROM
+                    banle_sanpham bl
+                INNER JOIN
+                    sanpham sp ON bl.sanpham_id = sp.id
+                INNER JOIN
+                    banle ON bl.banle_id = banle.id
+                WHERE
+                    banle.trangthai = 1 AND
+                    sp.nhomsanpham_id = ${nhomSanPhamId} 
+                    AND bl.ngaytao BETWEEN '${startDate}' AND '${endDate}'
+                GROUP BY
+                    sp.nhomsanpham_id;`
+            }
+
+            if (sanPhamId) {
+                sanPhamId = parseInt(sanPhamId);
+                query = `
+                SELECT
+                    sp.id AS sanpham_id,
+                    SUM(bl.soluong) AS tong_soluong,
+                    SUM(bl.dongiaban) AS tong_tien
+                FROM
+                    banle_sanpham bl
+                INNER JOIN
+                    sanpham sp ON bl.sanpham_id = sp.id
+                INNER JOIN
+                    banle ON bl.banle_id = banle.id
+                WHERE
+                    banle.trangthai = 1 AND
+                    sp.id = ${sanPhamId}
+                    AND bl.ngaytao BETWEEN '${startDate}' AND '${endDate}'
+                GROUP BY
+                    sp.id;`
+            }
+
+            return await banle.sequelize.query(
+                query
+            ,
+                { type: QueryTypes.SELECT },
+            );
+        } catch (error) {
+            return error;
+        }
+    },
+
+    thongkeSanPhamPhieuDieuTri: async (startDate, endDate, nhomSanPhamId, sanPhamId) => {
+        try {
+            let query = `
+            SELECT
+                COUNT(ps.sanpham_id) AS tong_soluong,
+                SUM(ps.gia) AS tong_tien
+            FROM
+                phieudieutri_sanpham ps
+            INNER JOIN
+                phieudieutri pdt ON ps.phieudieutri_id = pdt.id
+            WHERE
+                pdt.trangthai = 1 AND
+                ps.ngaytao BETWEEN '${startDate}' AND '${endDate}';
+            `;
+
+            if (nhomSanPhamId) {
+                nhomSanPhamId = parseInt(nhomSanPhamId);
+                query = `
+                SELECT
+                    sp.nhomsanpham_id,
+                    COUNT(ps.sanpham_id) AS tong_soluong,
+                    SUM(ps.gia) AS tong_tien
+                FROM
+                    phieudieutri_sanpham ps
+                INNER JOIN
+                    sanpham sp ON ps.sanpham_id = sp.id
+                INNER JOIN
+                    phieudieutri pdt ON ps.phieudieutri_id = pdt.id
+                WHERE
+                    sp.nhomsanpham_id = ${nhomSanPhamId}
+                    AND pdt.trangthai = 1
+                    AND ps.ngaytao BETWEEN '${startDate}' AND '${endDate}'
+                GROUP BY
+                    sp.nhomsanpham_id;`
+            }
+
+            if (sanPhamId) {
+                sanPhamId = parseInt(sanPhamId);
+                query = `
+                SELECT
+                    sp.id AS sanpham_id,
+                    COUNT(ps.sanpham_id) AS tong_soluong,
+                    SUM(ps.gia) AS tong_tien
+                FROM
+                    phieudieutri_sanpham ps
+                INNER JOIN
+                    sanpham sp ON ps.sanpham_id = sp.id
+                INNER JOIN
+                    phieudieutri pdt ON ps.phieudieutri_id = pdt.id
+                WHERE
+                    sp.id = ${sanPhamId}
+                    AND pdt.trangthai = 1
+                    AND ps.ngaytao BETWEEN '${startDate}' AND '${endDate}'
+                GROUP BY
+                    sp.id;`
+            }
+
+            return await banle.sequelize.query(
+                query
+            ,
+                { type: QueryTypes.SELECT },
+            );
+        } catch (error) {
+            return error;
+        }
+    },
+
+    chartSanPhamDieuTri: async (startDate, endDate, pageSize, pageNum) => {
+        try {
+            const data = await phieudieutri.sequelize.query(
+            `
+                SELECT
+                    sp.id, sp.ten, sp.tenthaythe,
+                    COUNT(ps.sanpham_id) AS tong_soluong,
+                    SUM(ps.gia) AS tong_tien
+                FROM
+                    phieudieutri_sanpham ps
+                INNER JOIN
+                    sanpham sp ON ps.sanpham_id = sp.id
+                WHERE
+                    sp.trangthai = 1
+                    AND sp.ngaytao BETWEEN '${startDate}' AND '${endDate}'
+                GROUP BY
+                    sp.id
+                ORDER BY
+                    tong_soluong DESC
+                LIMIT ${pageSize} OFFSET ${pageSize * (pageNum - 1)};
+            `,
+                { type: QueryTypes.SELECT },
+            );
+
+            const total = await phieudieutri.sequelize.query(
+                `
+                SELECT COUNT(*) AS totalResults
+                FROM (
+                    SELECT
+                        sp.id, sp.ten, sp.tenthaythe,
+                        COUNT(ps.sanpham_id) AS tong_soluong,
+                        SUM(ps.gia) AS tong_tien
+                    FROM
+                        phieudieutri_sanpham ps
+                    INNER JOIN
+                        sanpham sp ON ps.sanpham_id = sp.id
+                    WHERE
+                        sp.trangthai = 1
+                        AND sp.ngaytao BETWEEN '${startDate}' AND '${endDate}'
+                    GROUP BY
+                        sp.id
+                ) AS subquery;
+                `, 
+                { type: QueryTypes.SELECT }
+            );
+            return {data, total};
+        } catch (error) {
+            return error;
+        }
+    },
+
+    chartSanPhamBanLe: async (startDate, endDate, pageSize, pageNum) => {
+        try {
+            const data = await banle.sequelize.query(
+            `
+                SELECT
+                    sp.id, sp.ten, sp.tenthaythe,
+                    SUM(bl.soluong) AS tong_soluong,
+                    SUM(bl.dongiaban - bl.productPrice) AS tong_tien
+                FROM
+                    banle_sanpham bl
+                INNER JOIN
+                    sanpham sp ON bl.sanpham_id = sp.id
+                WHERE
+                    sp.trangthai = 1
+                    AND sp.ngaytao BETWEEN '${startDate}' AND '${endDate}'
+                GROUP BY
+                    sp.id
+                ORDER BY
+                    tong_tien DESC,
+                    tong_soluong DESC
+                LIMIT ${pageSize} OFFSET ${pageSize * (pageNum - 1)};
+            `,
+
+                { type: QueryTypes.SELECT },
+            );
+
+            const total = await phieudieutri.sequelize.query(
+                `
+                SELECT COUNT(*) AS totalResults
+                    FROM (
+                        SELECT
+                        sp.id, sp.ten, sp.tenthaythe,
+                        SUM(bl.soluong) AS tong_soluong,
+                        SUM(bl.dongiaban - bl.productPrice) AS tong_tien
+                    FROM
+                        banle_sanpham bl
+                    INNER JOIN
+                        sanpham sp ON bl.sanpham_id = sp.id
+                    WHERE
+                        sp.trangthai = 1
+                        AND sp.ngaytao BETWEEN '${startDate}' AND '${endDate}'
+                    GROUP BY
+                        sp.id
+                ) AS subquery;
+                `, 
+                { type: QueryTypes.SELECT }
+            );
+
+            return {data, total};
+        } catch (error) {
+            return error;
+        }
+    },
 };

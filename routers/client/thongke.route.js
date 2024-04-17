@@ -374,7 +374,7 @@ router.get("/thongkekhachhang", async(req, res) => {
             endDate = moment(endDate).format('YYYY-MM-DD');
         }
 
-        let dt_dieutri = await controller.khachHangPhieuDieuTri(startDate, endDate, customerID);        
+        const dt_dieutri = await controller.khachHangPhieuDieuTri(startDate, endDate, customerID);        
         const dt_banle = await controller.khachHangBanLe(startDate, endDate, customerID);
 
         response.success(res, "success", 
@@ -455,6 +455,106 @@ router.get("/danhsachkhachhangbanle", async(req, res) => {
     } catch (err) {
         console.log(err.message);
         response.error(res, "failed", 500)
+    }
+});
+
+router.get("/thongkesanpham", async(req, res) => {
+    try {
+        let startDate = req.query.startDate;
+        let endDate = req.query.endDate;
+        let nhomSanPhamId = req.query.nhomSanPhamId;
+        let sanPhamId = req.query.sanPhamId;
+
+        if (startDate && endDate) {
+            startDate = moment(startDate).startOf('day').format('YYYY-MM-DD HH:mm:ss');
+            endDate = moment(endDate).endOf('day').format('YYYY-MM-DD HH:mm:ss');
+        }
+
+        let dt_dieutri = await controller.thongkeSanPhamPhieuDieuTri(startDate, endDate, nhomSanPhamId, sanPhamId);
+        const dt_banle = await controller.thongkeSanPhamBanLe(startDate, endDate, nhomSanPhamId, sanPhamId);
+
+        response.success(res, "success", 
+        { 
+            dieutri: dt_dieutri[0],
+            banle: dt_banle[0]
+            
+        })
+    } catch (err) {
+        console.log(err.message);
+        response.error(res, "failed", 500)
+    }
+});
+
+router.get("/chartsanpham", async(req, res) => {
+    try {
+        let startDate = req.query.startDate;
+        let endDate = req.query.endDate;     
+        if (startDate && endDate) {
+            startDate = moment(startDate).startOf('day').format('YYYY-MM-DD HH:mm:ss');
+            endDate = moment(endDate).endOf('day').format('YYYY-MM-DD HH:mm:ss');
+        }
+
+        let chart_dieutri = await controller.chartSanPhamDieuTri(startDate, endDate, 10, 1);
+        let chart_banle = await controller.chartSanPhamBanLe(startDate, endDate, 10, 1);
+
+        response.success(res, "success", 
+        { 
+            dieutri: chart_dieutri.data,
+            banle: chart_banle.data
+            
+        })
+
+    } catch (err) {
+        console.log(err.message);
+        response.error(res, "failed", 500)
+    }
+});
+
+router.get('/listsanphamphieudieutri', async (req, res) => {
+    let startDate = req.query.startDate;
+    let endDate = req.query.endDate;
+    if (startDate && endDate) {
+        startDate = moment(startDate).startOf('day').format('YYYY-MM-DD HH:mm:ss');
+        endDate = moment(endDate).endOf('day').format('YYYY-MM-DD HH:mm:ss');
+    }
+    const pageSize = parseInt(req.query.pageSize) || 10;
+    const pageNum = parseInt(req.query.pageNum) || 1;
+    try {
+        const result = await controller.chartSanPhamDieuTri(startDate, endDate, pageSize, pageNum );
+        const pagination = {
+            totalPages: Math.ceil(result.total[0].totalResults / pageSize),
+            currentPage: pageNum,
+            pageSize,
+            totalItems: result.total[0].totalResults,
+        }; 
+        response.success_v2(res, 'Lấy dữ liệu thành công', result.data, pagination);
+    } catch (err) {
+        console.log(err.message);
+        response.error(res, 'failed', 500);
+    }
+});
+
+router.get('/listsanphambanle', async (req, res) => {
+    let startDate = req.query.startDate;
+    let endDate = req.query.endDate;
+    if (startDate && endDate) {
+        startDate = moment(startDate).startOf('day').format('YYYY-MM-DD HH:mm:ss');
+        endDate = moment(endDate).endOf('day').format('YYYY-MM-DD HH:mm:ss');
+    }
+    const pageSize = parseInt(req.query.pageSize) || 10;
+    const pageNum = parseInt(req.query.pageNum) || 1;
+    try {
+        const result = await controller.chartSanPhamBanLe(startDate, endDate, pageSize, pageNum );
+        const pagination = {
+            totalPages: Math.ceil(result.total[0].totalResults / pageSize),
+            currentPage: pageNum,
+            pageSize,
+            totalItems: result.total[0].totalResults,
+        }; 
+        response.success_v2(res, 'Lấy dữ liệu thành công', result.data, pagination);
+    } catch (err) {
+        console.log(err.message);
+        response.error(res, 'failed', 500);
     }
 });
 
