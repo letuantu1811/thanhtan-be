@@ -405,6 +405,22 @@ router.get("/topkhachhangbanle", async(req, res) => {
     }
 });
 
+router.get("/topkhachhangphieudieutri", async(req, res) => {
+    try {
+        let startDate = req.query.startDate;
+        let endDate = req.query.endDate;     
+        if (startDate && endDate) {
+            startDate = moment(startDate).startOf('day').format('YYYY-MM-DD HH:mm:ss');
+            endDate = moment(endDate).endOf('day').format('YYYY-MM-DD HH:mm:ss');
+        }
+        let result = await controller.topKhachHangPhieuDieuTri(startDate, endDate);
+        response.success(res, "success", result);      
+    } catch (err) {
+        console.log(err.message);
+        response.error(res, "failed", 500)
+    }
+});
+
 router.get("/danhsachkhachhangphieudieutri", async(req, res) => {
     try {
         let startDate = req.query.startDate;
