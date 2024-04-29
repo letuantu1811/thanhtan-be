@@ -14,7 +14,7 @@ const Sequelize = require('sequelize');
 //     }
 // });
 module.exports = new Sequelize('tha81756_qlthuy', 'tha81756_qlthuy', 'xqHIjeDP&9K8hVHL', {
-    host: '103.138.88.35',
+    host: '103.138.88.45',
     // host: 'localhost',
     dialect: 'mysql',
     port: 3306,
