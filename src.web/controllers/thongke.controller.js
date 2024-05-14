@@ -468,8 +468,12 @@ module.exports = {
         }
     },
 
-    thongKeBanLeTheoNhanVien: async (startDate, endDate) => {
+    thongKeBanLeTheoNhanVien: async (startDate, endDate, empID) => {
         try {
+            let str = '';
+            if (empID) {
+                str = `AND thanhvien.id = ${parseInt(empID)}`;
+            }
             return await banle.sequelize.query(
             `
             SELECT
@@ -484,6 +488,7 @@ module.exports = {
                 banle.ngaytao BETWEEN '${startDate}' AND '${endDate}' 
                 AND banle.trangthai = 1
                 AND thanhvien.trangthai = 1
+                '${str}'
             GROUP BY
                 thanhvien.id, thanhvien.tendaydu;
                 `,
@@ -494,8 +499,13 @@ module.exports = {
         }
     },
 
-    thongKePhieuDieuTriTheoNhanVien: async (startDate, endDate) => {
+    thongKePhieuDieuTriTheoNhanVien: async (startDate, endDate, empID) => {
         try {
+            let str = '';
+            if (empID) {
+                str = `AND thanhvien.id = ${parseInt(empID)}`;
+            }
+            ret
             return await phieudieutri.sequelize.query(
             `
             SELECT
@@ -510,6 +520,7 @@ module.exports = {
                 phieudieutri.ngaytao BETWEEN '${startDate}' AND '${endDate}' 
                 AND phieudieutri.trangthai = 1
                 AND thanhvien.trangthai = 1
+                '${str}'
             GROUP BY
                 thanhvien.id, thanhvien.tendaydu;
                 `,
@@ -568,7 +579,7 @@ module.exports = {
         }
     },
 
-    topKhachHangPhieuDieuTri: async (startDate, endDate) => {
+    topKhachHangPhieuDieuTri: async (startDate, endDate, pageSize) => {
         try {
             return await phieudieutri.sequelize.query(
             `
@@ -590,8 +601,7 @@ module.exports = {
                 khachhang.id, khachhang.ten, khachhang.sodienthoai
             ORDER BY
                 total_thanhtien DESC
-            LIMIT
-                10;
+            LIMIT ${pageSize};
                 `,
                 { type: QueryTypes.SELECT },
             );
@@ -600,7 +610,7 @@ module.exports = {
         }
     },
 
-    topKhachHangBanLe: async (startDate, endDate) => {
+    topKhachHangBanLe: async (startDate, endDate, pageSize) => {
         try {
             return await banle.sequelize.query(
             `
@@ -622,8 +632,7 @@ module.exports = {
                 khachhang.id, khachhang.ten, khachhang.sodienthoai
             ORDER BY
                 total_banle DESC
-            LIMIT
-                10;
+            LIMIT ${pageSize};
                 `,
                 { type: QueryTypes.SELECT },
             );
@@ -992,6 +1001,83 @@ module.exports = {
                 { type: QueryTypes.SELECT }
             );
 
+            return {data, total};
+        } catch (error) {
+            return error;
+        }
+    },
+
+    thongkeCongDichVu: async (startDate, endDate, cdvID) => {
+        try {
+            let str = cdvID ? `AND congdichvu_id = ${cdvID}` : ``;
+            let query = `
+                SELECT
+                    COUNT(congdichvu_id) AS tong_soluong,
+                    SUM(CAST(gia AS DECIMAL(10, 2))) AS tong_tien
+                FROM
+                    phieudieutri_congdichvu
+                WHERE
+                    ngaytao BETWEEN '${startDate}' AND '${endDate}'
+                    ${str}
+            `;
+            return await banle.sequelize.query(
+                query
+            ,
+                { type: QueryTypes.SELECT },
+            );
+        } catch (error) {
+            return error;
+        }
+    },
+
+    chartCongDichVu: async (startDate, endDate, pageSize, pageNum) => {
+        try {
+            const data = await phieudieutri.sequelize.query(
+            `
+            SELECT
+                cdv.id,
+                cdv.ten,
+                COUNT(pc.congdichvu_id) AS tong_soluong,
+                SUM(CAST(pc.gia AS DECIMAL(10, 2))) AS tong_tien
+            FROM
+                phieudieutri_congdichvu pc
+            INNER JOIN
+                congdichvu cdv ON pc.congdichvu_id = cdv.id
+            WHERE
+                cdv.trangthai = 1
+                AND pc.ngaytao BETWEEN '${startDate}' AND '${endDate}'
+            GROUP BY
+                cdv.id
+            ORDER BY
+                tong_tien DESC,
+                tong_soluong DESC
+            LIMIT ${pageSize} OFFSET ${pageSize * (pageNum - 1)};
+            `,
+                { type: QueryTypes.SELECT },
+            );
+
+            const total = await phieudieutri.sequelize.query(
+                `
+                SELECT COUNT(*) AS totalResults
+                FROM (
+                    SELECT
+                        cdv.id,
+                        cdv.ten,
+                        COUNT(pc.congdichvu_id) AS tong_soluong,
+                        SUM(CAST(pc.gia AS DECIMAL(10, 2))) AS tong_tien
+                    FROM
+                        phieudieutri_congdichvu pc
+                    INNER JOIN
+                        congdichvu cdv ON pc.congdichvu_id = cdv.id
+                    WHERE
+                        cdv.trangthai = 1
+                        AND pc.ngaytao BETWEEN '${startDate}' AND '${endDate}'
+                    GROUP BY
+                        cdv.id
+                ) AS subquery;
+                `, 
+                { type: QueryTypes.SELECT }
+            );
             return {data, total};
         } catch (error) {
             return error;

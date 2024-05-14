@@ -323,13 +323,15 @@ router.get("/chartnhanvien", async(req, res) => {
     try {
         let startDate = req.query.startDate;
         let endDate = req.query.endDate;     
+        let empID = req.query.empID;
+
         if (startDate && endDate) {
             startDate = moment(startDate).startOf('day').format('YYYY-MM-DD HH:mm:ss');
             endDate = moment(endDate).endOf('day').format('YYYY-MM-DD HH:mm:ss');
         }
 
-        let arr1 = await controller.thongKeBanLeTheoNhanVien(startDate, endDate);
-        let arr2 = await controller.thongKePhieuDieuTriTheoNhanVien(startDate, endDate);
+        let arr1 = await controller.thongKeBanLeTheoNhanVien(startDate, endDate, empID);
+        let arr2 = await controller.thongKePhieuDieuTriTheoNhanVien(startDate, endDate, empID);
 
         const arr2Map = {};
         arr2.forEach(item => {
@@ -397,7 +399,9 @@ router.get("/topkhachhangbanle", async(req, res) => {
             startDate = moment(startDate).startOf('day').format('YYYY-MM-DD HH:mm:ss');
             endDate = moment(endDate).endOf('day').format('YYYY-MM-DD HH:mm:ss');
         }
-        let result = await controller.topKhachHangBanLe(startDate, endDate);
+        const pageSize = parseInt(req.query.pageSize) || 10;
+
+        let result = await controller.topKhachHangBanLe(startDate, endDate, pageSize);
         response.success(res, "success", result);      
     } catch (err) {
         console.log(err.message);
@@ -413,7 +417,9 @@ router.get("/topkhachhangphieudieutri", async(req, res) => {
             startDate = moment(startDate).startOf('day').format('YYYY-MM-DD HH:mm:ss');
             endDate = moment(endDate).endOf('day').format('YYYY-MM-DD HH:mm:ss');
         }
-        let result = await controller.topKhachHangPhieuDieuTri(startDate, endDate);
+        const pageSize = parseInt(req.query.pageSize) || 10;
+
+        let result = await controller.topKhachHangPhieuDieuTri(startDate, endDate, pageSize);
         response.success(res, "success", result);      
     } catch (err) {
         console.log(err.message);
@@ -509,9 +515,10 @@ router.get("/chartsanpham", async(req, res) => {
             startDate = moment(startDate).startOf('day').format('YYYY-MM-DD HH:mm:ss');
             endDate = moment(endDate).endOf('day').format('YYYY-MM-DD HH:mm:ss');
         }
+        const pageSize = parseInt(req.query.pageSize) || 10;
 
-        let chart_dieutri = await controller.chartSanPhamDieuTri(startDate, endDate, 10, 1);
-        let chart_banle = await controller.chartSanPhamBanLe(startDate, endDate, 10, 1);
+        let chart_dieutri = await controller.chartSanPhamDieuTri(startDate, endDate, pageSize, 1);
+        let chart_banle = await controller.chartSanPhamBanLe(startDate, endDate, pageSize, 1);
 
         response.success(res, "success", 
         { 
@@ -574,5 +581,69 @@ router.get('/listsanphambanle', async (req, res) => {
     }
 });
 
+router.get("/tongquancongdichvu", async(req, res) => {
+    try {
+        let startDate = req.query.startDate;
+        let endDate = req.query.endDate;
+        let cdvID = req.query.cdvID;
+
+        if (startDate && endDate) {
+            startDate = moment(startDate).startOf('day').format('YYYY-MM-DD HH:mm:ss');
+            endDate = moment(endDate).endOf('day').format('YYYY-MM-DD HH:mm:ss');
+        }
+
+        let result = await controller.thongkeCongDichVu(startDate, endDate, cdvID);
+        if (result[0].tong_tien) result[0].tong_tien = result[0].tong_tien * 1000;
+
+        response.success(res, "success", result);
+    } catch (err) {
+        console.log(err.message);
+        response.error(res, "failed", 500)
+    }
+});
+
+router.get("/chartcdv", async(req, res) => {
+    try {
+        let startDate = req.query.startDate;
+        let endDate = req.query.endDate;     
+        if (startDate && endDate) {
+            startDate = moment(startDate).startOf('day').format('YYYY-MM-DD HH:mm:ss');
+            endDate = moment(endDate).endOf('day').format('YYYY-MM-DD HH:mm:ss');
+        }
+        const pageSize = parseInt(req.query.pageSize) || 10;
+
+        let result = await controller.chartCongDichVu(startDate, endDate, pageSize, 1);
+
+        response.success(res, "success", result.data)
+
+    } catch (err) {
+        console.log(err.message);
+        response.error(res, "failed", 500)
+    }
+});
+
+router.get('/listcdv', async (req, res) => {
+    let startDate = req.query.startDate;
+    let endDate = req.query.endDate;
+    if (startDate && endDate) {
+        startDate = moment(startDate).startOf('day').format('YYYY-MM-DD HH:mm:ss');
+        endDate = moment(endDate).endOf('day').format('YYYY-MM-DD HH:mm:ss');
+    }
+    const pageSize = parseInt(req.query.pageSize) || 10;
+    const pageNum = parseInt(req.query.pageNum) || 1;
+    try {
+        const result = await controller.chartCongDichVu(startDate, endDate, pageSize, pageNum );
+        const pagination = {
+            totalPages: Math.ceil(result.total[0].totalResults / pageSize),
+            currentPage: pageNum,
+            pageSize,
+            totalItems: result.total[0].totalResults,
+        }; 
+        response.success_v2(res, 'Lấy dữ liệu thành công', result.data, pagination);
+    } catch (err) {
+        console.log(err.message);
+        response.error(res, 'failed', 500);
+    }
+});
 
 module.exports = router;
