@@ -488,7 +488,7 @@ module.exports = {
                 banle.ngaytao BETWEEN '${startDate}' AND '${endDate}' 
                 AND banle.trangthai = 1
                 AND thanhvien.trangthai = 1
-                '${str}'
+                ${str}
             GROUP BY
                 thanhvien.id, thanhvien.tendaydu;
                 `,
@@ -505,7 +505,6 @@ module.exports = {
             if (empID) {
                 str = `AND thanhvien.id = ${parseInt(empID)}`;
             }
-            ret
             return await phieudieutri.sequelize.query(
             `
             SELECT
@@ -520,7 +519,7 @@ module.exports = {
                 phieudieutri.ngaytao BETWEEN '${startDate}' AND '${endDate}' 
                 AND phieudieutri.trangthai = 1
                 AND thanhvien.trangthai = 1
-                '${str}'
+                ${str}
             GROUP BY
                 thanhvien.id, thanhvien.tendaydu;
                 `,
