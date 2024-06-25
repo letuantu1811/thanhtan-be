@@ -11,6 +11,7 @@ const { toNumber } = require('lodash');
 module.exports = {
     existed: async (body) => {
         const res = body;
+        const DSSP = [...res.dsSP, ...res.dsSPDB];
         const healthFormId = await create_phieudieutri(res);
         let chungloai_id = null;
         if (res.thucung.chungloai && res.thucung.chungloai.id) {
@@ -59,23 +60,19 @@ module.exports = {
             .then((res) => {
                 console.log(res);
             });
-
-        await create_phieudieutri_sanpham(healthFormId, res.dsSP).then(async (res) => {
-            console.log(res + ' tại create_phieudieutri_sanpham');
-        });
-
-        await create_phieudieutri_sanpham(healthFormId, res.dsSPDB).then(async (res) => {
-            console.log(res + ' tại create_phieudieutri_sanpham_DB');
-        });
-
-        await create_phieudieutri_congdichvu(healthFormId, res.dsCDV).then((res) => {
-            console.log(res + ' tại create_phieudieutri_congdichvu ');
-        });
+        if (DSSP.length > 0) {
+            await create_phieudieutri_sanpham(healthFormId, DSSP)
+        }
+        if (res.dsCDV.length > 0) {
+            await create_phieudieutri_congdichvu(healthFormId, res.dsCDV)
+        }
     },
 
     already: async (body) => {
         try {
             const res = body;
+            const DSSP = [...res.dsSP, ...res.dsSPDB];
+
             // update khach hang
             await khachhang
                 .update(
@@ -115,15 +112,12 @@ module.exports = {
             console.log(res);
             const healthFormId = await create_phieudieutri(res);
 
-            await create_phieudieutri_sanpham(healthFormId, res.dsSP).then(async (res) => {
-                console.log(res + ' tại create_phieudieutri_sanpham');
-            });
-            await create_phieudieutri_sanpham(healthFormId, res.dsSPDB).then(async (res) => {
-                console.log(res + ' tại create_phieudieutri_sanpha_DB');
-            });
-            await create_phieudieutri_congdichvu(healthFormId, res.dsCDV).then((res) => {
-                console.log(res + ' tại create_phieudieutri_congdichvu ');
-            });
+            if (DSSP.length > 0) {
+                await create_phieudieutri_sanpham(healthFormId, DSSP)
+            }
+            if (res.dsCDV.length > 0) {
+                await create_phieudieutri_congdichvu(healthFormId, res.dsCDV)
+            }
         } catch (error) {
             log.error(error);
             throw new Error();
@@ -132,6 +126,7 @@ module.exports = {
 
     new: async (body) => {
         const res = body;
+        const DSSP = [...res.dsSP, ...res.dsSPDB];
         try {
             const customerId = await khachhang
                 .create({
@@ -164,9 +159,12 @@ module.exports = {
             res.khachhang.id = customerId;
 
             const healthFormId = await create_phieudieutri(res);
-            await create_phieudieutri_sanpham(healthFormId, res.dsSP);
-            await create_phieudieutri_sanpham(healthFormId, res.dsSPDB);
-            await create_phieudieutri_congdichvu(healthFormId, res.dsCDV);
+            if (DSSP.length > 0) {
+                await create_phieudieutri_sanpham(healthFormId, DSSP)
+            }
+            if (res.dsCDV.length > 0) {
+                await create_phieudieutri_congdichvu(healthFormId, res.dsCDV)
+            }
         } catch (error) {
             throw error;
         }
@@ -209,12 +207,18 @@ async function create_phieudieutri_sanpham(healthFormId, listSP) {
             let obj = {
                 phieudieutri_id: 0,
                 sanpham_id: 0,
+                gia: 0,
+                soluongban: 0,
                 ngaytao: localDate(new Date()),
             };
             await sanpham.updateSoLuong(element.id, element.soluong)
             obj = new Object();
             obj.phieudieutri_id = healthFormId;
             obj.sanpham_id = element.id;
+            if (element.gia) {           
+                obj.gia = parseInt((element.gia + '').replace(/,/g, ''))
+            }
+            obj.soluongban = parseInt(element.soluong);
             obj.ngaytao = localDate(new Date());
             arr.push(obj);
         }
@@ -232,11 +236,13 @@ async function create_phieudieutri_congdichvu(healthFormId, listCDV) {
             let obj = {
                 phieudieutri_id: 0,
                 congdichvu_id: 0,
+                gia: '',
                 ngaytao: localDate(new Date()),
             };
             obj = new Object();
             obj.phieudieutri_id = healthFormId;
             obj.congdichvu_id = element.id;
+            obj.gia = element.gia;
             obj.ngaytao = localDate(new Date());
             arr.push(obj);
         }
