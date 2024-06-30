@@ -114,8 +114,8 @@ router.get("/thongkedoanhthu", async(req, res) => {
         let endDate = req.query.endDate;
 
         if (startDate && endDate) {
-            startDate = moment(startDate).format('YYYY-MM-DD');
-            endDate = moment(endDate).format('YYYY-MM-DD');
+            startDate = moment(startDate).startOf('day').format('YYYY-MM-DD HH:mm:ss');
+            endDate = moment(endDate).endOf('day').format('YYYY-MM-DD HH:mm:ss');
         }
 
         let dt_dieutri = await controller.thongKeDoanhThuTheoNgay(startDate, endDate);
@@ -300,8 +300,8 @@ router.get("/thongkenhanvien", async(req, res) => {
         let empID = req.query.empID;
 
         if (startDate && endDate) {
-            startDate = moment(startDate).format('YYYY-MM-DD');
-            endDate = moment(endDate).format('YYYY-MM-DD');
+            startDate = moment(startDate).startOf('day').format('YYYY-MM-DD HH:mm:ss');
+            endDate = moment(endDate).endOf('day').format('YYYY-MM-DD HH:mm:ss');
         }
 
         let dt_dieutri = await controller.thongKeDoanhThuNhanVienTheoNgay(startDate, endDate, empID);        
@@ -333,31 +333,42 @@ router.get("/chartnhanvien", async(req, res) => {
         let arr1 = await controller.thongKeBanLeTheoNhanVien(startDate, endDate, empID);
         let arr2 = await controller.thongKePhieuDieuTriTheoNhanVien(startDate, endDate, empID);
 
-        const arr2Map = {};
-        arr2.forEach(item => {
-            arr2Map[item.id] = item;
-        });
-
-        const mergedArray = arr1.map(item1 => {
-            const matchingItem = arr2Map[item1.id];
-            if (matchingItem) {
-                return {
+        const mergeArrays = (arr1, arr2) => {
+            if (arr1.length === 0 && arr2.length === 0) return [];         
+            if (arr1.length === 0) {
+                return arr2.map(item2 => ({
+                    id: item2.id,
+                    tendaydu: item2.tendaydu,
+                    total_banle: 0,
+                    total_phieudieutri: parseInt(item2.total_phieudieutri) || 0,
+                    total: parseInt(item2.total_phieudieutri) || 0
+                }));
+            }   
+            if (arr2.length === 0) {
+                return arr1.map(item1 => ({
                     id: item1.id,
                     tendaydu: item1.tendaydu,
-                    total_banle: item1.total_banle,
-                    total_phieudieutri: matchingItem.total_phieudieutri,
-                    total: parseInt(matchingItem.total_phieudieutri || 0) +  item1.total_banle,
-                };
-            } else {
-                return {
-                    id: item1.id,
-                    tendaydu: item1.tendaydu,
-                    total_banle: item1.total_banle,
+                    total_banle: item1.total_banle || 0,
                     total_phieudieutri: 0,
-                    total: item1.total_banle
-                }; 
-            }
-        });
+                    total: item1.total_banle || 0
+                }));
+            }     
+
+            const arr2Map = new Map(arr2.map(item => [item.id, item]));
+            return arr1.map(item1 => {
+                const matchingItem = arr2Map.get(item1.id);
+                const total_banle = item1.total_banle || 0;
+                const total_phieudieutri = matchingItem ? parseInt(matchingItem.total_phieudieutri) || 0 : 0;
+                return {
+                    id: item1.id,
+                    tendaydu: item1.tendaydu,
+                    total_banle: total_banle,
+                    total_phieudieutri: total_phieudieutri,
+                    total: total_banle + total_phieudieutri,
+                };
+            });
+        };
+        const mergedArray = mergeArrays(arr1, arr2);
         response.success(res, "success", mergedArray);      
     } catch (err) {
         console.log(err.message);
@@ -372,8 +383,8 @@ router.get("/thongkekhachhang", async(req, res) => {
         let customerID = req.query.customerID;
 
         if (startDate && endDate) {
-            startDate = moment(startDate).format('YYYY-MM-DD');
-            endDate = moment(endDate).format('YYYY-MM-DD');
+            startDate = moment(startDate).startOf('day').format('YYYY-MM-DD HH:mm:ss');
+            endDate = moment(endDate).endOf('day').format('YYYY-MM-DD HH:mm:ss');
         }
 
         const dt_dieutri = await controller.khachHangPhieuDieuTri(startDate, endDate, customerID);        

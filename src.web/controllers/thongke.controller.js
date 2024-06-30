@@ -12,7 +12,6 @@ const { toNumber } = require('lodash');
 module.exports = {
     thongKeDoanhThuTheoNgay: async (startDate, endDate) => {
         try {
-            console.log(startDate + ' ' + endDate);
             return await phieudieutri.findAll({
                 attributes: [
                     [sequelize.fn('sum', sequelize.col('thanhtien')), 'thanhtien'],
@@ -31,7 +30,6 @@ module.exports = {
 
     thongKeDoanhThuBanLeTheoNgay: async (startDate, endDate) => {
         try {
-            console.log(startDate + ' ' + endDate);
             return await banle.findAll({
                 attributes: [
                     [sequelize.fn('sum', sequelize.col('tongdonhang')), 'thanhtien'],
@@ -50,7 +48,6 @@ module.exports = {
 
     thongKeCDVTheoNgay: async (startDate, endDate) => {
         try {
-            console.log(startDate + ' ' + endDate);
             return await phieudieutri.sequelize.query(
                 `
             select 
@@ -70,7 +67,6 @@ module.exports = {
 
     chartDieuTri: async (startDate, endDate) => {
         try {
-            console.log(startDate + ' ' + endDate);
             return await phieudieutri.sequelize.query(
             `WITH RECURSIVE months AS (
                 SELECT '${startDate}' AS month_date
@@ -425,7 +421,7 @@ module.exports = {
         try {
             let obj = {};
             if (empID) {
-                obj.nguoitao_id = parseInt(empID)            
+                obj.bacsi_id = parseInt(empID)
             }
             return await phieudieutri.findAll({
                 attributes: [
@@ -514,7 +510,7 @@ module.exports = {
             FROM
                 thanhvien
             LEFT JOIN
-                phieudieutri ON thanhvien.id = phieudieutri.nguoitao_id
+                phieudieutri ON thanhvien.id = phieudieutri.bacsi_id
             WHERE
                 phieudieutri.ngaytao BETWEEN '${startDate}' AND '${endDate}' 
                 AND phieudieutri.trangthai = 1
