@@ -621,7 +621,7 @@ module.exports = {
                         obj.phieudieutri_id = pdtID.id !== null ? pdtID.id : '';
                         obj.congdichvu_id = cdvID.id !== null ? cdvID.id : '';
                         obj.ngaytao = element.NgayDieuTri;
-                        obj.gia = cdvID.gia;
+                        obj.gia = cdvID.gia ? cdvID.gia.replace(/,/g, '') : '0';
                         if (obj.phieudieutri_id !== '' || obj.congdichvu_id !== '') arr.push(obj);
                     }
                 }

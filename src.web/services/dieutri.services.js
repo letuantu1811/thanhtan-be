@@ -237,13 +237,15 @@ async function create_phieudieutri_congdichvu(healthFormId, listCDV) {
             let obj = {
                 phieudieutri_id: 0,
                 congdichvu_id: 0,
-                gia: '',
+                gia: '0',
                 ngaytao: localDate(new Date()),
             };
             obj = new Object();
             obj.phieudieutri_id = healthFormId;
             obj.congdichvu_id = element.id;
-            obj.gia = element.gia;
+            if (element.gia) {
+                obj.gia = element.gia.replace(/,/g, '')
+            }
             obj.ngaytao = localDate(new Date());
             arr.push(obj);
         }

@@ -604,8 +604,7 @@ router.get("/tongquancongdichvu", async(req, res) => {
         }
 
         let result = await controller.thongkeCongDichVu(startDate, endDate, cdvID);
-        if (result[0].tong_tien) result[0].tong_tien = result[0].tong_tien * 1000;
-
+        
         response.success(res, "success", result);
     } catch (err) {
         console.log(err.message);

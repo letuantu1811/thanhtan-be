@@ -1008,7 +1008,7 @@ module.exports = {
             let query = `
                 SELECT
                     COUNT(congdichvu_id) AS tong_soluong,
-                    SUM(CAST(gia AS DECIMAL(10, 2))) AS tong_tien
+                    SUM(CAST(gia AS UNSIGNED)) AS tong_tien
                 FROM
                     phieudieutri_congdichvu
                 WHERE
@@ -1033,7 +1033,7 @@ module.exports = {
                 cdv.id,
                 cdv.ten,
                 COUNT(pc.congdichvu_id) AS tong_soluong,
-                SUM(CAST(pc.gia AS DECIMAL(10, 2))) AS tong_tien
+                SUM(CAST(pc.gia AS UNSIGNED)) AS tong_tien
             FROM
                 phieudieutri_congdichvu pc
             INNER JOIN
@@ -1059,7 +1059,7 @@ module.exports = {
                         cdv.id,
                         cdv.ten,
                         COUNT(pc.congdichvu_id) AS tong_soluong,
-                        SUM(CAST(pc.gia AS DECIMAL(10, 2))) AS tong_tien
+                        SUM(CAST(pc.gia AS UNSIGNED)) AS tong_tien
                     FROM
                         phieudieutri_congdichvu pc
                     INNER JOIN
