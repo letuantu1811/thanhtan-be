@@ -570,6 +570,142 @@ class CustomerController {
             return error;
         }
     }
+
+    async gopHoSo(id, phone) {
+        try {
+            const result = {};
+            const listKH = await khachhang.findAll({
+                where: { sodienthoai: phone,  trangthai: true },
+                attributes: ['id']
+            });
+
+            const duplicateIds = listKH.map(kh => kh.id).filter(khId => khId != id);
+            if (duplicateIds.length > 0) {
+                await phieudieutri.update(
+                    { khachhang_id: id },
+                    { where: { khachhang_id: duplicateIds } }
+                );
+                await giasuc.update(
+                    { khachhang_id: id },
+                    { where: { khachhang_id: duplicateIds } }
+                );
+                await khachhang.update(
+                    { trangthai: 0 },
+                    { where: { id: duplicateIds } }
+                );
+    
+                result.status = 1;
+                result.messenger = 'Gộp hồ sơ khách hàng thành công!';
+            } else {
+                result.status = 0;
+                result.messenger = 'Hồ sơ khách hàng này không có trùng lặp!';
+            }
+            return result;
+        } catch (error) {
+            return error;
+        }
+    }
+
+    async getPet(pageSize, pageNum, petName ,phone, name, address) {
+        const petN = petName || '';
+        const phoneParam = phone || '';
+        const nameParam = name || '';
+        const addressParam = address || '';
+        
+        try {
+            const offset = (pageNum - 1) * pageSize;
+    
+            const petResult = await giasuc.findAll({
+                include: [{
+                    model: khachhang,
+                    attributes: ['id', 'ten', 'sodienthoai', 'diachi'],
+                    as: 'khachhang',
+                    where: {
+                        sodienthoai: { [Op.like]: `%${phoneParam}%` },
+                        ten: { [Op.like]: `%${nameParam}%` },
+                        diachi: { [Op.like]: `%${addressParam}%` },                         
+                    },
+                }],
+                order: [['ngaytao', 'DESC']],
+                where: {
+                    trangthai: true,
+                    ten: { [Op.like]: `%${petN}%` }
+                },
+                limit: pageSize,
+                offset: offset 
+            });
+
+            const total = await giasuc.count({
+                include: [{
+                    model: khachhang,
+                    as: 'khachhang',
+                    where: {
+                        sodienthoai: { [Op.like]: `%${phoneParam}%` },
+                        ten: { [Op.like]: `%${nameParam}%` },
+                        diachi: { [Op.like]: `%${addressParam}%` },                         
+                    },
+                }],
+                where: {
+                    trangthai: true,
+                    ten: { [Op.like]: `%${petN}%` }                 
+                }
+            });
+    
+            const totalItems = total;
+            const totalPages = Math.ceil(totalItems / pageSize);
+    
+            const pagination = {
+                totalPages,
+                currentPage: pageNum,
+                pageSize,
+                totalItems,
+            };
+    
+            return { petResult, pagination };
+        } catch (error) {
+            return error;
+        }
+    }
+
+    async gopThuCung(id, namePet ,khId) {
+        try {
+            const result = {};
+            const listThuCung = await giasuc.findAll({
+                include: [{
+                    model: khachhang,
+                    as: 'khachhang',
+                    where: {
+                        id: khId                  
+                    },
+                }],
+                where: { ten: namePet },
+                attributes: ['id']
+            });
+
+            const duplicateIds = listThuCung.map(tc => tc.id).filter(tcId => tcId != id);
+
+            if (duplicateIds.length > 0) {
+                await phieudieutri.update(
+                    { giasuc_id: id },
+                    { where: { giasuc_id: duplicateIds } }
+                );
+                await giasuc.update(
+                    { trangthai: 0 },
+                    { where: { id: duplicateIds } }
+                );
+    
+                result.status = 1;
+                result.messenger = 'Gộp hồ sơ thú cưng thành công!';
+            } else {
+                result.status = 0;
+                result.messenger = 'Hồ sơ thú cưng này không có trùng lặp!';
+            }
+            return result;
+        } catch (error) {
+            return error;
+        }
+    }
+    
 }
 
 module.exports = new CustomerController();

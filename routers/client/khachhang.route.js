@@ -26,7 +26,6 @@ router.get("/v2", async(req, res) => {
     const name = req.query.name;
     const address = req.query.address;
     const clienteles = req.query.clienteles;
-//3224
     try {
         const results = await CustomerController.getCustomers_v2(pageSize, pageNum, phone, name, address, clienteles);
         response.success_v2(res, 'success', results.customers, results.pagination);
@@ -80,6 +79,22 @@ router.delete("/:id", async(req, res) => {
         response.success(res, "success", result)
     } catch (err) {
         console.log('Error at deleteCustomer:', err.message);
+        response.error(res, err.message, 500);
+    }
+});
+
+router.get("/pet", async(req, res) => {
+    const pageSize = parseInt(req.query.pageSize) || 20;
+    const pageNum = parseInt(req.query.pageNum) || 1;
+    const petName = req.query.petName;    
+    const phone = req.query.phone;
+    const name = req.query.name;
+    const address = req.query.address;
+
+    try {
+        const results = await CustomerController.getPet(pageSize, pageNum, petName ,phone, name, address);
+        response.success_v2(res, 'success', results.petResult, results.pagination);
+    } catch (err) {
         response.error(res, err.message, 500);
     }
 });
@@ -151,7 +166,6 @@ router.post("/import", async(req, res) => {
 router.post("/importPet", async(req, res) => {
     let data = req.body;
     try {
-        console.log("Ádasd");
         const result = await CustomerController.importPet(data);
 
         response.success(res, "success", result)
@@ -164,12 +178,36 @@ router.post("/importPet", async(req, res) => {
 router.get("/filter", async(req, res) => {
     // let data = req.body;
     try {
-        console.log("Ádasd");
         const result = await CustomerController.locKH();
 
         response.success(res, "success", result)
     } catch (err) {
         console.log('Error at locKH:', err.message);
+        response.error(res, err.message, 500);
+    }
+});
+
+router.post("/gophoso", async(req, res) => {
+    const id = req.body.id;
+    const phone = req.body.phone;
+    try {
+        const result = await CustomerController.gopHoSo(id, phone);
+
+        response.success(res, "success", result)
+    } catch (err) {
+        response.error(res, err.message, 500);
+    }
+});
+
+router.post("/gopthucung", async(req, res) => {
+    const id = req.body.id;
+    const namePet = req.body.namePet;
+    const khId = req.body.khId;
+    try {
+        const result = await CustomerController.gopThuCung(id, namePet, khId);
+
+        response.success(res, "success", result)
+    } catch (err) {
         response.error(res, err.message, 500);
     }
 });
