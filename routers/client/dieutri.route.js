@@ -56,31 +56,32 @@ router.get('/v2', async (req, res) => {
     try {
         const result = await dieutri.getAllToday_v2(pageSize, pageNum, dateselect, paramsCustomer, petName, isAdmin);
 
-        const arr = [];
-        if (!isAdmin) {
-            for (let index = 0; index < result.data.length; index++) {
-                const element = result.data[index];
-                if ((await dieutri.filterBlockedInExam(element.id)) === 0) {
-                    arr.push(element);
-                }
-            }
-            const totalItems = arr.length; 
-            const totalPages =  Math.ceil(totalItems / pageSize);
-            const start = (pageNum - 1) * pageSize;
-            const end = pageSize * pageNum - 1;
-            const data = arr.slice(start, end);
+        // const arr = [];
+        // if (!isAdmin) {
+        //     for (let index = 0; index < result.data.length; index++) {
+        //         const element = result.data[index];
+        //         console.log('element', element);
+        //         if ((await dieutri.filterBlockedInExam(element.id)) === 0) {
+        //             arr.push(element);
+        //         }
+        //     }
+        //     const totalItems = arr.length; 
+        //     const totalPages =  Math.ceil(totalItems / pageSize);
+        //     const start = (pageNum - 1) * pageSize;
+        //     const end = pageSize * pageNum - 1;
+        //     const data = arr.slice(start, end);
 
-            const pagination = {
-                totalPages,
-                currentPage: pageNum,
-                pageSize,
-                totalItems,
-            };           
-            response.success_v2(res, 'Lấy dữ liệu thành công', data, pagination);
-            return;
-        }
+        //     const pagination = {
+        //         totalPages,
+        //         currentPage: pageNum,
+        //         pageSize,
+        //         totalItems,
+        //     };           
+        //     response.success_v2(res, 'Lấy dữ liệu thành công', data, pagination);
+        //     return;
+        // }
 
-        response.success_v2(res, 'Lấy dữ liệu thành công', !isAdmin ? arr : result.data, result.pagination);
+        response.success_v2(res, 'Lấy dữ liệu thành công', result.data, result.pagination);
     } catch (err) {
         console.log(err.message);
         response.error(res, 'failed', 500);
@@ -134,31 +135,8 @@ router.get('/reexam_v2', async (req, res) => {
     const date = req.query.date;
     try {
         const result = await dieutri.getReExamByDate_v2(pageSize, pageNum, date, isAdmin, paramsCustomer, petName, isAdmin);
-        const arr = [];
-        if (!isAdmin) {
-            for (let index = 0; index < result.data.length; index++) {
-                const element = result.data[index];
-                if ((await dieutri.filterBlockedInExam(element.id)) === 0) {
-                    arr.push(element);
-                }
-            }
-            const totalItems = arr.length; 
-            const totalPages =  Math.ceil(totalItems / pageSize);
-            const start = (pageNum - 1) * pageSize;
-            const end = pageSize * pageNum - 1;
-            const data = arr.slice(start, end);
 
-            const pagination = {
-                totalPages,
-                currentPage: pageNum,
-                pageSize,
-                totalItems,
-            };           
-            response.success_v2(res, 'Lấy dữ liệu thành công', data, pagination);
-            return;
-        }
-
-        response.success_v2(res, 'Lấy dữ liệu thành công', !isAdmin ? arr : result.data, result.pagination);
+        response.success_v2(res, 'Lấy dữ liệu thành công', result.data, result.pagination);
 
     } catch (err) {
         console.log('Error at dieutri.router >> /reexam:', err.message);
