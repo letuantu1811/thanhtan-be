@@ -179,6 +179,7 @@ async function create_phieudieutri(body) {
             trieuchung: body.trieuchung ? body.trieuchung.trim() : '',
             chandoan: body.chandoan,
             tiensubenh: body.tiensubenh,
+            chidinhbacsi: body.chidinhbacsi,
             khambenh: body.khambenh,
             typedieutri_id: body.typeDieuTriID,
             ghichu: body.ghichu,

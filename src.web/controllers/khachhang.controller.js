@@ -558,7 +558,8 @@ class CustomerController {
                 {
                     ten: data.ten,
                     tuoi: data.tuoi,
-                    tiensubenh: data.tiensubenh ? JSON.stringify(data.tiensubenh) : ''
+                    tiensubenh: data.tiensubenh ? JSON.stringify(data.tiensubenh) : '',
+                    chidinhbacsi: data.chidinhbacsi ? JSON.stringify(data.chidinhbacsi) : ''
                 },
                 {
                     where: {

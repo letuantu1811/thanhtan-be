@@ -59,6 +59,9 @@ const giasuc = db.define(
         tiensubenh: {
             type: Sequelize.TEXT,
         },
+        chidinhbacsi: {
+            type: Sequelize.TEXT,
+        },
     },
     {
         timestamps: false,

@@ -750,6 +750,7 @@ module.exports = {
                     ngaytao: data.ngaykham,
                     ngaytaikham: data.ngaytaikham,
                     tiensubenh: data.tiensubenh,
+                    chidinhbacsi: data.chidinhbacsi,
                     khambenh: data.khambenh,
                     payment_id: data.paymentId,
                     typedieutri_id: data.typeDieuTriID
