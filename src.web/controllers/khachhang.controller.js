@@ -571,38 +571,48 @@ class CustomerController {
         }
     }
 
-    async gopHoSo(id, phone) {
+    async gopHoSo(id, idGop) {
         try {
-            const result = {};
-            const listKH = await khachhang.findAll({
-                where: { sodienthoai: phone,  trangthai: true },
-                attributes: ['id']
-            });
-
-            const duplicateIds = listKH.map(kh => kh.id).filter(khId => khId != id);
-            if (duplicateIds.length > 0) {
-                await phieudieutri.update(
-                    { khachhang_id: id },
-                    { where: { khachhang_id: duplicateIds } }
-                );
-                await giasuc.update(
-                    { khachhang_id: id },
-                    { where: { khachhang_id: duplicateIds } }
-                );
-                await khachhang.update(
-                    { trangthai: 0 },
-                    { where: { id: duplicateIds } }
-                );
+            await phieudieutri.update(
+                { 
+                    khachhang_id: id
+                },
+                {
+                    where: {
+                        khachhang_id: idGop 
+                    } 
+                }
+            );
     
-                result.status = 1;
-                result.messenger = 'Gộp hồ sơ khách hàng thành công!';
-            } else {
-                result.status = 0;
-                result.messenger = 'Hồ sơ khách hàng này không có trùng lặp!';
-            }
-            return result;
+            await giasuc.update(
+                {
+                    khachhang_id: id 
+                },
+                { 
+                    where: {
+                        khachhang_id: idGop
+                    }
+                }
+            );
+    
+            await khachhang.update(
+                { 
+                    trangthai: 0 
+                },
+                { 
+                    where: {
+                     id: idGop 
+                    } 
+                }
+            );
+    
+            return {
+                messenger: 'Gộp hồ sơ khách hàng thành công!'
+            };
         } catch (error) {
-            return error;
+            return {
+                messenger: 'Có lỗi xảy ra trong quá trình gộp hồ sơ!',
+            };
         }
     }
 
@@ -667,39 +677,30 @@ class CustomerController {
         }
     }
 
-    async gopThuCung(id, namePet ,khId) {
+    async gopThuCung(id, idGop) {
         try {
-            const result = {};
-            const listThuCung = await giasuc.findAll({
-                include: [{
-                    model: khachhang,
-                    as: 'khachhang',
+            await phieudieutri.update(
+                {
+                    giasuc_id: id 
+                },
+                { 
+                    where: { 
+                        giasuc_id: idGop 
+                    } 
+                }
+            );
+            await giasuc.update(
+                { 
+                    trangthai: 0 
+                },
+                {
                     where: {
-                        id: khId                  
-                    },
-                }],
-                where: { ten: namePet },
-                attributes: ['id']
-            });
-
-            const duplicateIds = listThuCung.map(tc => tc.id).filter(tcId => tcId != id);
-
-            if (duplicateIds.length > 0) {
-                await phieudieutri.update(
-                    { giasuc_id: id },
-                    { where: { giasuc_id: duplicateIds } }
-                );
-                await giasuc.update(
-                    { trangthai: 0 },
-                    { where: { id: duplicateIds } }
-                );
-    
-                result.status = 1;
-                result.messenger = 'Gộp hồ sơ thú cưng thành công!';
-            } else {
-                result.status = 0;
-                result.messenger = 'Hồ sơ thú cưng này không có trùng lặp!';
-            }
+                        id: idGop 
+                    } 
+                }
+            );
+            result.status = 1;
+            result.messenger = 'Gộp hồ sơ thú cưng thành công!';
             return result;
         } catch (error) {
             return error;

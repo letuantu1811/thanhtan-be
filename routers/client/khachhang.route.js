@@ -189,22 +189,21 @@ router.get("/filter", async(req, res) => {
 
 router.post("/gophoso", async(req, res) => {
     const id = req.body.id;
-    const phone = req.body.phone;
+    const idGop = req.body.idGop;
     try {
-        const result = await CustomerController.gopHoSo(id, phone);
+        const result = await CustomerController.gopHoSo(id, idGop);
 
         response.success(res, "success", result)
     } catch (err) {
-        response.error(res, err.message, 500);
+        response.error(res, err, 500);
     }
 });
 
 router.post("/gopthucung", async(req, res) => {
     const id = req.body.id;
-    const namePet = req.body.namePet;
-    const khId = req.body.khId;
+    const idGop = req.body.idGop;
     try {
-        const result = await CustomerController.gopThuCung(id, namePet, khId);
+        const result = await CustomerController.gopThuCung(id, idGop);
 
         response.success(res, "success", result)
     } catch (err) {
