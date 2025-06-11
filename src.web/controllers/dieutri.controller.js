@@ -194,107 +194,131 @@ module.exports = {
         }
     },
 
-    getAllToday_v2: async (pageSize, pageNum, date, paramsCustomer, petName, isAdmin) => {
-        const limit = pageSize;
-        const offset = (pageNum - 1) * limit;
-        const customer = paramsCustomer ? paramsCustomer : '';
-        const pet = petName ? petName : '';
-        let option = {};
-        try {
-            const today = date || tzSaiGon();
-            const defaultIncludes = [
-                { model: giasuc,
-                    as: 'giasuc',
-                    where: {
-                        ten: { [Op.like]: `%${pet}%` },
-                    }
-                },
-                { 
-                    model: khachhang, 
-                    as: 'khachhang',
-                    where: {
-                        [Op.or]: [
-                            {
-                                sodienthoai: { [Op.like]: `%${customer}%` }
-                            },
-                            {
-                                ten: { [Op.like]: `%${customer}%` }
-                            },
-                            {
-                                diachi: { [Op.like]: `%${customer}%` }
-                            }
-                        ],
-                    }                
-                },
-            ];
-            if (!isAdmin) {
-                defaultIncludes.push({
-                    model: sanpham,
-                    where: { an: 0 },
-                });
-                option.option = 0;
-            }
-
-            const currentDateTreatments = await model.findAll({
-                include: [...defaultIncludes],
-                where: {
-                    where: sequelize.where(
-                        sequelize.fn('date', sequelize.col('phieudieutri.ngaytao')),
-                        '=',
-                        today,
-                    ),
-                    trangthai: 1,
-                    ...option
-                },
-                order: [['ngaytao', 'DESC']],
-                limit,
-                offset
-            });
-
-            const total = await model.count({
-                include: [...defaultIncludes],
-                where: {
-                    where: sequelize.where(
-                        sequelize.fn('date', sequelize.col('phieudieutri.ngaytao')),
-                        '=',
-                        today,
-                    ),
-                    trangthai: 1,
-                    ...option
-                }
-            });
-
-            const totalItems = total; 
-            const totalPages = Math.ceil(totalItems / pageSize);
-            const pagination = {
-                totalPages,
-                currentPage: pageNum,
-                pageSize,
-                totalItems,
-            }; 
-
-            const data = currentDateTreatments.map((treetMent) => {
-                const rawTreetMent = treetMent.toJSON();
-                const discountAmount = toNumber(rawTreetMent.discountAmount) || 0;
-                const addedDiscountAmount = toNumber(rawTreetMent.addedDiscountAmount) || 0;
-                const thanhtien = toNumber(rawTreetMent.thanhtien) || 0;
-
-                const orginTotalAmount =
-                    (thanhtien + discountAmount) / (1 - addedDiscountAmount / 100);
-
-                const reCalculateAmountExamForm = {
-                    ...rawTreetMent,
-                    discountAmount: 0,
-                    addedDiscountAmount: 0,
-                    thanhtien: orginTotalAmount,
-                };
-                return reCalculateAmountExamForm;
-            });
-            return { data, pagination };
-        } catch (error) {
-            return error;
+   getAllToday_v2: async (pageSize, pageNum, date, paramsCustomer, petName, isAdmin) => {
+    const limit = pageSize;
+    const offset = (pageNum - 1) * limit;
+    const customer = paramsCustomer || '';
+    const pet = petName || '';
+    let option = {};
+    try {
+        const today = date || tzSaiGon();
+        // Build filter for khachhang
+        const khachhangOr = [];
+        if (customer) {
+            khachhangOr.push({ sodienthoai: { [Op.like]: `%${customer}%` } });
+            khachhangOr.push({ ten: { [Op.like]: `%${customer}%` } });
+            khachhangOr.push({ diachi: { [Op.like]: `%${customer}%` } });
         }
-    },
+        const khachhangWhere = khachhangOr.length > 0 ? { [Op.or]: khachhangOr } : undefined;
+
+        // Build filter for giasuc
+        const giasucWhere = pet ? { ten: { [Op.like]: `%${pet}%` } } : undefined;
+
+        // Build includes for data query
+        const defaultIncludes = [
+            ...(giasucWhere ? [{
+                model: giasuc,
+                as: 'giasuc',
+                where: giasucWhere
+            }] : [{
+                model: giasuc,
+                as: 'giasuc'
+            }]),
+            ...(khachhangWhere ? [{
+                model: khachhang,
+                as: 'khachhang',
+                where: khachhangWhere
+            }] : [{
+                model: khachhang,
+                as: 'khachhang'
+            }])
+        ];
+        if (!isAdmin) {
+            defaultIncludes.push({
+                model: sanpham,
+                where: { an: 0 },
+            });
+            option.option = 0;
+        }
+
+        const whereClause = {
+            where: sequelize.where(
+                sequelize.fn('date', sequelize.col('phieudieutri.ngaytao')),
+                '=',
+                today,
+            ),
+            trangthai: 1,
+            ...option
+        };
+
+        // Query data
+        const currentDateTreatments = await model.findAll({
+            include: defaultIncludes,
+            where: whereClause,
+            order: [['ngaytao', 'DESC']],
+            limit,
+            offset
+        });
+
+        // Tối ưu count
+        let total = 0;
+        let countWhere = `trangthai = 1 AND DATE(ngaytao) = :today`;
+        let replacements = { today };
+
+        if (pet) {
+            // Lấy id thú cưng phù hợp
+            const gs = await giasuc.findAll({
+                attributes: ['id'],
+                where: giasucWhere,
+                raw: true
+            });
+            const giasucIds = gs.map(item => item.id);
+            if (giasucIds.length === 0) {
+                return { data: [], pagination: { totalPages: 0, currentPage: pageNum, pageSize, totalItems: 0 } };
+            }
+            countWhere += ` AND giasuc_id IN (:giasucIds)`;
+            replacements.giasucIds = giasucIds;
+        }
+
+        if (khachhangWhere) {
+            // Lấy id khách hàng phù hợp
+            const khs = await khachhang.findAll({
+                attributes: ['id'],
+                where: khachhangWhere,
+                raw: true
+            });
+            const khachhangIds = khs.map(item => item.id);
+            if (khachhangIds.length === 0) {
+                return { data: [], pagination: { totalPages: 0, currentPage: pageNum, pageSize, totalItems: 0 } };
+            }
+            countWhere += ` AND khachhang_id IN (:khachhangIds)`;
+            replacements.khachhangIds = khachhangIds;
+        }
+
+        // Raw query count nhanh
+        const [result] = await model.sequelize.query(
+            `SELECT COUNT(*) as total FROM phieudieutri WHERE ${countWhere}`,
+            {
+                replacements,
+                type: sequelize.QueryTypes.SELECT
+            }
+        );
+        total = result.total || 0;
+
+        const totalPages = Math.ceil(total / pageSize);
+        const pagination = {
+            totalPages,
+            currentPage: pageNum,
+            pageSize,
+            totalItems: total,
+        };
+
+        const data = currentDateTreatments.map(treetMent => recalculateAmount(treetMent.toJSON()));
+        return { data, pagination };
+    } catch (error) {
+        return error;
+    }
+},
 
     getAll: async (role) => {
         const obj = {
@@ -378,37 +402,43 @@ module.exports = {
     },
 
     getReExamByDate_v2: async (pageSize, pageNum, date, isAdmin, paramsCustomer, petName) => {
-        const customer = paramsCustomer ? paramsCustomer : '';
-        const pet = petName ? petName : '';
+        const customer = paramsCustomer || '';
+        const pet = petName || '';
         const limit = pageSize;
         const offset = (pageNum - 1) * limit;
         let option = {};
         try {
             const selectedDate = date || tzSaiGon();
+            // Build filter for khachhang
+            const khachhangOr = [];
+            if (customer) {
+                khachhangOr.push({ sodienthoai: { [Op.like]: `%${customer}%` } });
+                khachhangOr.push({ ten: { [Op.like]: `%${customer}%` } });
+                khachhangOr.push({ diachi: { [Op.like]: `%${customer}%` } });
+            }
+            const khachhangWhere = khachhangOr.length > 0 ? { [Op.or]: khachhangOr } : undefined;
+
+            // Build filter for giasuc
+            const giasucWhere = pet ? { ten: { [Op.like]: `%${pet}%` } } : undefined;
+
+            // Build includes for data query
             const defaultIncludes = [
-                { model: giasuc,
+                ...(giasucWhere ? [{
+                    model: giasuc,
                     as: 'giasuc',
-                    where: {
-                        ten: { [Op.like]: `%${pet}%` },
-                    }
-                },
-                { 
-                    model: khachhang, 
+                    where: giasucWhere
+                }] : [{
+                    model: giasuc,
+                    as: 'giasuc'
+                }]),
+                ...(khachhangWhere ? [{
+                    model: khachhang,
                     as: 'khachhang',
-                    where: {
-                        [Op.or]: [
-                            {
-                                sodienthoai: { [Op.like]: `%${customer}%` }
-                            },
-                            {
-                                ten: { [Op.like]: `%${customer}%` }
-                            },
-                            {
-                                diachi: { [Op.like]: `%${customer}%` }
-                            }
-                        ],
-                    }                
-                },
+                    where: khachhangWhere
+                }] : [{
+                    model: khachhang,
+                    as: 'khachhang'
+                }])
             ];
             if (!isAdmin) {
                 defaultIncludes.push({
@@ -418,63 +448,65 @@ module.exports = {
                 option.option = 0;
             }
 
+            const whereClause = {
+                where: sequelize.where(
+                    sequelize.fn('date', sequelize.col('ngaytaikham')),
+                    '=',
+                    selectedDate,
+                ),
+                trangthai: 1,
+                ...option
+            };
+
+            // Query data
             const treetments = await model.findAll({
-                include: [...defaultIncludes],
-                where: {
-                    where: sequelize.where(
-                        sequelize.fn('date', sequelize.col('ngaytaikham')),
-                        '=',
-                        selectedDate,
-                    ),
-                    trangthai: 1,
-                    ...option
-                },
+                include: defaultIncludes,
+                where: whereClause,
                 order: [['ngaytao', 'DESC']],
                 limit,
                 offset
             });
 
-            const total = await model.count({
-                include: [...defaultIncludes],
-                where: {
-                    where: sequelize.where(
-                        sequelize.fn('date', sequelize.col('ngaytaikham')),
-                        '=',
-                        selectedDate,
-                    ),
-                    trangthai: 1,
-                    ...option
+            // Tối ưu count
+            // Lấy danh sách id của giasuc và khachhang nếu có lọc
+            let countWhere = { ...whereClause };
+            if (giasucWhere) {
+                const gs = await giasuc.findAll({
+                    attributes: ['id'],
+                    where: giasucWhere,
+                    raw: true
+                });
+                const giasucIds = gs.map(item => item.id);
+                if (giasucIds.length === 0) {
+                    return { data: [], pagination: { totalPages: 0, currentPage: pageNum, pageSize, totalItems: 0 } };
                 }
-            });
+                countWhere.giasuc_id = { [Op.in]: giasucIds };
+            }
+            if (khachhangWhere) {
+                const khs = await khachhang.findAll({
+                    attributes: ['id'],
+                    where: khachhangWhere,
+                    raw: true
+                });
+                const khachhangIds = khs.map(item => item.id);
+                if (khachhangIds.length === 0) {
+                    return { data: [], pagination: { totalPages: 0, currentPage: pageNum, pageSize, totalItems: 0 } };
+                }
+                countWhere.khachhang_id = { [Op.in]: khachhangIds };
+            }
 
-            const totalItems = total; 
-            const totalPages = Math.ceil(totalItems / pageSize);
-    
+            // Count nhanh không include
+            const total = await model.count({ where: countWhere });
+
+            const totalPages = Math.ceil(total / pageSize);
             const pagination = {
                 totalPages,
                 currentPage: pageNum,
                 pageSize,
-                totalItems,
-            }; 
+                totalItems: total,
+            };
 
-            const data = treetments.map((treetMent) => {
-                const rawTreetMent = treetMent.toJSON();
-                const discountAmount = toNumber(rawTreetMent.discountAmount) || 0;
-                const addedDiscountAmount = toNumber(rawTreetMent.addedDiscountAmount) || 0;
-                const thanhtien = toNumber(rawTreetMent.thanhtien) || 0;
-
-                const orginTotalAmount =
-                    (thanhtien + discountAmount) / (1 - addedDiscountAmount / 100);
-
-                const reCalculateAmountExamForm = {
-                    ...rawTreetMent,
-                    discountAmount: 0,
-                    addedDiscountAmount: 0,
-                    thanhtien: orginTotalAmount,
-                };
-
-                return reCalculateAmountExamForm;
-            });
+            const data = treetments.map(treetMent => recalculateAmount(treetMent.toJSON()));
             return { data, pagination };
         } catch (error) {
             return error;
@@ -484,39 +516,38 @@ module.exports = {
     getNotification: async (role) => {
         try {
             const today = tzSaiGon();
-            console.log(today);
-            const reExamCount = await model.count({
-                where: {
-                    where: sequelize.where(
-                        sequelize.fn('date', sequelize.col('ngaytaikham')),
-                        '=',
-                        today,
-                    ),
-                    // dataikham: null,
-                },
-            });
-            const examTodayCount = await model.count({
-                where: {
-                    where: sequelize.where(
-                        sequelize.fn('date', sequelize.col('ngaytao')),
-                        '=',
-                        today,
-                    ),
-                    trangthai: 1,
-                },
-            });
+
+            // Raw query count cho reExamCount
+            const [reExamResult] = await model.sequelize.query(
+                `SELECT COUNT(*) as total FROM phieudieutri WHERE DATE(ngaytaikham) = :today`,
+                {
+                    replacements: { today },
+                    type: sequelize.QueryTypes.SELECT
+                }
+            );
+            const reExamCount = reExamResult.total || 0;
+
+            // Raw query count cho examTodayCount
+            const [examTodayResult] = await model.sequelize.query(
+                `SELECT COUNT(*) as total FROM phieudieutri WHERE DATE(ngaytao) = :today AND trangthai = 1`,
+                {
+                    replacements: { today },
+                    type: sequelize.QueryTypes.SELECT
+                }
+            );
+            const examTodayCount = examTodayResult.total || 0;
+
             if (role === 'USER') {
-                return (body = {
+                return {
                     countDTtoday: 0,
                     countTDTtody: 0,
-                });
+                };
             } else {
-                return (body = {
+                return {
                     countDTtoday: examTodayCount,
                     countTDTtody: reExamCount,
-                });
+                };
             }
-            // return body;
         } catch (error) {
             return error;
         }
@@ -888,99 +919,114 @@ module.exports = {
         const limit = pageSize;
         const offset = (pageNum - 1) * limit;
 
-        const phoneParam = phone ? phone : '';
-        const nameParam = name ? name : '';
-        const addressParam = address ? address : '';
-        const pet = petName ? petName : '';
+        const phoneParam = phone || '';
+        const nameParam = name || '';
+        const addressParam = address || '';
+        const pet = petName || '';
         let option = {};
-        if (!isAdmin) {
-            option.option = 0;
-        }
+        if (!isAdmin) option.option = 0;
+
+        // Only select needed attributes
+        const khachhangAttributes = ['id', 'ten', 'sodienthoai', 'diachi'];
+        const giasucAttributes = ['id', 'ten', 'ngaytao', 'trangthai'];
+        const giongAttributes = ['id', 'ten'];
+        const chungloaiAttributes = ['id', 'ten'];
+
+        // Build dynamic customer filter
+        const khachhangOr = [];
+        if (phoneParam) khachhangOr.push({ sodienthoai: { [Op.like]: `%${phoneParam}%` } });
+        if (nameParam) khachhangOr.push({ ten: { [Op.like]: `%${nameParam}%` } });
+        if (addressParam) khachhangOr.push({ diachi: { [Op.like]: `%${addressParam}%` } });
+        const khachhangWhere = khachhangOr.length > 0 ? { [Op.or]: khachhangOr } : undefined;
+
+        const giasucWhere = {
+            trangthai: 1,
+            ten: { [Op.like]: `%${pet}%` }
+        };
+
+        // Build includes dynamically for speed
+        const includes = [
+            ...(khachhangWhere ? [{
+                model: khachhang,
+                as: 'khachhang',
+                attributes: khachhangAttributes,
+                where: khachhangWhere,
+            }] : [{
+                model: khachhang,
+                as: 'khachhang',
+                attributes: khachhangAttributes,
+            }]),
+            {
+                model: phieudieutri,
+                attributes: ['id', 'sophieudieutri'],
+                where: { trangthai: 1, ...option }
+            },
+            {
+                model: Giong,
+                as: 'giong',
+                attributes: giongAttributes,
+                include: {
+                    model: Chungloai,
+                    as: 'chungloai',
+                    attributes: chungloaiAttributes,
+                },
+            },
+        ];
 
         try {
+            // Query data with includes
             const data = await giasuc.findAll({
-                include: [
-                    {
-                        model: khachhang,
-                        as: 'khachhang',
-                        where: [
-                                {
-                                    sodienthoai: { [Op.like]: `%${phoneParam}%` }
-                                },
-                                {
-                                    ten: { [Op.like]: `%${nameParam}%` }
-                                },
-                                {
-                                    diachi: { [Op.like]: `%${addressParam}%` }
-                                },              
-                            ],
-                        },
-                    {
-                        model: phieudieutri,
-                        where: {
-                            trangthai: 1,
-                            ...option
-                        }
-                    },
-                    {
-                        model: Giong,
-                        as: 'giong',
-                        include: { model: Chungloai, as: 'chungloai' },
-                    },
-                ],
-                where: {
-                    trangthai: 1,
-                    ten: {
-                        [Op.like]: `%${pet}%`
-                    },
-                },
+                include: includes,
+                where: giasucWhere,
                 order: [['ngaytao', 'DESC']],
                 limit,
                 offset
             });
 
-            const total = await giasuc.count({
-                include: [
-                    {
-                        model: khachhang,
-                        as: 'khachhang',
-                        where: [
-                            {
-                                sodienthoai: { [Op.like]: `%${phoneParam}%` }
-                            },
-                            {
-                                ten: { [Op.like]: `%${nameParam}%` }
-                            },
-                            {
-                                diachi: { [Op.like]: `%${addressParam}%` }
-                            },              
-                        ],
-                    },
-                    {
-                        model: phieudieutri,
-                        where: {
-                            trangthai: 1,
-                            ...option
-                        }
-                    },
-                ],
-                where: {
-                    trangthai: 1,
-                    ten: {
-                        [Op.like]: `%${pet}%`
-                    },
+            // Fast count: only count main table with same filters as above, but skip includes
+            let countWhere = { ...giasucWhere };
+            if (khachhangWhere) {
+                // Nếu có lọc theo khách hàng, lấy danh sách id trước
+                const khIds = await khachhang.findAll({
+                    attributes: ['id'],
+                    where: khachhangWhere,
+                    raw: true
+                });
+                const khachhangIds = khIds.map(kh => kh.id);
+                if (khachhangIds.length === 0) {
+                    return { data: [], pagination: { totalPages: 0, currentPage: pageNum, pageSize, totalItems: 0 } };
                 }
-            });
+                // Raw query count với điều kiện khachhang_id
+                const [result] = await giasuc.sequelize.query(
+                    `SELECT COUNT(*) as total FROM giasuc WHERE trangthai = 1 AND ten LIKE :pet AND khachhang_id IN (:khachhangIds)`,
+                    {
+                        replacements: {
+                            pet: `%${pet}%`,
+                            khachhangIds
+                        },
+                        type: sequelize.QueryTypes.SELECT
+                    }
+                );
+                total = result.total || 0;
+            } else {
+                // Raw query count không lọc theo khách hàng
+                const [result] = await giasuc.sequelize.query(
+                    `SELECT COUNT(*) as total FROM giasuc WHERE trangthai = 1 AND ten LIKE :pet`,
+                    {
+                        replacements: { pet: `%${pet}%` },
+                        type: sequelize.QueryTypes.SELECT
+                    }
+                );
+                total = result.total || 0;
+            }
 
-            const totalItems = total; 
-            const totalPages = Math.ceil(totalItems / pageSize);
-    
+            const totalPages = Math.ceil(total / pageSize);
             const pagination = {
                 totalPages,
                 currentPage: pageNum,
                 pageSize,
-                totalItems,
-            };   
+                totalItems: total,
+            };
             return { data, pagination };
         } catch (error) {
             console.log(error);
@@ -1081,4 +1127,18 @@ function updateTK(id) {
     } catch (error) {
         return error;
     }
+}
+
+function recalculateAmount(rawTreetMent) {
+    const discountAmount = toNumber(rawTreetMent.discountAmount) || 0;
+    const addedDiscountAmount = toNumber(rawTreetMent.addedDiscountAmount) || 0;
+    const thanhtien = toNumber(rawTreetMent.thanhtien) || 0;
+    const orginTotalAmount = (thanhtien + discountAmount) / (1 - addedDiscountAmount / 100);
+
+    return {
+        ...rawTreetMent,
+        discountAmount: 0,
+        addedDiscountAmount: 0,
+        thanhtien: orginTotalAmount,
+    };
 }
