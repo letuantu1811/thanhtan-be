@@ -913,7 +913,6 @@ module.exports = {
             throw new Error();
         }
     },
-
     // Paging Pet Examination
     getPetExaminationPaging: async (pageSize, pageNum, phone, name, address, petName, isAdmin) => {
         const limit = pageSize;
@@ -926,55 +925,44 @@ module.exports = {
         let option = {};
         if (!isAdmin) option.option = 0;
 
-        // Only select needed attributes
-        const khachhangAttributes = ['id', 'ten', 'sodienthoai', 'diachi'];
-        const giasucAttributes = ['id', 'ten', 'ngaytao', 'trangthai'];
-        const giongAttributes = ['id', 'ten'];
-        const chungloaiAttributes = ['id', 'ten'];
-
         // Build dynamic customer filter
         const khachhangOr = [];
         if (phoneParam) khachhangOr.push({ sodienthoai: { [Op.like]: `%${phoneParam}%` } });
         if (nameParam) khachhangOr.push({ ten: { [Op.like]: `%${nameParam}%` } });
         if (addressParam) khachhangOr.push({ diachi: { [Op.like]: `%${addressParam}%` } });
-        const khachhangWhere = khachhangOr.length > 0 ? { [Op.or]: khachhangOr } : undefined;
+        const hasCustomerFilter = khachhangOr.length > 0;
+        const khachhangWhere = hasCustomerFilter ? { [Op.or]: khachhangOr } : undefined;
 
         const giasucWhere = {
             trangthai: 1,
             ten: { [Op.like]: `%${pet}%` }
         };
 
-        // Build includes dynamically for speed
+        // Build includes for data query
         const includes = [
-            ...(khachhangWhere ? [{
-                model: khachhang,
-                as: 'khachhang',
-                attributes: khachhangAttributes,
-                where: khachhangWhere,
-            }] : [{
-                model: khachhang,
-                as: 'khachhang',
-                attributes: khachhangAttributes,
-            }]),
+            hasCustomerFilter
+                ? {
+                    model: khachhang,
+                    as: 'khachhang',
+                    where: khachhangWhere,
+                }
+                : {
+                    model: khachhang,
+                    as: 'khachhang',
+                },
             {
                 model: phieudieutri,
-                attributes: ['id', 'sophieudieutri'],
                 where: { trangthai: 1, ...option }
             },
             {
                 model: Giong,
                 as: 'giong',
-                attributes: giongAttributes,
-                include: {
-                    model: Chungloai,
-                    as: 'chungloai',
-                    attributes: chungloaiAttributes,
-                },
+                include: { model: Chungloai, as: 'chungloai' },
             },
         ];
 
         try {
-            // Query data with includes
+            // 1. Query paged data
             const data = await giasuc.findAll({
                 include: includes,
                 where: giasucWhere,
@@ -983,10 +971,9 @@ module.exports = {
                 offset
             });
 
-            // Fast count: only count main table with same filters as above, but skip includes
+            // 2. Fast count: only filter by khachhang_id if needed
             let countWhere = { ...giasucWhere };
-            if (khachhangWhere) {
-                // Nếu có lọc theo khách hàng, lấy danh sách id trước
+            if (hasCustomerFilter) {
                 const khIds = await khachhang.findAll({
                     attributes: ['id'],
                     where: khachhangWhere,
@@ -996,29 +983,11 @@ module.exports = {
                 if (khachhangIds.length === 0) {
                     return { data: [], pagination: { totalPages: 0, currentPage: pageNum, pageSize, totalItems: 0 } };
                 }
-                // Raw query count với điều kiện khachhang_id
-                const [result] = await giasuc.sequelize.query(
-                    `SELECT COUNT(*) as total FROM giasuc WHERE trangthai = 1 AND ten LIKE :pet AND khachhang_id IN (:khachhangIds)`,
-                    {
-                        replacements: {
-                            pet: `%${pet}%`,
-                            khachhangIds
-                        },
-                        type: sequelize.QueryTypes.SELECT
-                    }
-                );
-                total = result.total || 0;
-            } else {
-                // Raw query count không lọc theo khách hàng
-                const [result] = await giasuc.sequelize.query(
-                    `SELECT COUNT(*) as total FROM giasuc WHERE trangthai = 1 AND ten LIKE :pet`,
-                    {
-                        replacements: { pet: `%${pet}%` },
-                        type: sequelize.QueryTypes.SELECT
-                    }
-                );
-                total = result.total || 0;
+                countWhere.khachhang_id = { [Op.in]: khachhangIds };
             }
+
+            // 3. Fast count (no includes)
+            const total = await giasuc.count({ where: countWhere });
 
             const totalPages = Math.ceil(total / pageSize);
             const pagination = {
@@ -1030,9 +999,16 @@ module.exports = {
             return { data, pagination };
         } catch (error) {
             console.log(error);
-            throw new Error();
+            return {
+                data: [],
+                pagination: { totalPages: 0, currentPage: pageNum, pageSize, totalItems: 0 },
+                error: true,
+                message: error.message || 'Internal server error'
+            };
         }
     },
+
+
 
     // get medical history
     getPetMedicalHistory: async (id) => {
