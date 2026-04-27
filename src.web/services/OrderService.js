@@ -85,7 +85,7 @@ class OrderService {
         }
 
         const defaultIncludes = [
-            {
+            {   
                 model: Product,
                 as: 'sanpham',
                 include: {
@@ -172,6 +172,8 @@ class OrderService {
     }
 
     async createOrder(body) {
+        console.log('createOrder=========================================')
+        console.log(body);
         let transaction = null;
         try {
             if (!body.listSP || !body.listSP.length) {
@@ -212,18 +214,18 @@ class OrderService {
                         },
                     );
                 }),
-            );
-
+            );    
             const rowcreated = await Order.create({
                 ngaytao: date,
                 ten: body.ten ? body.ten.trim() : '',
                 ghichu: body.ghichu ? body.ghichu.trim() : '',
                 nguoitao_id: body.nguoitao_id,
                 trangthai: ENUM.ENABLE,
+                payment_id : body.hinhthucthanhtoan,
                 tongdonhang: toNumber(body.tongdonhang) || 0,
                 discountAmount: toNumber(body.discountAmount) || 0,
             });
-
+                
             const banleID = rowcreated.id;
             const banle_sanpham = this.convertDetails(body.listSP, banleID);
             await BL_SP.bulkCreate(banle_sanpham);

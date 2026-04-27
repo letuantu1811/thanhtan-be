@@ -28,7 +28,9 @@ router.get("/v2", async(req, res) => {
     const clienteles = req.query.clienteles;
     try {
         const results = await CustomerController.getCustomers_v2(pageSize, pageNum, phone, name, address, clienteles);
+        console.log('Success: =====================================',response.customers);
         response.success_v2(res, 'success', results.customers, results.pagination);
+
     } catch (err) {
         console.log('Error at getCustomers:', err.message);
         response.error(res, err.message, 500);

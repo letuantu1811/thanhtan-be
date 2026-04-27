@@ -45,6 +45,10 @@ const Banle = db.define(
         ngaysua: {
             type: Sequelize.DATE,
         },
+        payment_id: {
+            type: Sequelize.INTEGER,
+            defaultValue: 1,
+        },
     },
     {
         timestamps: false,

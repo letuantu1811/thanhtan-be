@@ -42,7 +42,7 @@ const printBill = async (req, res) => {
         const mode = req.params.mode.toUpperCase();
         const billAsPayload = req.body;
         const userId = req.header('id');
-
+            
         const result = await OrderService.printBill(userId, mode, billAsPayload);
 
         return response.success(res, 'success', result);

@@ -169,8 +169,8 @@ class CustomerController {
 
     // Pagination customers
     async getCustomers_v2(pageSize, pageNum, phone, name, address, clienteles) {
-        const limit = pageSize;
-        const offset = (pageNum - 1) * limit;
+        const limit = Number(pageSize);
+        const offset = (Number(pageNum) - 1) * limit;
         const phoneParam = phone ? phone : '';
         const nameParam = name ? name : '';
         const addressParam = address ? address : '';
@@ -181,7 +181,7 @@ class CustomerController {
             }
         }
         try {
-            const customers = await khachhang.findAll({
+            const customers = (await khachhang.findAll({
                 include: [
                     {
                         model: giasuc,
@@ -190,20 +190,22 @@ class CustomerController {
                             trangthai: 1,
                         },
                         required: false,
-                        include: {
-                            model: chungloai,
-                            attributes: ['id', 'ten'],
-                            as: 'chungloai',
-                        },
-                        include: {
-                            model: Giong,
-                            attributes: ['id', 'ten'],
-                            as: 'giong',
-                            include: {
-                                attributes: ['id', 'ten'],
+                        include: [
+                            {
                                 model: chungloai,
+                                attributes: ['id', 'ten'],
+                                as: 'chungloai',
                             },
-                        },
+                            {
+                                model: Giong,
+                                attributes: ['id', 'ten'],
+                                as: 'giong',
+                                include: {
+                                    attributes: ['id', 'ten'],
+                                    model: chungloai,
+                                },
+                            }
+                        ],
                     },
                     {
                         model: Nhomkhachhang,
@@ -220,7 +222,7 @@ class CustomerController {
                     diachi: { [Op.like]: `%${addressParam}%` },                         
                     ...clientelesParam
                 },
-            })
+            }))
                 .map((customer) => customer.toJSON());
 
             const total = await khachhang.count({
