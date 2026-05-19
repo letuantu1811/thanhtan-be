@@ -76,5 +76,10 @@ khachhang.hasMany(phieudieutri, {
     foreignKey: 'khachhang_id',
 });
 
+const Thanhvien = require("./thanhvien");
+khachhang.belongsTo(Thanhvien, {
+  foreignKey: "nguoitao_id",
+  as: "nguoitao"
+});
 
 module.exports = khachhang;

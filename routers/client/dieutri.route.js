@@ -20,7 +20,7 @@ router.get('/notification', async (req, res) => {
 
 router.get('/', async (req, res) => {
     const role = req.header('quyen');
-    const isAdmin = ['ADMIN', 'MANAGER'].includes(role.toUpperCase());
+    const isAdmin = ['ADMIN', 'MANAGER'].includes(role?.toUpperCase());
     const dateselect = req.query.date;
     console.log(req);
     try {
@@ -46,7 +46,7 @@ router.get('/', async (req, res) => {
 // Exam today pagination
 router.get('/v2', async (req, res) => {
     const role = req.header('quyen');
-    const isAdmin = ['ADMIN', 'MANAGER'].includes(role.toUpperCase());
+    const isAdmin = ['ADMIN', 'MANAGER'].includes(role?.toUpperCase());
     const dateselect = req.query.date;
     const paramsCustomer = req.query.paramsCustomer;
     const petName = req.query.petName;
@@ -102,7 +102,7 @@ router.get('/detail/:id', async (req, res) => {
 
 router.get('/reexam', async (req, res) => {
     const role = req.header('quyen');
-    const isAdmin = ['ADMIN', 'MANAGER'].includes(role.toUpperCase());
+    const isAdmin = ['ADMIN', 'MANAGER'].includes(role?.toUpperCase());
     const date = req.query.date;
     try {
         const result = await dieutri.getReExamByDate(date, isAdmin);
@@ -131,7 +131,7 @@ router.get('/reexam_v2', async (req, res) => {
     const petName = req.query.petName;
 
     const role = req.header('quyen');
-    const isAdmin = ['ADMIN', 'MANAGER'].includes(role.toUpperCase());
+    const isAdmin = ['ADMIN', 'MANAGER'].includes(role?.toUpperCase());
     const date = req.query.date;
     try {
         const result = await dieutri.getReExamByDate_v2(pageSize, pageNum, date, isAdmin, paramsCustomer, petName, isAdmin);
@@ -203,10 +203,9 @@ router.get('/all', async (req, res) => {
 router.get('/examByPetId', async (req, res) => {
     try {
         const role = req.header('quyen');
-        const isViewedNonRestricted = ['ADMIN', 'MANAGER'].includes(role.toUpperCase());
+        const isViewedNonRestricted = ['ADMIN', 'MANAGER'].includes(role?.toUpperCase());
         const id = req.query.id;
         const phieudieutriid = req.query.phieudieutriid;
-        console.log(phieudieutriid + '123');
         const result = await dieutri.getAllExamByPetId(id, isViewedNonRestricted);
         response.success(res, 'success', result);
     } catch (err) {
@@ -317,7 +316,7 @@ router.get('/getExaminationWithMedicin_v2/:id', async (req, res) => {
     const fromDate = req.query.fromDate;
     const toDate = req.query.toDate;
     const role = req.header('quyen');
-    const isAdmin = ['ADMIN', 'MANAGER'].includes(role.toUpperCase());
+    const isAdmin = ['ADMIN', 'MANAGER'].includes(role?.toUpperCase());
     try {
         const result = await truyxuatbenhan.getExaminationWithMedicinName_v2(id, pageSize, pageNum, fromDate, toDate, isAdmin);
         response.success_v2(res, 'success', result.data, result.pagination);
@@ -332,7 +331,7 @@ router.get('/getPetExamination', async (req, res) => {
     const arr = [];
     try {
         const result = await dieutri.getPetExamination();
-        if (role.toUpperCase() === 'USER') {
+        if (role?.toUpperCase() === 'USER') {
             for (let index = 0; index < 150; index++) {
                 for (let index2 = 0; index2 < result[index].phieudieutris.length; index2++) {
                     const element2 = result[index].phieudieutris[index2];
@@ -342,7 +341,7 @@ router.get('/getPetExamination', async (req, res) => {
                 }
             }
         }
-        response.success(res, 'success', role.toUpperCase() === 'USER' ? arr : result);
+        response.success(res, 'success', role?.toUpperCase() === 'USER' ? arr : result);
     } catch (err) {
         console.log(err.message);
         response.error(res, 'failed', 500);
@@ -352,7 +351,7 @@ router.get('/getPetExamination', async (req, res) => {
 // Paging Pet Examination 
 router.get('/getPetExamination_v2', async (req, res) => {
     const role = req.header('quyen');
-    const isAdmin = ['ADMIN', 'MANAGER'].includes(role.toUpperCase());
+    const isAdmin = ['ADMIN', 'MANAGER'].includes(role?.toUpperCase());
     const pageSize = parseInt(req.query.pageSize) || 20;
     const pageNum = parseInt(req.query.pageNum) || 1;
     const phone = req.query.phone;
@@ -401,7 +400,7 @@ router.get('/getPetExamination_v2', async (req, res) => {
 
 router.get('/getPetMedicalHistory/:id', async (req, res) => {
     const role = req.header('quyen');
-    const isAdmin = role.toUpperCase() === 'ADMIN';
+    const isAdmin = role?.toUpperCase() === 'ADMIN';
     const petID = req.params.id;
     try {
         const result = await dieutri.getPetMedicalHistory(petID, isAdmin);
@@ -414,7 +413,7 @@ router.get('/getPetMedicalHistory/:id', async (req, res) => {
 
 router.get('/getPetMedicalHistory_v2/:id', async (req, res) => {
     const role = req.header('quyen');
-    const isAdmin = role.toUpperCase() === 'ADMIN';
+    const isAdmin = role?.toUpperCase() === 'ADMIN';
     const petID = req.params.id;
     try {
         const result = await dieutri.getPetMedicalHistory_v2(petID, isAdmin);

@@ -1,7 +1,6 @@
 const Sequelize = require("sequelize");
 const db = require("../config");
 const Banle = require("./banle");
-const khachhang = require("./khachhang");
 
 const Thanhvien = db.define("thanhvien", {
     id: {
@@ -41,6 +40,12 @@ const Thanhvien = db.define("thanhvien", {
     },
     config: {
         type: Sequelize.INTEGER
+    },
+    nguoitao_fullname: {
+        type: Sequelize.VIRTUAL(Sequelize.STRING),
+        get() {
+            return this.nguoiban ? this.nguoiban.tendaydu : null;
+        }
     }
 }, {
     timestamps: false,

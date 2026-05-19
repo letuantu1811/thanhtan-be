@@ -6,6 +6,7 @@ const congdichvu = require('../models/congdichvu');
 const sanpham = require('../models/sanpham');
 const bacsi = require('../models/bacsi');
 const giasuc = require('./giasuc');
+const Thanhvien = require('./thanhvien');
 
 const phieudieutri = db.define(
     'phieudieutri',
@@ -88,6 +89,12 @@ const phieudieutri = db.define(
         option: {
             type: Sequelize.BOOLEAN,
         },
+        nguoitao_fullname: {
+            type: Sequelize.VIRTUAL(Sequelize.STRING),
+            get() {
+                return this.nguoitao ? this.nguoitao.tendaydu : null;
+            }
+        },
     },
     {
         timestamps: false,
@@ -126,5 +133,9 @@ giasuc.hasMany(phieudieutri, {
 });
 phieudieutri.belongsTo(giasuc, {
     foreignKey: 'giasuc_id',
+});
+phieudieutri.belongsTo(Thanhvien, {
+    foreignKey: 'nguoitao_id',
+    as: 'nguoitao',
 });
 module.exports = phieudieutri;

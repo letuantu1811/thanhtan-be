@@ -3,6 +3,7 @@ const phieudieutri = require('../../database/models/phieudieutri');
 const sanpham = require('../../database/models/sanpham');
 const giasuc = require('../../database/models/giasuc');
 const khachhang = require('../../database/models/khachhang');
+const Thanhvien = require('../../database/models/thanhvien');
 const { ENUM } = require('../../utils/index');
 const { Op } = require('sequelize');
 const { localDate } = require('../../utils/localDate');
@@ -18,11 +19,14 @@ module.exports = {
                         model: giasuc,
                     },
                     {
+                        model: Thanhvien, as: 'nguoitao', attributes: ['id', 'tendaydu']
+                    },
+                    {
                         model: sanpham,
                         where: {
                             id: 261,
                         },
-                        require: true,
+                        required: false,
                     },
                 ],
                 where: {
@@ -50,15 +54,19 @@ module.exports = {
         const pet = petName ? petName : '';
 
         const defaultIncludes = [
-            { model: giasuc,
+            {
+                model: giasuc,
                 as: 'giasuc',
                 where: {
                     ten: { [Op.like]: `%${pet}%` },
                 }
             },
-            { 
+            {
+                model: Thanhvien, as: 'nguoitao', attributes: ['id', 'tendaydu']
+            },
+            {
                 attributes: [],
-                model: khachhang, 
+                model: khachhang,
                 as: 'khachhang',
                 where: {
                     [Op.or]: [
@@ -72,14 +80,14 @@ module.exports = {
                             diachi: { [Op.like]: `%${customer}%` }
                         }
                     ],
-                }                
+                }
             },
             {
                 model: sanpham,
                 where: {
                     id: 261,
                 },
-                require: true,
+                require: false,
             },
         ];
 
@@ -109,14 +117,14 @@ module.exports = {
                 },
             });
 
-            const totalItems = total; 
+            const totalItems = total;
             const totalPages = Math.ceil(totalItems / pageSize);
             const pagination = {
                 totalPages,
                 currentPage: pageNum,
                 pageSize,
                 totalItems,
-            }; 
+            };
             return { data, pagination };
         } catch (error) {
             console.log(error);
@@ -126,7 +134,9 @@ module.exports = {
 
     getExaminationWithMedicinName: async (id) => {
         let object = {};
+        let isRequired = false;
         if (id !== 'null') {
+            isRequired = true;
             object = {
                 where: {
                     id: id,
@@ -140,9 +150,12 @@ module.exports = {
                         model: giasuc,
                     },
                     {
+                        model: Thanhvien, as: 'nguoitao', attributes: ['id', 'tendaydu']
+                    },
+                    {
                         model: sanpham,
                         ...object,
-                        require: true,
+                        required: isRequired,
                     },
                 ],
                 where: {
@@ -166,7 +179,9 @@ module.exports = {
             to_date = moment(parseInt(toDate)).format('YYYY-MM-DD HH:mm:ss');
         }
         let object = {};
+        let isRequired = false;
         if (id !== 'null') {
+            isRequired = true;
             object = {
                 where: {
                     id: id,
@@ -184,9 +199,12 @@ module.exports = {
                         model: giasuc,
                     },
                     {
+                        model: Thanhvien, as: 'nguoitao', attributes: ['id', 'tendaydu']
+                    },
+                    {
                         model: sanpham,
                         ...object,
-                        require: true,
+                        required: isRequired,
                     },
                 ],
                 where: {
@@ -209,7 +227,7 @@ module.exports = {
                     {
                         model: sanpham,
                         ...object,
-                        require: true,
+                        required: isRequired,
                     },
                 ],
                 where: {
@@ -222,15 +240,15 @@ module.exports = {
                 },
             });
 
-            const totalItems = total; 
+            const totalItems = total;
             const totalPages = Math.ceil(totalItems / pageSize);
             const pagination = {
                 totalPages,
                 currentPage: pageNum,
                 pageSize,
                 totalItems,
-            }; 
-            return { data, pagination };           
+            };
+            return { data, pagination };
         } catch (error) {
             console.log(error);
             throw new Error();

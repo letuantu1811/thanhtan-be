@@ -8,6 +8,7 @@ const Giong = require('../../database/models/giong');
 const { localDate } = require('../../utils/localDate');
 const phieudieutri = require('../../database/models/phieudieutri');
 const sanpham = require('../../database/models/sanpham');
+const Thanhvien = require('../../database/models/thanhvien');
 const { error } = require('../../utils/api.res/response');
 
 class CustomerController {
@@ -189,6 +190,7 @@ class CustomerController {
                         where: {
                             trangthai: 1,
                         },
+
                         required: false,
                         include: [
                             {
@@ -196,6 +198,7 @@ class CustomerController {
                                 attributes: ['id', 'ten'],
                                 as: 'chungloai',
                             },
+
                             {
                                 model: Giong,
                                 attributes: ['id', 'ten'],
@@ -207,10 +210,16 @@ class CustomerController {
                             }
                         ],
                     },
+                    
                     {
                         model: Nhomkhachhang,
                         as: 'nhomkhachhang',
                     },
+                    {
+                        model: Thanhvien,
+                        as: 'nguoitao',
+                        attributes: ['id', 'tendaydu']
+                    }
                 ],
                 order: [['ngaytao', 'DESC']],
                 limit,
@@ -219,31 +228,37 @@ class CustomerController {
                     trangthai: true,
                     sodienthoai: { [Op.like]: `%${phoneParam}%` },
                     ten: { [Op.like]: `%${nameParam}%` },
-                    diachi: { [Op.like]: `%${addressParam}%` },                         
+                    diachi: { [Op.like]: `%${addressParam}%` },
                     ...clientelesParam
                 },
             }))
-                .map((customer) => customer.toJSON());
+                .map((customer) => {
+                    const json = customer.toJSON();
+                    if (json.nguoitao) {
+                        json.nguoitao_fullname = json.nguoitao.tendaydu;
+                    }
+                    return json;
+                });
 
             const total = await khachhang.count({
                 where: {
                     trangthai: true,
                     sodienthoai: { [Op.like]: `%${phoneParam}%` },
                     ten: { [Op.like]: `%${nameParam}%` },
-                    diachi: { [Op.like]: `%${addressParam}%` },                          
+                    diachi: { [Op.like]: `%${addressParam}%` },
                     ...clientelesParam
                 }
             });
-    
-            const totalItems = total; 
+
+            const totalItems = total;
             const totalPages = Math.ceil(totalItems / pageSize);
-    
+
             const pagination = {
                 totalPages,
                 currentPage: pageNum,
                 pageSize,
                 totalItems,
-            };   
+            };
             return { customers, pagination };
 
         } catch (error) {
@@ -366,12 +381,12 @@ class CustomerController {
                 //         });
                 // });
                 giasuc.bulkCreate(arr)
-                .then(() => {
-                    console.log('Dữ liệu đã được chèn thành công.');                  
-                })
-                .catch((error) => {
-                    throw new Error(error);
-                });   
+                    .then(() => {
+                        console.log('Dữ liệu đã được chèn thành công.');
+                    })
+                    .catch((error) => {
+                        throw new Error(error);
+                    });
             }
         } catch (error) {
             throw new Error();
@@ -576,38 +591,38 @@ class CustomerController {
     async gopHoSo(id, idGop) {
         try {
             await phieudieutri.update(
-                { 
+                {
                     khachhang_id: id
                 },
                 {
-                    where: {
-                        khachhang_id: idGop 
-                    } 
-                }
-            );
-    
-            await giasuc.update(
-                {
-                    khachhang_id: id 
-                },
-                { 
                     where: {
                         khachhang_id: idGop
                     }
                 }
             );
-    
-            await khachhang.update(
-                { 
-                    trangthai: 0 
+
+            await giasuc.update(
+                {
+                    khachhang_id: id
                 },
-                { 
+                {
                     where: {
-                     id: idGop 
-                    } 
+                        khachhang_id: idGop
+                    }
                 }
             );
-    
+
+            await khachhang.update(
+                {
+                    trangthai: 0
+                },
+                {
+                    where: {
+                        id: idGop
+                    }
+                }
+            );
+
             return {
                 messenger: 'Gộp hồ sơ khách hàng thành công!'
             };
@@ -618,33 +633,35 @@ class CustomerController {
         }
     }
 
-    async getPet(pageSize, pageNum, petName ,phone, name, address) {
+    async getPet(pageSize, pageNum, petName, phone, name, address) {
         const petN = petName || '';
         const phoneParam = phone || '';
         const nameParam = name || '';
         const addressParam = address || '';
-        
+
         try {
             const offset = (pageNum - 1) * pageSize;
-    
+
             const petResult = await giasuc.findAll({
-                include: [{
+                include: [
+                    {
                     model: khachhang,
                     attributes: ['id', 'ten', 'sodienthoai', 'diachi'],
                     as: 'khachhang',
                     where: {
                         sodienthoai: { [Op.like]: `%${phoneParam}%` },
                         ten: { [Op.like]: `%${nameParam}%` },
-                        diachi: { [Op.like]: `%${addressParam}%` },                         
+                        diachi: { [Op.like]: `%${addressParam}%` },
                     },
-                }],
+                },  
+            ],
                 order: [['ngaytao', 'DESC']],
                 where: {
                     trangthai: true,
                     ten: { [Op.like]: `%${petN}%` }
                 },
                 limit: pageSize,
-                offset: offset 
+                offset: offset
             });
 
             const total = await giasuc.count({
@@ -654,25 +671,25 @@ class CustomerController {
                     where: {
                         sodienthoai: { [Op.like]: `%${phoneParam}%` },
                         ten: { [Op.like]: `%${nameParam}%` },
-                        diachi: { [Op.like]: `%${addressParam}%` },                         
+                        diachi: { [Op.like]: `%${addressParam}%` },
                     },
                 }],
                 where: {
                     trangthai: true,
-                    ten: { [Op.like]: `%${petN}%` }                 
+                    ten: { [Op.like]: `%${petN}%` }
                 }
             });
-    
+
             const totalItems = total;
             const totalPages = Math.ceil(totalItems / pageSize);
-    
+
             const pagination = {
                 totalPages,
                 currentPage: pageNum,
                 pageSize,
                 totalItems,
             };
-    
+
             return { petResult, pagination };
         } catch (error) {
             return error;
@@ -683,22 +700,22 @@ class CustomerController {
         try {
             await phieudieutri.update(
                 {
-                    giasuc_id: id 
-                },
-                { 
-                    where: { 
-                        giasuc_id: idGop 
-                    } 
-                }
-            );
-            await giasuc.update(
-                { 
-                    trangthai: 0 
+                    giasuc_id: id
                 },
                 {
                     where: {
-                        id: idGop 
-                    } 
+                        giasuc_id: idGop
+                    }
+                }
+            );
+            await giasuc.update(
+                {
+                    trangthai: 0
+                },
+                {
+                    where: {
+                        id: idGop
+                    }
                 }
             );
             result.status = 1;
@@ -708,7 +725,7 @@ class CustomerController {
             return error;
         }
     }
-    
+
 }
 
 module.exports = new CustomerController();

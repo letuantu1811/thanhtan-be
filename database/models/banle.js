@@ -49,6 +49,12 @@ const Banle = db.define(
             type: Sequelize.INTEGER,
             defaultValue: 1,
         },
+        nguoitao_fullname: {
+            type: Sequelize.VIRTUAL(Sequelize.STRING),
+            get() {
+                return this.nguoiban ? this.nguoiban.tendaydu : null;
+            }
+        },
     },
     {
         timestamps: false,

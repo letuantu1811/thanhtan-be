@@ -6,7 +6,7 @@ const response = require('../../utils/api.res/response');
 
 router.get("/", async(req, res) => {    
     const role = req.header('quyen');
-    const isAdmin = role.toUpperCase() === 'ADMIN';
+    const isAdmin = role?.toUpperCase() === 'ADMIN';
     try {
         const customers = await CustomerController.getCustomers(isAdmin);
         response.success(res, 'success', customers);
@@ -19,7 +19,7 @@ router.get("/", async(req, res) => {
 // pagination customers
 router.get("/v2", async(req, res) => {    
     const role = req.header('quyen');
-    const isAdmin = role.toUpperCase() === 'ADMIN';
+    const isAdmin = role?.toUpperCase() === 'ADMIN';
     const pageSize = parseInt(req.query.pageSize) || 20;
     const pageNum = parseInt(req.query.pageNum) || 1;
     const phone = req.query.phone;

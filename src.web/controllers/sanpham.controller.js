@@ -639,7 +639,7 @@ module.exports = {
 
     getAllMedicines: async (role) => {
         let obj = {};
-        if (role.toUpperCase() !== 'ADMIN') {
+        if (role?.toUpperCase() !== 'ADMIN') {
             obj = { an: 0 };
         }
         try {
