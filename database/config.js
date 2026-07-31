@@ -20,10 +20,10 @@ module.exports = new Sequelize('tha81756_qlthuy', 'tha81756_qlthuy', 'xqHIjeDP&9
     port: 3306,
     logging: true,
     pool: {
-        max: 5,
-        min: 0,
-        acquire: 30000,
-        idle: 10000,
+    max: 50,       // Tăng từ 5 lên 50 (thoải mái chạy song song vì server chịu được 500)
+    min: 2,        // Giữ tối thiểu 2 kết nối luôn mở để giảm độ trễ (latency)
+    acquire: 60000, // Cho phép đợi tối đa 60 giây để lấy kết nối trước khi báo lỗi timeout
+    idle: 10000,   // Đóng bớt kết nối thừa nếu sau 10 giây không có request nào dùng đến
     },
 });
 

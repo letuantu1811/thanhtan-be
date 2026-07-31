@@ -194,145 +194,124 @@ module.exports = {
         }
     },
 
-    getAllToday_v2: async (pageSize, pageNum, date, paramsCustomer, petName, isAdmin) => {
-        const limit = pageSize;
-        const offset = (pageNum - 1) * limit;
-        const customer = paramsCustomer || '';
-        const pet = petName || '';
-        let option = {};
-        try {
-            const today = date || tzSaiGon();
-            // Build filter for khachhang
-            const khachhangOr = [];
-            if (customer) {
-                khachhangOr.push({ sodienthoai: { [Op.like]: `%${customer}%` } });
-                khachhangOr.push({ ten: { [Op.like]: `%${customer}%` } });
-                khachhangOr.push({ diachi: { [Op.like]: `%${customer}%` } });
+   getAllToday_v2: async (pageSize, pageNum, date, paramsCustomer, petName, isAdmin) => {
+    const limit = parseInt(pageSize) || 10;
+    const offset = (parseInt(pageNum) - 1) * limit;
+    const customer = paramsCustomer || '';
+    const pet = petName || '';
+
+    try {
+        const today = date || tzSaiGon();
+
+        // 1. Xây dựng bộ lọc cho Khách hàng
+        const khachhangOr = [];
+        if (customer) {
+            khachhangOr.push({ sodienthoai: { [Op.like]: `%${customer}%` } });
+            khachhangOr.push({ ten: { [Op.like]: `%${customer}%` } });
+            khachhangOr.push({ diachi: { [Op.like]: `%${customer}%` } });
+        }
+        const khachhangWhere = khachhangOr.length > 0 ? { [Op.or]: khachhangOr } : undefined;
+
+        // 2. Xây dựng bộ lọc cho Gia súc (Pet)
+        const giasucWhere = pet ? { ten: { [Op.like]: `%${pet}%` } } : undefined;
+
+        // 3. Xây dựng mảng Include dùng chung để đồng bộ dữ liệu đếm và tìm kiếm
+        const defaultIncludes = [
+            {
+                model: giasuc,
+                as: 'giasuc',
+                ...(giasucWhere && { where: giasucWhere, required: true })
+            },
+            {
+                model: khachhang,
+                as: 'khachhang',
+                ...(khachhangWhere && { where: khachhangWhere, required: true })
             }
-            const khachhangWhere = khachhangOr.length > 0 ? { [Op.or]: khachhangOr } : undefined;
+        ];
 
-            // Build filter for giasuc
-            const giasucWhere = pet ? { ten: { [Op.like]: `%${pet}%` } } : undefined;
+        // Thêm điều kiện ẩn sản phẩm nếu không phải Admin
+        const extraWhere = {};
+        if (!isAdmin) {
+            defaultIncludes.push({
+                model: sanpham,
+                where: { an: 0 },
+                required: true 
+            });
+            extraWhere.option = 0;
+        }
 
-            // Build includes for data query
-            const defaultIncludes = [
-                ...(giasucWhere ? [{
-                    model: giasuc,
-                    as: 'giasuc',
-                    where: giasucWhere
-                }] : [{
-                    model: giasuc,
-                    as: 'giasuc'
-                }]),
-                ...(khachhangWhere ? [{
-                    model: khachhang,
-                    as: 'khachhang',
-                    where: khachhangWhere
-                }] : [{
-                    model: khachhang,
-                    as: 'khachhang'
-                }]),
-                {
-                    model: Thanhvien,
-                    as: 'nguoitao',
-                    attributes: ['id', 'tendaydu']
-                }
-            ];
-            if (!isAdmin) {
-                defaultIncludes.push({
-                    model: sanpham,
-                    where: { an: 0 },
-                });
-                option.option = 0;
+        // Mảng include đầy đủ để lấy dữ liệu (Bao gồm bảng Thanhvien)
+        const fullIncludesForData = [
+            ...defaultIncludes,
+            {
+                model: Thanhvien,
+                as: 'nguoitao',
+                attributes: ['id', 'tendaydu']
             }
+        ];
 
-            const whereClause = {
-                where: sequelize.where(
+        // 4. SỬA LỖI 500: Quy hoạch chuẩn cấu trúc điều kiện Where bằng [Op.and]
+        const pureWhereClause = {
+            [Op.and]: [
+                sequelize.where(
                     sequelize.fn('date', sequelize.col('phieudieutri.ngaytao')),
                     '=',
-                    today,
+                    today
                 ),
-                trangthai: 1,
-                ...option
-            };
+                { trangthai: 1 },
+                extraWhere
+            ]
+        };
 
-            // Query data
-            const currentDateTreatments = await model.findAll({
-                include: defaultIncludes,
-                where: whereClause,
+        // 5. Chạy song song FindAll và Count bằng ORM, tích hợp subQuery: false để tránh lỗi biên dịch SQL
+        const [currentDateTreatments, total] = await Promise.all([
+            model.findAll({
+                include: fullIncludesForData,
+                where: pureWhereClause,
                 order: [['ngaytao', 'DESC']],
                 limit,
-                offset
-            });
+                offset,
+                subQuery: false
+            }),
+            model.count({
+                include: defaultIncludes, // Chỉ kết nối bảng có filter để đếm nhanh hơn
+                where: pureWhereClause,
+                distinct: true,
+                col: 'id',
+                subQuery: false
+            })
+        ]);
 
-            // Tối ưu count
-            let total = 0;
-            let countWhere = `trangthai = 1 AND DATE(ngaytao) = :today`;
-            let replacements = { today };
+        // 6. Tính toán phân trang
+        const totalPages = Math.ceil(total / limit);
+        const pagination = {
+            totalPages,
+            currentPage: parseInt(pageNum),
+            pageSize: limit,
+            totalItems: total,
+        };
 
-            if (pet) {
-                // Lấy id thú cưng phù hợp
-                const gs = await giasuc.findAll({
-                    attributes: ['id'],
-                    where: giasucWhere,
-                    raw: true
-                });
-                const giasucIds = gs.map(item => item.id);
-                if (giasucIds.length === 0) {
-                    return { data: [], pagination: { totalPages: 0, currentPage: pageNum, pageSize, totalItems: 0 } };
-                }
-                countWhere += ` AND giasuc_id IN (:giasucIds)`;
-                replacements.giasucIds = giasucIds;
-            }
-
-            if (khachhangWhere) {
-                // Lấy id khách hàng phù hợp
-                const khs = await khachhang.findAll({
-                    attributes: ['id'],
-                    where: khachhangWhere,
-                    raw: true
-                });
-                const khachhangIds = khs.map(item => item.id);
-                if (khachhangIds.length === 0) {
-                    return { data: [], pagination: { totalPages: 0, currentPage: pageNum, pageSize, totalItems: 0 } };
-                }
-                countWhere += ` AND khachhang_id IN (:khachhangIds)`;
-                replacements.khachhangIds = khachhangIds;
-            }
-
-            // Raw query count nhanh
-            const [result] = await model.sequelize.query(
-                `SELECT COUNT(*) as total FROM phieudieutri WHERE ${countWhere}`,
-                {
-                    replacements,
-                    type: sequelize.QueryTypes.SELECT
-                }
-            );
-            total = result.total || 0;
-
-            const totalPages = Math.ceil(total / pageSize);
-            const pagination = {
-                totalPages,
-                currentPage: pageNum,
-                pageSize,
-                totalItems: total,
+        // 7. Định dạng dữ liệu an toàn, xử lý dữ liệu ảo từ Thanhvien
+        const data = currentDateTreatments.map(treetMent => {
+            const raw = treetMent.toJSON();
+            const processed = recalculateAmount(raw);
+            return {
+                ...processed,
+                nguoitao_fullname: raw.nguoitao ? raw.nguoitao.tendaydu : null,
+                nguoitao_id: raw.nguoitao_id || (raw.nguoitao ? raw.nguoitao.id : null),
             };
+        });
 
-            const data = currentDateTreatments.map(treetMent => {
-                const raw = treetMent.toJSON();
-                const processed = recalculateAmount(raw);
-                return {
-                    ...processed,
-                    nguoitao_fullname: raw.nguoitao ? raw.nguoitao.tendaydu : null,
-                    nguoitao_id: raw.nguoitao_id || (raw.nguoitao ? raw.nguoitao.id : null),
-                };
-            });
-            return { data, pagination };
-        } catch (error) {
-            return error;
-        }
-    },
+        return { data, pagination };
 
+    } catch (error) {
+        console.error('Lỗi tại getAllToday_v2:', error);
+        throw error; // Ném lỗi ra ngoài cho Controller phản hồi lỗi hệ thống chính xác
+    }
+},
+
+
+    
     getAll: async (role) => {
         const obj = {
             limit: null,
@@ -364,180 +343,171 @@ module.exports = {
         }
     },
 
-    getReExamByDate: async (date, isAdmin) => {
-        try {
-            const selectedDate = date || tzSaiGon();
+   getReExamByDate: async (date, isAdmin) => {
+    try {
+        const selectedDate = date || tzSaiGon();
 
-            const defaultIncludes = [
-                { model: giasuc, as: 'giasuc' },
-                { model: khachhang, as: 'khachhang' },
-            ];
-            if (!isAdmin) {
-                defaultIncludes.push({
-                    model: sanpham,
-                    where: { an: 0 },
-                });
-            }
-
-            const treetments = await model.findAll({
-                include: [...defaultIncludes],
-                where: {
-                    where: sequelize.where(
-                        sequelize.fn('date', sequelize.col('ngaytaikham')),
-                        '=',
-                        selectedDate,
-                    ),
-                    trangthai: 1,
-                },
-                order: [['ngaytao', 'DESC']],
+        const defaultIncludes = [
+            { model: giasuc, as: 'giasuc' },
+            { model: khachhang, as: 'khachhang' },
+        ];
+        
+        const extraWhere = {};
+        if (!isAdmin) {
+            defaultIncludes.push({
+                model: sanpham,
+                where: { an: 0 },
+                required: true // Ép inner join để lọc chính xác dữ liệu hiển thị của user thường
             });
-
-            return treetments.map((treetMent) => {
-                const rawTreetMent = treetMent.toJSON();
-                const discountAmount = toNumber(rawTreetMent.discountAmount) || 0;
-                const addedDiscountAmount = toNumber(rawTreetMent.addedDiscountAmount) || 0;
-                const thanhtien = toNumber(rawTreetMent.thanhtien) || 0;
-
-                const orginTotalAmount =
-                    (thanhtien + discountAmount) / (1 - addedDiscountAmount / 100);
-
-                const reCalculateAmountExamForm = {
-                    ...rawTreetMent,
-                    discountAmount: 0,
-                    addedDiscountAmount: 0,
-                    thanhtien: orginTotalAmount,
-                };
-                return reCalculateAmountExamForm;
-            });
-        } catch (error) {
-            return error;
+            extraWhere.option = 0;
         }
-    },
 
-    getReExamByDate_v2: async (pageSize, pageNum, date, isAdmin, paramsCustomer, petName) => {
-        const customer = paramsCustomer || '';
-        const pet = petName || '';
-        const limit = pageSize;
-        const offset = (pageNum - 1) * limit;
-        let option = {};
-        try {
-            const selectedDate = date || tzSaiGon();
-            // Build filter for khachhang
-            const khachhangOr = [];
-            if (customer) {
-                khachhangOr.push({ sodienthoai: { [Op.like]: `%${customer}%` } });
-                khachhangOr.push({ ten: { [Op.like]: `%${customer}%` } });
-                khachhangOr.push({ diachi: { [Op.like]: `%${customer}%` } });
-            }
-            const khachhangWhere = khachhangOr.length > 0 ? { [Op.or]: khachhangOr } : undefined;
-
-            // Build filter for giasuc
-            const giasucWhere = pet ? { ten: { [Op.like]: `%${pet}%` } } : undefined;
-
-            // Build includes for data query
-            const defaultIncludes = [
-                ...(giasucWhere ? [{
-                    model: giasuc,
-                    as: 'giasuc',
-                    where: giasucWhere
-                }] : [{
-                    model: giasuc,
-                    as: 'giasuc'
-                }]),
-                ...(khachhangWhere ? [{
-                    model: khachhang,
-                    as: 'khachhang',
-                    where: khachhangWhere
-                }] : [{
-                    model: khachhang,
-                    as: 'khachhang'
-                }]),
-                {
-                    model: Thanhvien,
-                    as: 'nguoitao',
-                    attributes: ['id', 'tendaydu']
-                }
-            ];
-            if (!isAdmin) {
-                defaultIncludes.push({
-                    model: sanpham,
-                    where: { an: 0 },
-                });
-                option.option = 0;
-            }
-
-            const whereClause = {
-                where: sequelize.where(
+        // SỬA LỖI: Gom cụm điều kiện Where chuẩn hóa, sửa lỗi lồng 'where: { where: ... }'
+        const pureWhereClause = {
+            [Op.and]: [
+                sequelize.where(
                     sequelize.fn('date', sequelize.col('ngaytaikham')),
                     '=',
-                    selectedDate,
+                    selectedDate
                 ),
-                trangthai: 1,
-                ...option
-            };
+                { trangthai: 1 },
+                extraWhere
+            ]
+        };
 
-            // Query data
-            const treetments = await model.findAll({
+        const treetments = await model.findAll({
+            include: defaultIncludes,
+            where: pureWhereClause,
+            order: [['ngaytao', 'DESC']],
+            subQuery: false // Tắt subQuery để câu lệnh JOIN chạy mượt và nhanh hơn
+        });
+
+        // Giữ nguyên logic tính toán tiền của bạn nhưng bọc trong code sạch hơn
+        return treetments.map((treetMent) => {
+            const rawTreetMent = treetMent.toJSON();
+            const discountAmount = toNumber(rawTreetMent.discountAmount) || 0;
+            const addedDiscountAmount = toNumber(rawTreetMent.addedDiscountAmount) || 0;
+            const thanhtien = toNumber(rawTreetMent.thanhtien) || 0;
+
+            const orginTotalAmount =
+                (thanhtien + discountAmount) / (1 - addedDiscountAmount / 100);
+
+            return {
+                ...rawTreetMent,
+                discountAmount: 0,
+                addedDiscountAmount: 0,
+                thanhtien: orginTotalAmount,
+            };
+        });
+    } catch (error) {
+        console.error('Lỗi tại getReExamByDate:', error);
+        throw error; // Ném lỗi ra ngoài để Controller bắt và phản hồi HTTP 500 thay vì nuốt lỗi
+    }
+},
+
+
+    getReExamByDate_v2: async (pageSize, pageNum, date, isAdmin, paramsCustomer, petName) => {
+    const limit = parseInt(pageSize) || 10;
+    const offset = (parseInt(pageNum) - 1) * limit;
+    const customer = paramsCustomer || '';
+    const pet = petName || '';
+
+    try {
+        const selectedDate = date || tzSaiGon();
+
+        // 1. Xây dựng bộ lọc cho Khách hàng
+        const khachhangOr = [];
+        if (customer) {
+            khachhangOr.push({ sodienthoai: { [Op.like]: `%${customer}%` } });
+            khachhangOr.push({ ten: { [Op.like]: `%${customer}%` } });
+            khachhangOr.push({ diachi: { [Op.like]: `%${customer}%` } });
+        }
+        const khachhangWhere = khachhangOr.length > 0 ? { [Op.or]: khachhangOr } : undefined;
+
+        // 2. Xây dựng bộ lọc cho Gia súc (Pet)
+        const giasucWhere = pet ? { ten: { [Op.like]: `%${pet}%` } } : undefined;
+
+        // 3. Xây dựng mảng Include dùng chung cho cả Find và Count để đồng bộ dữ liệu
+        // Sử dụng mảng clone độc lập để tránh bị gộp đè thuộc tính khi chạy Promise.all
+        const defaultIncludes = [
+            {
+                model: giasuc,
+                as: 'giasuc',
+                ...(giasucWhere && { where: giasucWhere, required: true })
+            },
+            {
+                model: khachhang,
+                as: 'khachhang',
+                ...(khachhangWhere && { where: khachhangWhere, required: true })
+            }
+        ];
+
+        // Thêm điều kiện ẩn sản phẩm nếu không phải Admin
+        const extraWhere = {};
+        if (!isAdmin) {
+            defaultIncludes.push({
+                model: sanpham,
+                where: { an: 0 },
+                required: true 
+            });
+            extraWhere.option = 0; 
+        }
+
+        // 4. SỬA LỖI 500: Gom cụm điều kiện Where chuẩn hóa của Sequelize
+        // Không dùng dấu ... trước sequelize.where mà đưa nó vào mảng [Op.and]
+        const pureWhereClause = {
+            [Op.and]: [
+                sequelize.where(
+                    sequelize.fn('date', sequelize.col('ngaytaikham')),
+                    '=',
+                    selectedDate
+                ),
+                { trangthai: 1 },
+                extraWhere
+            ]
+        };
+
+        // 5. Chạy song song cả 2 truy vấn FindAll và Count bằng Promise.all
+        // Bổ sung thuộc tính subQuery: false để tránh lỗi phát sinh SQL khi phân trang có chứa include bảng khác
+        const [treetments, total] = await Promise.all([
+            model.findAll({
                 include: defaultIncludes,
-                where: whereClause,
+                where: pureWhereClause,
                 order: [['ngaytao', 'DESC']],
                 limit,
-                offset
-            });
+                offset,
+                subQuery: false 
+            }),
+            model.count({
+                include: defaultIncludes,
+                where: pureWhereClause,
+                distinct: true, 
+                col: 'id',
+                subQuery: false
+            })
+        ]);
 
-            // Tối ưu count
-            // Lấy danh sách id của giasuc và khachhang nếu có lọc
-            let countWhere = { ...whereClause };
-            if (giasucWhere) {
-                const gs = await giasuc.findAll({
-                    attributes: ['id'],
-                    where: giasucWhere,
-                    raw: true
-                });
-                const giasucIds = gs.map(item => item.id);
-                if (giasucIds.length === 0) {
-                    return { data: [], pagination: { totalPages: 0, currentPage: pageNum, pageSize, totalItems: 0 } };
-                }
-                countWhere.giasuc_id = { [Op.in]: giasucIds };
-            }
-            if (khachhangWhere) {
-                const khs = await khachhang.findAll({
-                    attributes: ['id'],
-                    where: khachhangWhere,
-                    raw: true
-                });
-                const khachhangIds = khs.map(item => item.id);
-                if (khachhangIds.length === 0) {
-                    return { data: [], pagination: { totalPages: 0, currentPage: pageNum, pageSize, totalItems: 0 } };
-                }
-                countWhere.khachhang_id = { [Op.in]: khachhangIds };
-            }
+        // 6. Tính toán phân trang
+        const totalPages = Math.ceil(total / limit);
+        const pagination = {
+            totalPages,
+            currentPage: parseInt(pageNum),
+            pageSize: limit,
+            totalItems: total,
+        };
 
-            // Count nhanh không include
-            const total = await model.count({ where: countWhere });
+        // 7. Định dạng dữ liệu trả về
+        const data = treetments.map(treetMent => recalculateAmount(treetMent.toJSON()));
+        
+        return { data, pagination };
 
-            const totalPages = Math.ceil(total / pageSize);
-            const pagination = {
-                totalPages,
-                currentPage: pageNum,
-                pageSize,
-                totalItems: total,
-            };
+    } catch (error) {
+        console.error('Lỗi tại getReExamByDate_v2:', error);
+        throw error; 
+    }
+},
 
-            const data = treetments.map(treetMent => {
-                const raw = treetMent.toJSON();
-                const processed = recalculateAmount(raw);
-                return {
-                    ...processed,
-                    nguoitao_fullname: raw.nguoitao ? raw.nguoitao.tendaydu : null,
-                    nguoitao_id: raw.nguoitao_id || (raw.nguoitao ? raw.nguoitao.id : null),
-                };
-            });
-            return { data, pagination };
-        } catch (error) {
-            return error;
-        }
-    },
+
 
     getNotification: async (role) => {
         try {
@@ -683,21 +653,20 @@ module.exports = {
                     }
                 }
             }
-            if (arr.length > 0) {
-                return phieudieutri_congdichvu.sequelize.transaction().then(async (t) => {
-                    return await phieudieutri_congdichvu
-                        .bulkCreate(arr, { transaction: t })
-                        .then(() => {
-                            return t.commit();
-                        })
-                        .catch((err) => {
-                            console.log(err + ' tại func thêm phieudieutri_congdichv');
-                            t.rollback();
-                            throw Error(err);
-                        });
-                });
-            }
-            // console.log(arr);
+        if (arr.length > 0) {
+            return phieudieutri_congdichvu.sequelize.transaction().then(async (t) => {
+                return await phieudieutri_congdichvu
+                    .bulkCreate(arr, { transaction: t })
+                    .then(async () => { // Thêm async ở đây nếu cần an toàn
+                        return await t.commit(); // Nên await commit
+                    })
+                    .catch(async (err) => { // 🌟 BẮT BUỘC phải thêm async ở đây
+                        console.log(err + ' tại func thêm phieudieutri_congdichv');
+                        await t.rollback(); // Bây giờ lệnh này mới chạy chính xác
+                        throw Error(err);
+                    });
+            });
+        }
         } catch (error) {
             console.log(error);
             throw new Error();
@@ -739,20 +708,20 @@ module.exports = {
                     }
                 }
             }
-            if (arr.length > 0) {
-                return phieudieutri_sanpham.sequelize.transaction().then(async (t) => {
-                    return await phieudieutri_sanpham
-                        .bulkCreate(arr, { transaction: t })
-                        .then(() => {
-                            return t.commit();
-                        })
-                        .catch((err) => {
-                            console.log(err + ' tại func thêm phieudieutri_sanpham');
-                            t.rollback();
-                            throw Error(err);
-                        });
-                });
-            }
+                    if (arr.length > 0) {
+                    return phieudieutri_sanpham.sequelize.transaction().then(async (t) => {
+                        return await phieudieutri_sanpham
+                            .bulkCreate(arr, { transaction: t })
+                            .then(async () => {
+                                return await t.commit(); // Thêm await để đảm bảo đã lưu xong dữ liệu
+                            })
+                            .catch(async (err) => { // 🌟 BẮT BUỘC: Thêm async ở đây để chạy được await bên dưới
+                                console.log(err + ' tại func thêm phieudieutri_sanpham');
+                                await t.rollback(); // Kết nối sẽ được giải phóng an toàn tại đây
+                                throw Error(err);
+                            });
+                    });
+                }   
             // console.log(arr);
         } catch (error) {
             console.log(error);
@@ -948,98 +917,90 @@ module.exports = {
     },
     // Paging Pet Examination
     getPetExaminationPaging: async (pageSize, pageNum, phone, name, address, petName, isAdmin) => {
-        const limit = pageSize;
-        const offset = (pageNum - 1) * limit;
+    const limit = parseInt(pageSize) || 10;
+    const offset = (parseInt(pageNum) - 1) * limit;
 
-        const phoneParam = phone || '';
-        const nameParam = name || '';
-        const addressParam = address || '';
-        const pet = petName || '';
-        let option = {};
-        if (!isAdmin) option.option = 0;
+    const phoneParam = phone || '';
+    const nameParam = name || '';
+    const addressParam = address || '';
+    const pet = petName || '';
+    
+    const pTreatmentOption = {};
+    if (!isAdmin) pTreatmentOption.option = 0;
 
-        // Build dynamic customer filter
-        const khachhangOr = [];
-        if (phoneParam) khachhangOr.push({ sodienthoai: { [Op.like]: `%${phoneParam}%` } });
-        if (nameParam) khachhangOr.push({ ten: { [Op.like]: `%${nameParam}%` } });
-        if (addressParam) khachhangOr.push({ diachi: { [Op.like]: `%${addressParam}%` } });
-        const hasCustomerFilter = khachhangOr.length > 0;
-        const khachhangWhere = hasCustomerFilter ? { [Op.or]: khachhangOr } : undefined;
+    // 1. Xây dựng bộ lọc tìm kiếm Khách hàng (Dynamic Filter)
+    const khachhangOr = [];
+    if (phoneParam) khachhangOr.push({ sodienthoai: { [Op.like]: `%${phoneParam}%` } });
+    if (nameParam) khachhangOr.push({ ten: { [Op.like]: `%${nameParam}%` } });
+    if (addressParam) khachhangOr.push({ diachi: { [Op.like]: `%${addressParam}%` } });
+    const hasCustomerFilter = khachhangOr.length > 0;
+    const khachhangWhere = hasCustomerFilter ? { [Op.or]: khachhangOr } : undefined;
 
-        const giasucWhere = {
-            trangthai: 1,
-            ten: { [Op.like]: `%${pet}%` }
-        };
+    // 2. Bộ lọc cho bảng gốc Gia súc (Pet)
+    const giasucWhere = {
+        trangthai: 1,
+        ten: { [Op.like]: `%${pet}%` }
+    };
 
-        // Build includes for data query
-        const includes = [
-            hasCustomerFilter
-                ? {
-                    model: khachhang,
-                    as: 'khachhang',
-                    where: khachhangWhere,
-                }
-                : {
-                    model: khachhang,
-                    as: 'khachhang',
-                },
-            {
-                model: phieudieutri,
-                where: { trangthai: 1, ...option }
-            },
-            {
-                model: Giong,
-                as: 'giong',
-                include: { model: Chungloai, as: 'chungloai' },
-            },
-        ];
+    // 3. Xây dựng mảng Include dùng chung cho cả FindAll và Count để đảm bảo đồng bộ 100%
+    const defaultIncludes = [
+        {
+            model: khachhang,
+            as: 'khachhang',
+            ...(hasCustomerFilter && { where: khachhangWhere, required: true }) // Ép inner join khi có filter khách hàng
+        },
+        {
+            model: phieudieutri,
+            as: 'phieudieutris', // Hãy kiểm tra chính xác alias 'as' của mối quan hệ này trong Model của bạn
+            where: { trangthai: 1, ...pTreatmentOption },
+            required: true // Ép inner join để chỉ đếm/lấy những thú cưng có phiếu điều trị thỏa mãn điều kiện
+        }
+    ];
 
-        try {
-            // 1. Query paged data
-            const data = await giasuc.findAll({
-                include: includes,
+    // Mảng bao gồm đầy đủ dữ liệu cho lệnh findAll (Thêm bảng giống, chủng loại để hiển thị)
+    const fullIncludesForData = [
+        ...defaultIncludes,
+        {
+            model: Giong,
+            as: 'giong',
+            include: [{ model: Chungloai, as: 'chungloai' }],
+        }
+    ];
+
+    try {
+        // 4. Kích hoạt chạy song song cả 2 truy vấn để giảm tối đa thời gian chờ
+        const [petsData, total] = await Promise.all([
+            giasuc.findAll({
+                include: fullIncludesForData,
                 where: giasucWhere,
                 order: [['ngaytao', 'DESC']],
                 limit,
                 offset
-            });
+            }),
+            giasuc.count({
+                include: defaultIncludes, // Chỉ cần include bảng khachhang và phieudieutri để đếm, không cần giong/chungloai giúp tăng tốc độ
+                where: giasucWhere,
+                distinct: true,  // Tránh đếm trùng lặp dòng do cơ chế JOIN bảng
+                col: 'id'        // Đếm chuẩn xác theo khóa chính của bảng giasuc
+            })
+        ]);
 
-            // 2. Fast count: only filter by khachhang_id if needed
-            let countWhere = { ...giasucWhere };
-            if (hasCustomerFilter) {
-                const khIds = await khachhang.findAll({
-                    attributes: ['id'],
-                    where: khachhangWhere,
-                    raw: true
-                });
-                const khachhangIds = khIds.map(kh => kh.id);
-                if (khachhangIds.length === 0) {
-                    return { data: [], pagination: { totalPages: 0, currentPage: pageNum, pageSize, totalItems: 0 } };
-                }
-                countWhere.khachhang_id = { [Op.in]: khachhangIds };
-            }
+        // 5. Tính toán cấu trúc phân trang
+        const totalPages = Math.ceil(total / limit);
+        const pagination = {
+            totalPages,
+            currentPage: parseInt(pageNum),
+            pageSize: limit,
+            totalItems: total,
+        };
 
-            // 3. Fast count (no includes)
-            const total = await giasuc.count({ where: countWhere });
+        return { data: petsData, pagination };
 
-            const totalPages = Math.ceil(total / pageSize);
-            const pagination = {
-                totalPages,
-                currentPage: pageNum,
-                pageSize,
-                totalItems: total,
-            };
-            return { data, pagination };
-        } catch (error) {
-            console.log(error);
-            return {
-                data: [],
-                pagination: { totalPages: 0, currentPage: pageNum, pageSize, totalItems: 0 },
-                error: true,
-                message: error.message || 'Internal server error'
-            };
-        }
-    },
+    } catch (error) {
+        console.error('Lỗi tại getPetExaminationPaging:', error);
+        throw error; // Ném lỗi ra lớp ngoài (Controller) để xử lý HTTP Status Code (500) tập trung
+    }
+},
 
 
 

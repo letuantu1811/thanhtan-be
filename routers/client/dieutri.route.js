@@ -358,11 +358,11 @@ router.get('/getPetExamination_v2', async (req, res) => {
     const name = req.query.name;
     const address = req.query.address;
     const petName = req.query.petName;
-
+    
     try {
         if (!isAdmin) {
             const arr = [];
-            const temp = await dieutri.getPetExaminationPaging(150, 1, phone, name, address, petName, isAdmin);
+            const temp = await dieutri.getPetExaminationPaging(pageSize, 1, phone, name, address, petName, isAdmin);
             const results = temp.data;
             for (let index = 0; index < results.length; index++) {
                 let count = 0;
