@@ -135,7 +135,7 @@ router.get('/reexam_v2', async (req, res) => {
     const date = req.query.date;
     try {
         const result = await dieutri.getReExamByDate_v2(pageSize, pageNum, date, isAdmin, paramsCustomer, petName, isAdmin);
-
+        
         response.success_v2(res, 'Lấy dữ liệu thành công', result.data, result.pagination);
 
     } catch (err) {
@@ -360,43 +360,15 @@ router.get('/getPetExamination_v2', async (req, res) => {
     const petName = req.query.petName;
     
     try {
-        if (!isAdmin) {
-            const arr = [];
-            const temp = await dieutri.getPetExaminationPaging(pageSize, 1, phone, name, address, petName, isAdmin);
-            const results = temp.data;
-            for (let index = 0; index < results.length; index++) {
-                let count = 0;
-                for (let index2 = 0; index2 < results[index].phieudieutris.length; index2++) {
-                    const element2 = results[index].phieudieutris[index2];
-                    if ((await dieutri.filterBlockedInExam(element2.id)) === 0) {
-                        count++; 
-                    }
-                }
-                count > 1 && arr.push(results[index]);
-            }
-            const totalItems = arr.length; 
-            const totalPages =  Math.ceil(totalItems / pageSize);
-            const start = (pageNum - 1) * pageSize;
-            const end = pageSize * pageNum - 1;
-            const data = arr.slice(start, end);
-
-            const pagination = {
-                totalPages,
-                currentPage: pageNum,
-                pageSize,
-                totalItems,
-            };           
-            response.success_v2(res, 'success', data, pagination);
-            return;
-        }
 
         const result = await dieutri.getPetExaminationPaging(pageSize, pageNum, phone, name, address, petName, isAdmin);        
-        response.success_v2(res, 'success', result.data, result.pagination);
+        return response.success_v2(res, 'success', result.data, result.pagination);
     } catch (err) {
-        console.log(err.message);
-        response.error(res, 'failed', 500);
+        console.error("Lỗi Router getPetExamination_v2:", err.message);
+        return response.error(res, 'failed', 500);
     }
 });
+
 
 router.get('/getPetMedicalHistory/:id', async (req, res) => {
     const role = req.header('quyen');

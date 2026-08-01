@@ -194,124 +194,83 @@ module.exports = {
         }
     },
 
-   getAllToday_v2: async (pageSize, pageNum, date, paramsCustomer, petName, isAdmin) => {
-    const limit = parseInt(pageSize) || 10;
-    const offset = (parseInt(pageNum) - 1) * limit;
-    const customer = paramsCustomer || '';
-    const pet = petName || '';
+    getAllToday_v2: async (pageSize, pageNum, date, paramsCustomer, petName, isAdmin) => {
+        const limit = Math.min(parseInt(pageSize) || 10, 150);
+        const offset = (parseInt(pageNum) - 1) * limit;
+        const customer = paramsCustomer || '';
+        const pet = petName || '';
 
-    try {
-        const today = date || tzSaiGon();
+        try {
+            const today = date || tzSaiGon(); // Giả định trả về chuỗi dạng 'YYYY-MM-DD'
+            
+            // TỐI ƯU KHÔNG GÂY PHÁ INDEX: Tạo mốc thời gian trong ngày
+            const startOfDay = `${today} 00:00:00`;
+            const endOfDay = `${today} 23:59:59`;
 
-        // 1. Xây dựng bộ lọc cho Khách hàng
-        const khachhangOr = [];
-        if (customer) {
-            khachhangOr.push({ sodienthoai: { [Op.like]: `%${customer}%` } });
-            khachhangOr.push({ ten: { [Op.like]: `%${customer}%` } });
-            khachhangOr.push({ diachi: { [Op.like]: `%${customer}%` } });
-        }
-        const khachhangWhere = khachhangOr.length > 0 ? { [Op.or]: khachhangOr } : undefined;
-
-        // 2. Xây dựng bộ lọc cho Gia súc (Pet)
-        const giasucWhere = pet ? { ten: { [Op.like]: `%${pet}%` } } : undefined;
-
-        // 3. Xây dựng mảng Include dùng chung để đồng bộ dữ liệu đếm và tìm kiếm
-        const defaultIncludes = [
-            {
-                model: giasuc,
-                as: 'giasuc',
-                ...(giasucWhere && { where: giasucWhere, required: true })
-            },
-            {
-                model: khachhang,
-                as: 'khachhang',
-                ...(khachhangWhere && { where: khachhangWhere, required: true })
+            const khachhangOr = [];
+            if (customer) {
+                khachhangOr.push({ sodienthoai: { [Op.like]: `%${customer}%` } });
+                khachhangOr.push({ ten: { [Op.like]: `%${customer}%` } });
+                khachhangOr.push({ diachi: { [Op.like]: `%${customer}%` } });
             }
-        ];
+            const khachhangWhere = khachhangOr.length > 0 ? { [Op.or]: khachhangOr } : undefined;
+            const giasucWhere = pet ? { ten: { [Op.like]: `%${pet}%` } } : undefined;
 
-        // Thêm điều kiện ẩn sản phẩm nếu không phải Admin
-        const extraWhere = {};
-        if (!isAdmin) {
-            defaultIncludes.push({
-                model: sanpham,
-                where: { an: 0 },
-                required: true 
-            });
-            extraWhere.option = 0;
-        }
+            const dataIncludes = [
+                { model: giasuc, as: 'giasuc', ...(giasucWhere && { where: giasucWhere, required: true }) },
+                { model: khachhang, as: 'khachhang', ...(khachhangWhere && { where: khachhangWhere, required: true }) },
+                { model: Thanhvien, as: 'nguoitao', attributes: ['id', 'tendaydu'] }
+            ];
 
-        // Mảng include đầy đủ để lấy dữ liệu (Bao gồm bảng Thanhvien)
-        const fullIncludesForData = [
-            ...defaultIncludes,
-            {
-                model: Thanhvien,
-                as: 'nguoitao',
-                attributes: ['id', 'tendaydu']
+            const countIncludes = [];
+            if (giasucWhere) countIncludes.push({ model: giasuc, as: 'giasuc', where: giasucWhere, attributes: [], required: true });
+            if (khachhangWhere) countIncludes.push({ model: khachhang, as: 'khachhang', where: khachhangWhere, attributes: [], required: true });
+
+            const extraWhere = {};
+            if (!isAdmin) {
+                dataIncludes.push({ model: sanpham, where: { an: 0 }, required: true });
+                countIncludes.push({ model: sanpham, where: { an: 0 }, attributes: [], required: true });
+                extraWhere.option = 0;
             }
-        ];
 
-        // 4. SỬA LỖI 500: Quy hoạch chuẩn cấu trúc điều kiện Where bằng [Op.and]
-        const pureWhereClause = {
-            [Op.and]: [
-                sequelize.where(
-                    sequelize.fn('date', sequelize.col('phieudieutri.ngaytao')),
-                    '=',
-                    today
-                ),
-                { trangthai: 1 },
-                extraWhere
-            ]
-        };
-
-        // 5. Chạy song song FindAll và Count bằng ORM, tích hợp subQuery: false để tránh lỗi biên dịch SQL
-        const [currentDateTreatments, total] = await Promise.all([
-            model.findAll({
-                include: fullIncludesForData,
-                where: pureWhereClause,
-                order: [['ngaytao', 'DESC']],
-                limit,
-                offset,
-                subQuery: false
-            }),
-            model.count({
-                include: defaultIncludes, // Chỉ kết nối bảng có filter để đếm nhanh hơn
-                where: pureWhereClause,
-                distinct: true,
-                col: 'id',
-                subQuery: false
-            })
-        ]);
-
-        // 6. Tính toán phân trang
-        const totalPages = Math.ceil(total / limit);
-        const pagination = {
-            totalPages,
-            currentPage: parseInt(pageNum),
-            pageSize: limit,
-            totalItems: total,
-        };
-
-        // 7. Định dạng dữ liệu an toàn, xử lý dữ liệu ảo từ Thanhvien
-        const data = currentDateTreatments.map(treetMent => {
-            const raw = treetMent.toJSON();
-            const processed = recalculateAmount(raw);
-            return {
-                ...processed,
-                nguoitao_fullname: raw.nguoitao ? raw.nguoitao.tendaydu : null,
-                nguoitao_id: raw.nguoitao_id || (raw.nguoitao ? raw.nguoitao.id : null),
+            // CẤU TRÚC WHERE MỚI: Tận dụng hoàn toàn Index của MySQL
+            const pureWhereClause = {
+                [Op.and]: [
+                    {
+                        ngaytao: {
+                            [Op.between]: [startOfDay, endOfDay]
+                        }
+                    },
+                    { trangthai: 1 },
+                    extraWhere
+                ]
             };
-        });
 
-        return { data, pagination };
+            const [currentDateTreatments, total] = await Promise.all([
+                model.findAll({ include: dataIncludes, where: pureWhereClause, order: [['ngaytao', 'DESC']], limit, offset, subQuery: false }),
+                model.count({ include: countIncludes, where: pureWhereClause, distinct: true, col: 'id', subQuery: false })
+            ]);
 
-    } catch (error) {
-        console.error('Lỗi tại getAllToday_v2:', error);
-        throw error; // Ném lỗi ra ngoài cho Controller phản hồi lỗi hệ thống chính xác
-    }
-},
+            const totalPages = Math.ceil(total / limit);
+            return {
+                data: currentDateTreatments.map(treetMent => {
+                    const raw = treetMent.toJSON();
+                    const processed = recalculateAmount(raw);
+                    return {
+                        ...processed,
+                        nguoitao_fullname: raw.nguoitao ? raw.nguoitao.tendaydu : null,
+                        nguoitao_id: raw.nguoitao_id || (raw.nguoitao ? raw.nguoitao.id : null),
+                    };
+                }),
+                pagination: { totalPages, currentPage: parseInt(pageNum), pageSize: limit, totalItems: total }
+            };
+        } catch (error) {
+            console.error('Lỗi tại getAllToday_v2:', error);
+            throw error;
+        }
+    },
 
 
-    
     getAll: async (role) => {
         const obj = {
             limit: null,
@@ -405,110 +364,133 @@ module.exports = {
     }
 },
 
-
     getReExamByDate_v2: async (pageSize, pageNum, date, isAdmin, paramsCustomer, petName) => {
-    const limit = parseInt(pageSize) || 10;
-    const offset = (parseInt(pageNum) - 1) * limit;
-    const customer = paramsCustomer || '';
-    const pet = petName || '';
+        // Ép sàn tối đa để bảo vệ hệ thống khỏi tràn bộ nhớ khi FE truyền số quá lớn
+        const limit = Math.min(parseInt(pageSize) || 10, 150); 
+        const offset = (parseInt(pageNum) - 1) * limit;
+        const customer = paramsCustomer || '';
+        const pet = petName || '';
 
-    try {
-        const selectedDate = date || tzSaiGon();
+        try {
+            const selectedDate = date || tzSaiGon(); // Giả định chuỗi ngày có dạng 'YYYY-MM-DD'
 
-        // 1. Xây dựng bộ lọc cho Khách hàng
-        const khachhangOr = [];
-        if (customer) {
-            khachhangOr.push({ sodienthoai: { [Op.like]: `%${customer}%` } });
-            khachhangOr.push({ ten: { [Op.like]: `%${customer}%` } });
-            khachhangOr.push({ diachi: { [Op.like]: `%${customer}%` } });
-        }
-        const khachhangWhere = khachhangOr.length > 0 ? { [Op.or]: khachhangOr } : undefined;
+            // TỐI ƯU KHÔNG GÂY PHÁ INDEX: Tạo mốc thời gian bắt đầu và kết thúc trong ngày
+            const startOfReExam = `${selectedDate} 00:00:00`;
+            const endOfReExam = `${selectedDate} 23:59:59`;
 
-        // 2. Xây dựng bộ lọc cho Gia súc (Pet)
-        const giasucWhere = pet ? { ten: { [Op.like]: `%${pet}%` } } : undefined;
-
-        // 3. Xây dựng mảng Include dùng chung cho cả Find và Count để đồng bộ dữ liệu
-        // Sử dụng mảng clone độc lập để tránh bị gộp đè thuộc tính khi chạy Promise.all
-        const defaultIncludes = [
-            {
-                model: giasuc,
-                as: 'giasuc',
-                ...(giasucWhere && { where: giasucWhere, required: true })
-            },
-            {
-                model: khachhang,
-                as: 'khachhang',
-                ...(khachhangWhere && { where: khachhangWhere, required: true })
+            // 1. Xây dựng bộ lọc cho Khách hàng
+            const khachhangOr = [];
+            if (customer) {
+                khachhangOr.push({ sodienthoai: { [Op.like]: `%${customer}%` } });
+                khachhangOr.push({ ten: { [Op.like]: `%${customer}%` } });
+                khachhangOr.push({ diachi: { [Op.like]: `%${customer}%` } });
             }
-        ];
+            const khachhangWhere = khachhangOr.length > 0 ? { [Op.or]: khachhangOr } : undefined;
 
-        // Thêm điều kiện ẩn sản phẩm nếu không phải Admin
-        const extraWhere = {};
-        if (!isAdmin) {
-            defaultIncludes.push({
-                model: sanpham,
-                where: { an: 0 },
-                required: true 
-            });
-            extraWhere.option = 0; 
+            // 2. Xây dựng bộ lọc cho Gia súc (Pet)
+            const giasucWhere = pet ? { ten: { [Op.like]: `%${pet}%` } } : undefined;
+
+            // 3. MẢNG INCLUDE ĐẦY ĐỦ ĐỂ LẤY DỮ LIỆU hiển thị (findAll)
+            const dataIncludes = [
+                {
+                    model: giasuc,
+                    as: 'giasuc',
+                    ...(giasucWhere && { where: giasucWhere, required: true })
+                },
+                {
+                    model: khachhang,
+                    as: 'khachhang',
+                    ...(khachhangWhere && { where: khachhangWhere, required: true })
+                }
+            ];
+
+            // 4. MẢNG INCLUDE SIÊU RÚT GỌN ĐỂ ĐẾM (count) - Loại bỏ cột thừa chống ETIMEDOUT
+            const countIncludes = [];
+            if (giasucWhere) {
+                countIncludes.push({
+                    model: giasuc,
+                    as: 'giasuc',
+                    where: giasucWhere,
+                    attributes: [], 
+                    required: true
+                });
+            }
+            if (khachhangWhere) {
+                countIncludes.push({
+                    model: khachhang,
+                    as: 'khachhang',
+                    where: khachhangWhere,
+                    attributes: [], 
+                    required: true
+                });
+            }
+
+            // Thêm điều kiện ẩn sản phẩm nếu không phải Admin
+            const extraWhere = {};
+            if (!isAdmin) {
+                const sanphamInclude = {
+                    model: sanpham,
+                    where: { an: 0 },
+                    attributes: [], 
+                    required: true 
+                };
+                dataIncludes.push({ ...sanphamInclude, attributes: undefined }); 
+                countIncludes.push(sanphamInclude); 
+                extraWhere.option = 0; 
+            }
+
+            // 5. CẤU TRÚC WHERE MỚI: Tận dụng hoàn toàn chỉ mục Index của MySQL
+            const pureWhereClause = {
+                [Op.and]: [
+                    {
+                        ngaytaikham: {
+                            [Op.between]: [startOfReExam, endOfReExam]
+                        }
+                    },
+                    { trangthai: 1 },
+                    extraWhere
+                ]
+            };
+
+            // 6. Thực thi truy vấn song song an toàn tuyệt đối
+            const [treetments, total] = await Promise.all([
+                model.findAll({
+                    include: dataIncludes,
+                    where: pureWhereClause,
+                    order: [['ngaytao', 'DESC']],
+                    limit,
+                    offset,
+                    subQuery: false 
+                }),
+                model.count({
+                    include: countIncludes, 
+                    where: pureWhereClause,
+                    distinct: true, 
+                    col: 'id',
+                    subQuery: false
+                })
+            ]);
+
+            // 7. Tính toán phân trang
+            const totalPages = Math.ceil(total / limit);
+            const pagination = {
+                totalPages,
+                currentPage: parseInt(pageNum),
+                pageSize: limit,
+                totalItems: total,
+            };
+
+            // 8. Định dạng dữ liệu trả về
+            const data = treetments.map(treetMent => recalculateAmount(treetMent.toJSON()));
+            
+            return { data, pagination };
+
+        } catch (error) {
+            console.error('Lỗi tại getReExamByDate_v2:', error);
+            throw error; 
         }
-
-        // 4. SỬA LỖI 500: Gom cụm điều kiện Where chuẩn hóa của Sequelize
-        // Không dùng dấu ... trước sequelize.where mà đưa nó vào mảng [Op.and]
-        const pureWhereClause = {
-            [Op.and]: [
-                sequelize.where(
-                    sequelize.fn('date', sequelize.col('ngaytaikham')),
-                    '=',
-                    selectedDate
-                ),
-                { trangthai: 1 },
-                extraWhere
-            ]
-        };
-
-        // 5. Chạy song song cả 2 truy vấn FindAll và Count bằng Promise.all
-        // Bổ sung thuộc tính subQuery: false để tránh lỗi phát sinh SQL khi phân trang có chứa include bảng khác
-        const [treetments, total] = await Promise.all([
-            model.findAll({
-                include: defaultIncludes,
-                where: pureWhereClause,
-                order: [['ngaytao', 'DESC']],
-                limit,
-                offset,
-                subQuery: false 
-            }),
-            model.count({
-                include: defaultIncludes,
-                where: pureWhereClause,
-                distinct: true, 
-                col: 'id',
-                subQuery: false
-            })
-        ]);
-
-        // 6. Tính toán phân trang
-        const totalPages = Math.ceil(total / limit);
-        const pagination = {
-            totalPages,
-            currentPage: parseInt(pageNum),
-            pageSize: limit,
-            totalItems: total,
-        };
-
-        // 7. Định dạng dữ liệu trả về
-        const data = treetments.map(treetMent => recalculateAmount(treetMent.toJSON()));
-        
-        return { data, pagination };
-
-    } catch (error) {
-        console.error('Lỗi tại getReExamByDate_v2:', error);
-        throw error; 
-    }
-},
-
-
-
+    },
+    
     getNotification: async (role) => {
         try {
             const today = tzSaiGon();
@@ -915,9 +897,8 @@ module.exports = {
             throw new Error();
         }
     },
-    // Paging Pet Examination
-    getPetExaminationPaging: async (pageSize, pageNum, phone, name, address, petName, isAdmin) => {
-    const limit = parseInt(pageSize) || 10;
+   getPetExaminationPaging: async (pageSize, pageNum, phone, name, address, petName, isAdmin) => {
+    const limit = parseInt(pageSize) || 20;
     const offset = (parseInt(pageNum) - 1) * limit;
 
     const phoneParam = phone || '';
@@ -928,7 +909,7 @@ module.exports = {
     const pTreatmentOption = {};
     if (!isAdmin) pTreatmentOption.option = 0;
 
-    // 1. Xây dựng bộ lọc tìm kiếm Khách hàng (Dynamic Filter)
+    // 1. Bộ lọc khách hàng
     const khachhangOr = [];
     if (phoneParam) khachhangOr.push({ sodienthoai: { [Op.like]: `%${phoneParam}%` } });
     if (nameParam) khachhangOr.push({ ten: { [Op.like]: `%${nameParam}%` } });
@@ -936,30 +917,24 @@ module.exports = {
     const hasCustomerFilter = khachhangOr.length > 0;
     const khachhangWhere = hasCustomerFilter ? { [Op.or]: khachhangOr } : undefined;
 
-    // 2. Bộ lọc cho bảng gốc Gia súc (Pet)
+    // 2. Bộ lọc thú cưng
     const giasucWhere = {
         trangthai: 1,
         ten: { [Op.like]: `%${pet}%` }
     };
 
-    // 3. Xây dựng mảng Include dùng chung cho cả FindAll và Count để đảm bảo đồng bộ 100%
-    const defaultIncludes = [
+    // 3. Mảng bao gồm đầy đủ dữ liệu cho lệnh findAll (Lấy dữ liệu hiển thị)
+    const fullIncludesForData = [
         {
             model: khachhang,
             as: 'khachhang',
-            ...(hasCustomerFilter && { where: khachhangWhere, required: true }) // Ép inner join khi có filter khách hàng
+            ...(hasCustomerFilter && { where: khachhangWhere, required: true })
         },
         {
             model: phieudieutri,
-            as: 'phieudieutris', // Hãy kiểm tra chính xác alias 'as' của mối quan hệ này trong Model của bạn
             where: { trangthai: 1, ...pTreatmentOption },
-            required: true // Ép inner join để chỉ đếm/lấy những thú cưng có phiếu điều trị thỏa mãn điều kiện
-        }
-    ];
-
-    // Mảng bao gồm đầy đủ dữ liệu cho lệnh findAll (Thêm bảng giống, chủng loại để hiển thị)
-    const fullIncludesForData = [
-        ...defaultIncludes,
+            required: true 
+        },
         {
             model: Giong,
             as: 'giong',
@@ -968,24 +943,82 @@ module.exports = {
     ];
 
     try {
-        // 4. Kích hoạt chạy song song cả 2 truy vấn để giảm tối đa thời gian chờ
-        const [petsData, total] = await Promise.all([
-            giasuc.findAll({
-                include: fullIncludesForData,
-                where: giasucWhere,
-                order: [['ngaytao', 'DESC']],
-                limit,
-                offset
-            }),
-            giasuc.count({
-                include: defaultIncludes, // Chỉ cần include bảng khachhang và phieudieutri để đếm, không cần giong/chungloai giúp tăng tốc độ
-                where: giasucWhere,
-                distinct: true,  // Tránh đếm trùng lặp dòng do cơ chế JOIN bảng
-                col: 'id'        // Đếm chuẩn xác theo khóa chính của bảng giasuc
-            })
-        ]);
+        let petsData = [];
+        let total = 0;
 
-        // 5. Tính toán cấu trúc phân trang
+        if (!isAdmin) {
+            // --- XỬ LÝ CHO USER THƯỜNG (CẦN LỌC PHIẾU VÀ ĐẾM SỐ PHIẾU > 1) ---
+
+            // Mảng include rút gọn tối đa dành riêng cho câu lệnh COUNT để chống ETIMEDOUT
+            const minimalIncludesForCount = [
+                {
+                    model: phieudieutri,
+                    where: { trangthai: 1, ...pTreatmentOption },
+                    attributes: [], // Không lấy bất kỳ cột nào của bảng phieudieutri
+                    required: true
+                }
+            ];
+            if (hasCustomerFilter) {
+                minimalIncludesForCount.push({
+                    model: khachhang,
+                    as: 'khachhang',
+                    where: khachhangWhere,
+                    attributes: [], // Không lấy bất kỳ cột nào của bảng khachhang
+                    required: true
+                });
+            }
+
+            // Kích hoạt song song
+            const [dataQuery, totalResult] = await Promise.all([
+                giasuc.findAll({
+                    include: fullIncludesForData,
+                    where: giasucWhere,
+                    order: [['ngaytao', 'DESC']],
+                    limit,
+                    offset,
+                    subQuery: false,
+                    group: ['giasuc.id'],
+                    having: sequelize.literal('COUNT(phieudieutris.id) > 1')
+                }),
+                giasuc.findAll({
+                    attributes: ['id'], // CHỈ LẤY ĐÚNG CỘT ID ĐỂ ĐẾM, BỎ HẾT CÁC CỘT KHÁC
+                    include: minimalIncludesForCount, // Dùng include siêu sạch, bỏ giong/chungloai
+                    where: giasucWhere,
+                    subQuery: false,
+                    group: ['giasuc.id'],
+                    having: sequelize.literal('COUNT(phieudieutris.id) > 1'),
+                    raw: true
+                })
+            ]);
+
+            petsData = dataQuery;
+            total = totalResult.length;
+
+        } else {
+            // --- XỬ LÝ CHO ADMIN (CHỈ CẦN PHÂN TRANG THÔNG THƯỜNG, ĐẾM NHANH CHÓNG) ---
+            const [dataQuery, countQuery] = await Promise.all([
+                giasuc.findAll({
+                    include: fullIncludesForData,
+                    where: giasucWhere,
+                    order: [['ngaytao', 'DESC']],
+                    limit,
+                    offset,
+                    subQuery: false
+                }),
+                giasuc.count({
+                    include: hasCustomerFilter ? [{ model: khachhang, as: 'khachhang', where: khachhangWhere, required: true }] : [],
+                    where: giasucWhere,
+                    distinct: true,
+                    col: 'id',
+                    subQuery: false
+                })
+            ]);
+
+            petsData = dataQuery;
+            total = countQuery;
+        }
+
+        // 6. Tính toán phân trang
         const totalPages = Math.ceil(total / limit);
         const pagination = {
             totalPages,
@@ -998,9 +1031,10 @@ module.exports = {
 
     } catch (error) {
         console.error('Lỗi tại getPetExaminationPaging:', error);
-        throw error; // Ném lỗi ra lớp ngoài (Controller) để xử lý HTTP Status Code (500) tập trung
+        throw error;
     }
 },
+
 
 
 
