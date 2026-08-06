@@ -897,143 +897,106 @@ module.exports = {
             throw new Error();
         }
     },
-   getPetExaminationPaging: async (pageSize, pageNum, phone, name, address, petName, isAdmin) => {
-    const limit = parseInt(pageSize) || 20;
-    const offset = (parseInt(pageNum) - 1) * limit;
+    getPetExaminationPaging: async (pageSize, pageNum, phone, name, address, petName, isAdmin) => {
+        const limit = Math.min(parseInt(pageSize) || 20, 150);
+        const offset = (parseInt(pageNum) - 1) * limit;
 
-    const phoneParam = phone || '';
-    const nameParam = name || '';
-    const addressParam = address || '';
-    const pet = petName || '';
-    
-    const pTreatmentOption = {};
-    if (!isAdmin) pTreatmentOption.option = 0;
+        const cleanPhone = phone ? phone.replace(/\s+/g, '') : '';
+        const phoneParam = cleanPhone ? `%${cleanPhone}%` : '%';
+        const nameParam = name ? `%${name.trim()}%` : '%';
+        const addressParam = address ? `%${address.trim()}%` : '%';
+        const petParam = petName ? `%${petName.trim()}%` : '%';
 
-    // 1. Bộ lọc khách hàng
-    const khachhangOr = [];
-    if (phoneParam) khachhangOr.push({ sodienthoai: { [Op.like]: `%${phoneParam}%` } });
-    if (nameParam) khachhangOr.push({ ten: { [Op.like]: `%${nameParam}%` } });
-    if (addressParam) khachhangOr.push({ diachi: { [Op.like]: `%${addressParam}%` } });
-    const hasCustomerFilter = khachhangOr.length > 0;
-    const khachhangWhere = hasCustomerFilter ? { [Op.or]: khachhangOr } : undefined;
-
-    // 2. Bộ lọc thú cưng
-    const giasucWhere = {
-        trangthai: 1,
-        ten: { [Op.like]: `%${pet}%` }
-    };
-
-    // 3. Mảng bao gồm đầy đủ dữ liệu cho lệnh findAll (Lấy dữ liệu hiển thị)
-    const fullIncludesForData = [
-        {
-            model: khachhang,
-            as: 'khachhang',
-            ...(hasCustomerFilter && { where: khachhangWhere, required: true })
-        },
-        {
-            model: phieudieutri,
-            where: { trangthai: 1, ...pTreatmentOption },
-            required: true 
-        },
-        {
-            model: Giong,
-            as: 'giong',
-            include: [{ model: Chungloai, as: 'chungloai' }],
-        }
-    ];
-
-    try {
-        let petsData = [];
-        let total = 0;
-
-        if (!isAdmin) {
-            // --- XỬ LÝ CHO USER THƯỜNG (CẦN LỌC PHIẾU VÀ ĐẾM SỐ PHIẾU > 1) ---
-
-            // Mảng include rút gọn tối đa dành riêng cho câu lệnh COUNT để chống ETIMEDOUT
-            const minimalIncludesForCount = [
-                {
-                    model: phieudieutri,
-                    where: { trangthai: 1, ...pTreatmentOption },
-                    attributes: [], // Không lấy bất kỳ cột nào của bảng phieudieutri
-                    required: true
-                }
-            ];
-            if (hasCustomerFilter) {
-                minimalIncludesForCount.push({
-                    model: khachhang,
-                    as: 'khachhang',
-                    where: khachhangWhere,
-                    attributes: [], // Không lấy bất kỳ cột nào của bảng khachhang
-                    required: true
-                });
+        try {
+            let sql = '';
+            
+            if (!isAdmin) {
+                // Dùng Derived Table: Gom nhóm đếm phiếu trước -> JOIN sau
+                sql = `
+                    SELECT giasuc.id
+                    FROM giasuc
+                    INNER JOIN (
+                        SELECT giasuc_id
+                        FROM phieudieutri
+                        WHERE trangthai = 1 AND option = 0
+                        GROUP BY giasuc_id
+                        HAVING COUNT(id) > 1
+                    ) AS pdt_count ON giasuc.id = pdt_count.giasuc_id
+                    LEFT JOIN khachhang ON giasuc.khachhang_id = khachhang.id
+                    WHERE giasuc.trangthai = 1 
+                    AND giasuc.ten LIKE :petParam
+                    AND (:cleanPhone = '' OR REPLACE(khachhang.sodienthoai, ' ', '') LIKE :phoneParam)
+                    AND (:name = '' OR khachhang.ten LIKE :nameParam)
+                    AND (:address = '' OR khachhang.diachi LIKE :addressParam)
+                `;
+            } else {
+                // Nhánh Admin: Chỉ lấy những con có ít nhất 1 phiếu
+                sql = `
+                    SELECT DISTINCT giasuc.id
+                    FROM giasuc
+                    INNER JOIN phieudieutri AS pdt ON giasuc.id = pdt.giasuc_id AND pdt.trangthai = 1
+                    LEFT JOIN khachhang ON giasuc.khachhang_id = khachhang.id
+                    WHERE giasuc.trangthai = 1 
+                    AND giasuc.ten LIKE :petParam
+                    AND (:cleanPhone = '' OR REPLACE(khachhang.sodienthoai, ' ', '') LIKE :phoneParam)
+                    AND (:name = '' OR khachhang.ten LIKE :nameParam)
+                    AND (:address = '' OR khachhang.diachi LIKE :addressParam)
+                `;
             }
 
-            // Kích hoạt song song
-            const [dataQuery, totalResult] = await Promise.all([
-                giasuc.findAll({
-                    include: fullIncludesForData,
-                    where: giasucWhere,
-                    order: [['ngaytao', 'DESC']],
-                    limit,
-                    offset,
-                    subQuery: false,
-                    group: ['giasuc.id'],
-                    having: sequelize.literal('COUNT(phieudieutris.id) > 1')
-                }),
-                giasuc.findAll({
-                    attributes: ['id'], // CHỈ LẤY ĐÚNG CỘT ID ĐỂ ĐẾM, BỎ HẾT CÁC CỘT KHÁC
-                    include: minimalIncludesForCount, // Dùng include siêu sạch, bỏ giong/chungloai
-                    where: giasucWhere,
-                    subQuery: false,
-                    group: ['giasuc.id'],
-                    having: sequelize.literal('COUNT(phieudieutris.id) > 1'),
-                    raw: true
-                })
-            ]);
+            const validPetIdsResult = await model.sequelize.query(sql, {
+                replacements: { 
+                    petParam, 
+                    phoneParam, 
+                    nameParam, 
+                    addressParam,
+                    cleanPhone,
+                    name: name ? name.trim() : '',
+                    address: address ? address.trim() : ''
+                },
+                type: model.sequelize.QueryTypes.SELECT
+            });
 
-            petsData = dataQuery;
-            total = totalResult.length;
+            const total = validPetIdsResult.length;
+            if (total === 0) {
+                return { 
+                    data: [], 
+                    pagination: { totalPages: 0, currentPage: parseInt(pageNum), pageSize: limit, totalItems: 0 } 
+                };
+            }
 
-        } else {
-            // --- XỬ LÝ CHO ADMIN (CHỈ CẦN PHÂN TRANG THÔNG THƯỜNG, ĐẾM NHANH CHÓNG) ---
-            const [dataQuery, countQuery] = await Promise.all([
-                giasuc.findAll({
-                    include: fullIncludesForData,
-                    where: giasucWhere,
-                    order: [['ngaytao', 'DESC']],
-                    limit,
-                    offset,
-                    subQuery: false
-                }),
-                giasuc.count({
-                    include: hasCustomerFilter ? [{ model: khachhang, as: 'khachhang', where: khachhangWhere, required: true }] : [],
-                    where: giasucWhere,
-                    distinct: true,
-                    col: 'id',
-                    subQuery: false
-                })
-            ]);
+            const pagedPetIds = validPetIdsResult.slice(offset, offset + limit).map(item => item.id);
 
-            petsData = dataQuery;
-            total = countQuery;
+            const petsData = await giasuc.findAll({
+                where: { id: { [Op.in]: pagedPetIds } },
+                include: [
+                    { model: khachhang, as: 'khachhang' },
+                    { 
+                        model: phieudieutri, 
+                        as: 'phieudieutris', 
+                        where: isAdmin ? { trangthai: 1 } : { trangthai: 1, option: 0 },
+                        required: false 
+                    },
+                    {
+                        model: Giong,
+                        as: 'giong',
+                        include: [{ model: Chungloai, as: 'chungloai' }],
+                    }
+                ],
+                order: [['ngaytao', 'DESC']]
+            });
+
+            const totalPages = Math.ceil(total / limit);
+            return {
+                data: petsData,
+                pagination: { totalPages, currentPage: parseInt(pageNum), pageSize: limit, totalItems: total }
+            };
+
+        } catch (error) {
+            console.error('Lỗi tại getPetExaminationPaging:', error);
+            throw error;
         }
-
-        // 6. Tính toán phân trang
-        const totalPages = Math.ceil(total / limit);
-        const pagination = {
-            totalPages,
-            currentPage: parseInt(pageNum),
-            pageSize: limit,
-            totalItems: total,
-        };
-
-        return { data: petsData, pagination };
-
-    } catch (error) {
-        console.error('Lỗi tại getPetExaminationPaging:', error);
-        throw error;
-    }
-},
+    },
 
 
 
