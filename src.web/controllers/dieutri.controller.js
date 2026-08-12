@@ -22,11 +22,13 @@ const ENABLED_CACHE = true;
 const PET_EXAMINATION_CACHE_TTL_MS = 5 * 60 * 1000;
 const PET_EXAMINATION_CACHE_MAX_ENTRIES = 500;
 
+const clearPetExaminationCache = () => cached.clear();
+
 module.exports = {
     create: async (res) => {
         console.log(model);
         try {
-            return await model.create({
+            const treatment = await model.create({
                 ngaytao: localDate(new Date()),
                 khachhang_id: res.guest_id,
                 nguoitao_id: res.user_id,
@@ -39,6 +41,8 @@ module.exports = {
                 discountAmount: toNumber(res.discountAmount) || 0,
                 addedDiscountAmount: toNumber(res.addedDiscountAmount) || 0,
             });
+            clearPetExaminationCache();
+            return treatment;
         } catch (error) {
             return error;
         }
@@ -75,6 +79,7 @@ module.exports = {
                 default:
                     break;
             }
+            clearPetExaminationCache();
         } catch (error) {
             throw error;
         }
@@ -643,6 +648,9 @@ module.exports = {
                 }
             }
             await phieudieutri.bulkCreate(arr);
+            if (arr.length > 0) {
+                clearPetExaminationCache();
+            }
         } catch (error) {
             console.log(error);
             throw new Error();
@@ -1029,10 +1037,7 @@ module.exports = {
             const paginationStartedAt = Date.now();
             const now = Date.now();
             const cachedTotal = ENABLED_CACHE ? cached.get(totalCacheKey) : null;
-            const hasCachedTotal = ENABLED_CACHE && cachedTotal && cachedTotal.expiresAt > now;
-            if (cachedTotal && !hasCachedTotal) {
-                cached.delete(totalCacheKey);
-            }
+            const hasCachedTotal = ENABLED_CACHE && cachedTotal !== undefined;
             const cachedPage = ENABLED_CACHE ? cached.get(pageCacheKey) : null;
             const hasCachedPage = ENABLED_CACHE && cachedPage && cachedPage.expiresAt > now;
             if (cachedPage && !hasCachedPage) {
@@ -1071,7 +1076,6 @@ module.exports = {
                 }
                 cached.set(totalCacheKey, {
                     total,
-                    expiresAt: now + PET_EXAMINATION_CACHE_TTL_MS,
                 });
             }
             console.info('[getPetExamination_v2] pagination queries:', {
