@@ -973,32 +973,20 @@ module.exports = {
         const cleanPetName = petName ? petName.trim() : '';
         const requestStartedAt = Date.now();
         const cacheKeyParts = [Boolean(isAdmin), cleanPhone, cleanName, cleanAddress, cleanPetName];
-        const totalCacheKey = `total:${JSON.stringify(cacheKeyParts)}`;
-        const pageCacheKey = `page:${JSON.stringify([...cacheKeyParts, limit, currentPage])}`;
+        const listCacheKey = `list:${JSON.stringify(cacheKeyParts)}`;
 
         try {
             const customerFilterEnabled = Boolean(cleanPhone || cleanName || cleanAddress);
             const joins = customerFilterEnabled
                 ? 'INNER JOIN khachhang ON giasuc.khachhang_id = khachhang.id'
                 : '';
-            const conditions = ['phieudieutri.trangthai = 1', 'giasuc.trangthai = 1'];
+            const treatmentConditions = ['phieudieutri.trangthai = 1'];
+            const conditions = ['giasuc.trangthai = 1'];
             const replacements = {};
 
             if (!isAdmin) {
-                conditions.push('phieudieutri.option = 0');
+                treatmentConditions.push('phieudieutri.option = 0');
             }
-            conditions.push(
-                `
-                EXISTS (
-                    SELECT 1
-                    FROM phieudieutri AS p2
-                    WHERE p2.giasuc_id = phieudieutri.giasuc_id
-                      AND p2.id <> phieudieutri.id
-                      AND p2.trangthai = 1
-                      ${isAdmin ? '' : 'AND p2.option = 0'}
-                )
-            `.trim(),
-            );
 
             if (cleanPetName) {
                 conditions.push('giasuc.ten LIKE :petParam');
@@ -1017,71 +1005,76 @@ module.exports = {
                 replacements.addressParam = `%${cleanAddress}%`;
             }
 
-            const eligiblePetsFromSql = `
-                FROM phieudieutri
-                INNER JOIN giasuc ON giasuc.id = phieudieutri.giasuc_id
+            const eligiblePetsSql = `
+                SELECT
+                    eligible_treatments.id,
+                    eligible_treatments.ngaydieutrigannhat
+                FROM (
+                    SELECT
+                        phieudieutri.giasuc_id AS id,
+                        MAX(phieudieutri.ngaytao) AS ngaydieutrigannhat
+                    FROM phieudieutri
+                    WHERE ${treatmentConditions.join('\n                    AND ')}
+                    GROUP BY phieudieutri.giasuc_id
+                    HAVING COUNT(*) > 1
+                ) AS eligible_treatments
+                INNER JOIN giasuc ON giasuc.id = eligible_treatments.id
                 ${joins}
                 WHERE ${conditions.join('\n                AND ')}
             `;
             const countSql = `
-                SELECT COUNT(DISTINCT phieudieutri.giasuc_id) AS total
-                ${eligiblePetsFromSql}
+                SELECT COUNT(*) AS total
+                FROM (${eligiblePetsSql}) AS eligible_pets
             `;
             const pagedIdsSql = `
-                SELECT DISTINCT giasuc.id, giasuc.ngaytao
-                ${eligiblePetsFromSql}
-                ORDER BY giasuc.ngaytao DESC
-                LIMIT :limit OFFSET :offset
+                ${eligiblePetsSql}
+                ORDER BY ngaydieutrigannhat DESC
+                ${ENABLED_CACHE ? '' : 'LIMIT :limit OFFSET :offset'}
             `;
 
             const paginationStartedAt = Date.now();
             const now = Date.now();
-            const cachedTotal = ENABLED_CACHE ? cached.get(totalCacheKey) : null;
-            const hasCachedTotal = ENABLED_CACHE && cachedTotal !== undefined;
-            const cachedPage = ENABLED_CACHE ? cached.get(pageCacheKey) : null;
-            const hasCachedPage = ENABLED_CACHE && cachedPage && cachedPage.expiresAt > now;
-            if (cachedPage && !hasCachedPage) {
-                cached.delete(pageCacheKey);
+            const cachedList = ENABLED_CACHE ? cached.get(listCacheKey) : null;
+            const hasCachedList = ENABLED_CACHE && cachedList && cachedList.expiresAt > now;
+            if (cachedList && !hasCachedList) {
+                cached.delete(listCacheKey);
             }
 
-            const countPromise = hasCachedTotal
+            const countPromise = ENABLED_CACHE
                 ? Promise.resolve(null)
                 : model.sequelize.query(countSql, {
                       replacements,
                       type: model.sequelize.QueryTypes.SELECT,
                   });
-            const pagePromise = hasCachedPage
-                ? Promise.resolve(cachedPage.rows)
+            const listPromise = hasCachedList
+                ? Promise.resolve(null)
                 : model.sequelize.query(pagedIdsSql, {
-                      replacements: { ...replacements, limit, offset },
+                      replacements: ENABLED_CACHE
+                          ? replacements
+                          : { ...replacements, limit, offset },
                       type: model.sequelize.QueryTypes.SELECT,
                   });
-            const [pagedPetIdsResult, countResult] = await Promise.all([pagePromise, countPromise]);
+            const [eligiblePetRows, countResult] = await Promise.all([listPromise, countPromise]);
+            const eligiblePetIds = hasCachedList
+                ? cachedList.ids
+                : eligiblePetRows.map((item) => item.id);
 
-            const total = hasCachedTotal ? cachedTotal.total : Number(countResult[0]?.total) || 0;
-            if (ENABLED_CACHE && !hasCachedPage) {
+            const total = ENABLED_CACHE
+                ? eligiblePetIds.length
+                : Number(countResult[0]?.total) || 0;
+            if (ENABLED_CACHE && !hasCachedList) {
                 if (cached.size >= PET_EXAMINATION_CACHE_MAX_ENTRIES) {
                     const oldestKey = cached.keys().next().value;
                     cached.delete(oldestKey);
                 }
-                cached.set(pageCacheKey, {
-                    rows: pagedPetIdsResult,
+                cached.set(listCacheKey, {
+                    ids: eligiblePetIds,
                     expiresAt: now + PET_EXAMINATION_CACHE_TTL_MS,
-                });
-            }
-            if (ENABLED_CACHE && !hasCachedTotal) {
-                if (cached.size >= PET_EXAMINATION_CACHE_MAX_ENTRIES) {
-                    const oldestKey = cached.keys().next().value;
-                    cached.delete(oldestKey);
-                }
-                cached.set(totalCacheKey, {
-                    total,
                 });
             }
             console.info('[getPetExamination_v2] pagination queries:', {
                 durationMs: Date.now() - paginationStartedAt,
-                totalCacheHit: Boolean(hasCachedTotal),
-                pageCacheHit: Boolean(hasCachedPage),
+                listCacheHit: Boolean(hasCachedList),
                 isAdmin,
                 pageSize: limit,
                 pageNum: currentPage,
@@ -1101,7 +1094,9 @@ module.exports = {
                 };
             }
 
-            const pagedPetIds = pagedPetIdsResult.map((item) => item.id);
+            const pagedPetIds = ENABLED_CACHE
+                ? eligiblePetIds.slice(offset, offset + limit)
+                : eligiblePetIds;
             const totalPages = Math.ceil(total / limit);
 
             if (pagedPetIds.length === 0) {
@@ -1151,13 +1146,19 @@ module.exports = {
                 return groupedTreatments;
             }, new Map());
 
-            const petsData = pets.map((pet) => {
-                const rawPet = pet.toJSON();
-                return {
-                    ...rawPet,
-                    phieudieutris: treatmentsByPetId.get(rawPet.id) || [],
-                };
-            });
+            const petOrderById = new Map(pagedPetIds.map((id, index) => [id, index]));
+            const petsData = pets
+                .map((pet) => {
+                    const rawPet = pet.toJSON();
+                    return {
+                        ...rawPet,
+                        phieudieutris: treatmentsByPetId.get(rawPet.id) || [],
+                    };
+                })
+                .sort(
+                    (firstPet, secondPet) =>
+                        petOrderById.get(firstPet.id) - petOrderById.get(secondPet.id),
+                );
             console.info('[getPetExamination_v2] total:', {
                 durationMs: Date.now() - requestStartedAt,
                 resultCount: petsData.length,
