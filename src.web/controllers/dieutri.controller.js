@@ -17,6 +17,11 @@ const Giong = require('../../database/models/giong');
 const Chungloai = require('../../database/models/chungloai');
 const { toNumber, isNil, omit } = require('lodash');
 
+const cached = new Map();
+const ENABLED_CACHE = true;
+const PET_EXAMINATION_CACHE_TTL_MS = 5 * 60 * 1000;
+const PET_EXAMINATION_CACHE_MAX_ENTRIES = 500;
+
 module.exports = {
     create: async (res) => {
         console.log(model);
@@ -959,6 +964,9 @@ module.exports = {
         const cleanAddress = address ? address.trim() : '';
         const cleanPetName = petName ? petName.trim() : '';
         const requestStartedAt = Date.now();
+        const cacheKeyParts = [Boolean(isAdmin), cleanPhone, cleanName, cleanAddress, cleanPetName];
+        const totalCacheKey = `total:${JSON.stringify(cacheKeyParts)}`;
+        const pageCacheKey = `page:${JSON.stringify([...cacheKeyParts, limit, currentPage])}`;
 
         try {
             const customerFilterEnabled = Boolean(cleanPhone || cleanName || cleanAddress);
@@ -1019,18 +1027,57 @@ module.exports = {
             `;
 
             const paginationStartedAt = Date.now();
-            const [pagedPetIdsResult, countResult] = await Promise.all([
-                model.sequelize.query(pagedIdsSql, {
-                    replacements: { ...replacements, limit, offset },
-                    type: model.sequelize.QueryTypes.SELECT,
-                }),
-                model.sequelize.query(countSql, {
-                    replacements,
-                    type: model.sequelize.QueryTypes.SELECT,
-                }),
-            ]);
+            const now = Date.now();
+            const cachedTotal = ENABLED_CACHE ? cached.get(totalCacheKey) : null;
+            const hasCachedTotal = ENABLED_CACHE && cachedTotal && cachedTotal.expiresAt > now;
+            if (cachedTotal && !hasCachedTotal) {
+                cached.delete(totalCacheKey);
+            }
+            const cachedPage = ENABLED_CACHE ? cached.get(pageCacheKey) : null;
+            const hasCachedPage = ENABLED_CACHE && cachedPage && cachedPage.expiresAt > now;
+            if (cachedPage && !hasCachedPage) {
+                cached.delete(pageCacheKey);
+            }
+
+            const countPromise = hasCachedTotal
+                ? Promise.resolve(null)
+                : model.sequelize.query(countSql, {
+                      replacements,
+                      type: model.sequelize.QueryTypes.SELECT,
+                  });
+            const pagePromise = hasCachedPage
+                ? Promise.resolve(cachedPage.rows)
+                : model.sequelize.query(pagedIdsSql, {
+                      replacements: { ...replacements, limit, offset },
+                      type: model.sequelize.QueryTypes.SELECT,
+                  });
+            const [pagedPetIdsResult, countResult] = await Promise.all([pagePromise, countPromise]);
+
+            const total = hasCachedTotal ? cachedTotal.total : Number(countResult[0]?.total) || 0;
+            if (ENABLED_CACHE && !hasCachedPage) {
+                if (cached.size >= PET_EXAMINATION_CACHE_MAX_ENTRIES) {
+                    const oldestKey = cached.keys().next().value;
+                    cached.delete(oldestKey);
+                }
+                cached.set(pageCacheKey, {
+                    rows: pagedPetIdsResult,
+                    expiresAt: now + PET_EXAMINATION_CACHE_TTL_MS,
+                });
+            }
+            if (ENABLED_CACHE && !hasCachedTotal) {
+                if (cached.size >= PET_EXAMINATION_CACHE_MAX_ENTRIES) {
+                    const oldestKey = cached.keys().next().value;
+                    cached.delete(oldestKey);
+                }
+                cached.set(totalCacheKey, {
+                    total,
+                    expiresAt: now + PET_EXAMINATION_CACHE_TTL_MS,
+                });
+            }
             console.info('[getPetExamination_v2] pagination queries:', {
                 durationMs: Date.now() - paginationStartedAt,
+                totalCacheHit: Boolean(hasCachedTotal),
+                pageCacheHit: Boolean(hasCachedPage),
                 isAdmin,
                 pageSize: limit,
                 pageNum: currentPage,
@@ -1038,7 +1085,6 @@ module.exports = {
                 hasPetFilter: Boolean(cleanPetName),
             });
 
-            const total = Number(countResult[0]?.total) || 0;
             if (total === 0) {
                 return {
                     data: [],
