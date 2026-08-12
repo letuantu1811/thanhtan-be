@@ -965,23 +965,24 @@ module.exports = {
             const joins = customerFilterEnabled
                 ? 'INNER JOIN khachhang ON giasuc.khachhang_id = khachhang.id'
                 : '';
-            const conditions = ['giasuc.trangthai = 1'];
+            const conditions = ['phieudieutri.trangthai = 1', 'giasuc.trangthai = 1'];
             const replacements = {};
 
-            const eligibleTreatmentsSql = isAdmin
-                ? `
-                    SELECT pdt.giasuc_id
-                    FROM phieudieutri AS pdt
-                    WHERE pdt.trangthai = 1
-                    GROUP BY pdt.giasuc_id
-                `
-                : `
-                    SELECT pdt.giasuc_id
-                    FROM phieudieutri AS pdt
-                    WHERE pdt.trangthai = 1 AND pdt.option = 0
-                    GROUP BY pdt.giasuc_id
-                    HAVING COUNT(pdt.id) > 1
-                `;
+            if (!isAdmin) {
+                conditions.push('phieudieutri.option = 0');
+                conditions.push(
+                    `
+                    EXISTS (
+                        SELECT 1
+                        FROM phieudieutri AS p2
+                        WHERE p2.giasuc_id = phieudieutri.giasuc_id
+                          AND p2.id <> phieudieutri.id
+                          AND p2.trangthai = 1
+                          AND p2.option = 0
+                    )
+                `.trim(),
+                );
+            }
 
             if (cleanPetName) {
                 conditions.push('giasuc.ten LIKE :petParam');
@@ -1000,35 +1001,34 @@ module.exports = {
                 replacements.addressParam = `%${cleanAddress}%`;
             }
 
-            const eligiblePetsSql = `
-                FROM giasuc
-                INNER JOIN (${eligibleTreatmentsSql}) AS eligible_treatments
-                    ON eligible_treatments.giasuc_id = giasuc.id
+            const eligiblePetsFromSql = `
+                FROM phieudieutri
+                INNER JOIN giasuc ON giasuc.id = phieudieutri.giasuc_id
                 ${joins}
                 WHERE ${conditions.join('\n                AND ')}
             `;
-            const countSql = `SELECT COUNT(*) AS total ${eligiblePetsSql}`;
+            const countSql = `
+                SELECT COUNT(DISTINCT phieudieutri.giasuc_id) AS total
+                ${eligiblePetsFromSql}
+            `;
             const pagedIdsSql = `
-                SELECT giasuc.id, COUNT(*) OVER() AS total
-                ${eligiblePetsSql}
+                SELECT DISTINCT giasuc.id, giasuc.ngaytao
+                ${eligiblePetsFromSql}
                 ORDER BY giasuc.ngaytao DESC
                 LIMIT :limit OFFSET :offset
             `;
 
             const paginationStartedAt = Date.now();
-            const pagedPetIdsResult = await model.sequelize.query(pagedIdsSql, {
-                replacements: { ...replacements, limit, offset },
-                type: model.sequelize.QueryTypes.SELECT,
-            });
-
-            // A page outside the available range has no row carrying the window count.
-            // Only that uncommon case needs a separate count query.
-            const countResult = pagedPetIdsResult.length
-                ? null
-                : await model.sequelize.query(countSql, {
-                      replacements,
-                      type: model.sequelize.QueryTypes.SELECT,
-                  });
+            const [pagedPetIdsResult, countResult] = await Promise.all([
+                model.sequelize.query(pagedIdsSql, {
+                    replacements: { ...replacements, limit, offset },
+                    type: model.sequelize.QueryTypes.SELECT,
+                }),
+                model.sequelize.query(countSql, {
+                    replacements,
+                    type: model.sequelize.QueryTypes.SELECT,
+                }),
+            ]);
             console.info('[getPetExamination_v2] pagination queries:', {
                 durationMs: Date.now() - paginationStartedAt,
                 isAdmin,
@@ -1038,7 +1038,7 @@ module.exports = {
                 hasPetFilter: Boolean(cleanPetName),
             });
 
-            const total = Number(pagedPetIdsResult[0]?.total ?? countResult?.[0]?.total) || 0;
+            const total = Number(countResult[0]?.total) || 0;
             if (total === 0) {
                 return {
                     data: [],
