@@ -986,19 +986,19 @@ module.exports = {
 
             if (!isAdmin) {
                 conditions.push('phieudieutri.option = 0');
-                conditions.push(
-                    `
-                    EXISTS (
-                        SELECT 1
-                        FROM phieudieutri AS p2
-                        WHERE p2.giasuc_id = phieudieutri.giasuc_id
-                          AND p2.id <> phieudieutri.id
-                          AND p2.trangthai = 1
-                          AND p2.option = 0
-                    )
-                `.trim(),
-                );
             }
+            conditions.push(
+                `
+                EXISTS (
+                    SELECT 1
+                    FROM phieudieutri AS p2
+                    WHERE p2.giasuc_id = phieudieutri.giasuc_id
+                      AND p2.id <> phieudieutri.id
+                      AND p2.trangthai = 1
+                      ${isAdmin ? '' : 'AND p2.option = 0'}
+                )
+            `.trim(),
+            );
 
             if (cleanPetName) {
                 conditions.push('giasuc.ten LIKE :petParam');
