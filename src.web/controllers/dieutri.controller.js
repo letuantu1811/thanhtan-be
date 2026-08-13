@@ -17,13 +17,6 @@ const Giong = require('../../database/models/giong');
 const Chungloai = require('../../database/models/chungloai');
 const { toNumber, isNil, omit } = require('lodash');
 
-const cached = new Map();
-const ENABLED_CACHE = true;
-const PET_EXAMINATION_CACHE_TTL_MS = 5 * 60 * 1000;
-const PET_EXAMINATION_CACHE_MAX_ENTRIES = 500;
-
-const clearPetExaminationCache = () => cached.clear();
-
 module.exports = {
     create: async (res) => {
         console.log(model);
@@ -41,7 +34,6 @@ module.exports = {
                 discountAmount: toNumber(res.discountAmount) || 0,
                 addedDiscountAmount: toNumber(res.addedDiscountAmount) || 0,
             });
-            clearPetExaminationCache();
             return treatment;
         } catch (error) {
             return error;
@@ -79,7 +71,6 @@ module.exports = {
                 default:
                     break;
             }
-            clearPetExaminationCache();
         } catch (error) {
             throw error;
         }
@@ -648,9 +639,6 @@ module.exports = {
                 }
             }
             await phieudieutri.bulkCreate(arr);
-            if (arr.length > 0) {
-                clearPetExaminationCache();
-            }
         } catch (error) {
             console.log(error);
             throw new Error();
@@ -972,8 +960,6 @@ module.exports = {
         const cleanAddress = address ? address.trim() : '';
         const cleanPetName = petName ? petName.trim() : '';
         const requestStartedAt = Date.now();
-        const cacheKeyParts = [Boolean(isAdmin), cleanPhone, cleanName, cleanAddress, cleanPetName];
-        const listCacheKey = `list:${JSON.stringify(cacheKeyParts)}`;
 
         try {
             const customerFilterEnabled = Boolean(cleanPhone || cleanName || cleanAddress);
@@ -1016,7 +1002,7 @@ module.exports = {
                     FROM phieudieutri
                     WHERE ${treatmentConditions.join('\n                    AND ')}
                     GROUP BY phieudieutri.giasuc_id
-                    HAVING COUNT(*) > 1
+                    ${isAdmin ? '' : 'HAVING COUNT(*) > 1'}
                 ) AS eligible_treatments
                 INNER JOIN giasuc ON giasuc.id = eligible_treatments.id
                 ${joins}
@@ -1028,53 +1014,24 @@ module.exports = {
             `;
             const pagedIdsSql = `
                 ${eligiblePetsSql}
-                ORDER BY ngaydieutrigannhat DESC
-                ${ENABLED_CACHE ? '' : 'LIMIT :limit OFFSET :offset'}
+                ORDER BY giasuc.ngaytao DESC, eligible_treatments.id DESC
+                LIMIT :limit OFFSET :offset
             `;
 
             const paginationStartedAt = Date.now();
-            const now = Date.now();
-            const cachedList = ENABLED_CACHE ? cached.get(listCacheKey) : null;
-            const hasCachedList = ENABLED_CACHE && cachedList && cachedList.expiresAt > now;
-            if (cachedList && !hasCachedList) {
-                cached.delete(listCacheKey);
-            }
-
-            const countPromise = ENABLED_CACHE
-                ? Promise.resolve(null)
-                : model.sequelize.query(countSql, {
-                      replacements,
-                      type: model.sequelize.QueryTypes.SELECT,
-                  });
-            const listPromise = hasCachedList
-                ? Promise.resolve(null)
-                : model.sequelize.query(pagedIdsSql, {
-                      replacements: ENABLED_CACHE
-                          ? replacements
-                          : { ...replacements, limit, offset },
-                      type: model.sequelize.QueryTypes.SELECT,
-                  });
+            const countPromise = model.sequelize.query(countSql, {
+                replacements,
+                type: model.sequelize.QueryTypes.SELECT,
+            });
+            const listPromise = model.sequelize.query(pagedIdsSql, {
+                replacements: { ...replacements, limit, offset },
+                type: model.sequelize.QueryTypes.SELECT,
+            });
             const [eligiblePetRows, countResult] = await Promise.all([listPromise, countPromise]);
-            const eligiblePetIds = hasCachedList
-                ? cachedList.ids
-                : eligiblePetRows.map((item) => item.id);
-
-            const total = ENABLED_CACHE
-                ? eligiblePetIds.length
-                : Number(countResult[0]?.total) || 0;
-            if (ENABLED_CACHE && !hasCachedList) {
-                if (cached.size >= PET_EXAMINATION_CACHE_MAX_ENTRIES) {
-                    const oldestKey = cached.keys().next().value;
-                    cached.delete(oldestKey);
-                }
-                cached.set(listCacheKey, {
-                    ids: eligiblePetIds,
-                    expiresAt: now + PET_EXAMINATION_CACHE_TTL_MS,
-                });
-            }
+            const eligiblePetIds = eligiblePetRows.map((item) => item.id);
+            const total = Number(countResult[0]?.total) || 0;
             console.info('[getPetExamination_v2] pagination queries:', {
                 durationMs: Date.now() - paginationStartedAt,
-                listCacheHit: Boolean(hasCachedList),
                 isAdmin,
                 pageSize: limit,
                 pageNum: currentPage,
@@ -1094,9 +1051,7 @@ module.exports = {
                 };
             }
 
-            const pagedPetIds = ENABLED_CACHE
-                ? eligiblePetIds.slice(offset, offset + limit)
-                : eligiblePetIds;
+            const pagedPetIds = eligiblePetIds;
             const totalPages = Math.ceil(total / limit);
 
             if (pagedPetIds.length === 0) {
