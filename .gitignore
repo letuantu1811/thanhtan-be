@@ -110,3 +110,4 @@ node_modules*
 node_modules/
 public/
 tmp/
+database/.DS_Store
