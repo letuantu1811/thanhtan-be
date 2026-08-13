@@ -966,13 +966,11 @@ module.exports = {
             const joins = customerFilterEnabled
                 ? 'INNER JOIN khachhang ON giasuc.khachhang_id = khachhang.id'
                 : '';
-            const treatmentConditions = ['phieudieutri.trangthai = 1'];
-            const conditions = ['giasuc.trangthai = 1'];
+            const conditions = [
+                'giasuc.trangthai = 1',
+                'giasuc.sophieudieutri > 0',
+            ];
             const replacements = {};
-
-            if (!isAdmin) {
-                treatmentConditions.push('phieudieutri.option = 0');
-            }
 
             if (cleanPetName) {
                 conditions.push('giasuc.ten LIKE :petParam');
@@ -991,30 +989,22 @@ module.exports = {
                 replacements.addressParam = `%${cleanAddress}%`;
             }
 
-            const eligiblePetsSql = `
+            const filteredPetsSql = `
                 SELECT
-                    eligible_treatments.id,
-                    eligible_treatments.ngaydieutrigannhat
-                FROM (
-                    SELECT
-                        phieudieutri.giasuc_id AS id,
-                        MAX(phieudieutri.ngaytao) AS ngaydieutrigannhat
-                    FROM phieudieutri
-                    WHERE ${treatmentConditions.join('\n                    AND ')}
-                    GROUP BY phieudieutri.giasuc_id
-                    ${isAdmin ? '' : 'HAVING COUNT(*) > 1'}
-                ) AS eligible_treatments
-                INNER JOIN giasuc ON giasuc.id = eligible_treatments.id
+                    giasuc.id
+                FROM giasuc
                 ${joins}
                 WHERE ${conditions.join('\n                AND ')}
             `;
             const countSql = `
                 SELECT COUNT(*) AS total
-                FROM (${eligiblePetsSql}) AS eligible_pets
+                FROM giasuc
+                ${joins}
+                WHERE ${conditions.join('\n                AND ')}
             `;
             const pagedIdsSql = `
-                ${eligiblePetsSql}
-                ORDER BY giasuc.ngaytao DESC, eligible_treatments.id DESC
+                ${filteredPetsSql}
+                ORDER BY giasuc.ngaytao DESC, giasuc.id DESC
                 LIMIT :limit OFFSET :offset
             `;
 
