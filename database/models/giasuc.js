@@ -56,11 +56,6 @@ const giasuc = db.define(
         phieudieutriid: {
             type: Sequelize.STRING,
         },
-        sophieudieutri: {
-            type: Sequelize.INTEGER.UNSIGNED,
-            allowNull: false,
-            defaultValue: 0,
-        },
         tiensubenh: {
             type: Sequelize.TEXT,
         },

@@ -54,7 +54,14 @@ router.get('/v2', async (req, res) => {
     const pageNum = parseInt(req.query.pageNum) || 1;
 
     try {
-        const result = await dieutri.getAllToday_v2(pageSize, pageNum, dateselect, paramsCustomer, petName, isAdmin);
+        const result = await dieutri.getAllToday_v2(
+            pageSize,
+            pageNum,
+            dateselect,
+            paramsCustomer,
+            petName,
+            isAdmin,
+        );
 
         // const arr = [];
         // if (!isAdmin) {
@@ -65,7 +72,7 @@ router.get('/v2', async (req, res) => {
         //             arr.push(element);
         //         }
         //     }
-        //     const totalItems = arr.length; 
+        //     const totalItems = arr.length;
         //     const totalPages =  Math.ceil(totalItems / pageSize);
         //     const start = (pageNum - 1) * pageSize;
         //     const end = pageSize * pageNum - 1;
@@ -76,7 +83,7 @@ router.get('/v2', async (req, res) => {
         //         currentPage: pageNum,
         //         pageSize,
         //         totalItems,
-        //     };           
+        //     };
         //     response.success_v2(res, 'Lấy dữ liệu thành công', data, pagination);
         //     return;
         // }
@@ -134,10 +141,17 @@ router.get('/reexam_v2', async (req, res) => {
     const isAdmin = ['ADMIN', 'MANAGER'].includes(role?.toUpperCase());
     const date = req.query.date;
     try {
-        const result = await dieutri.getReExamByDate_v2(pageSize, pageNum, date, isAdmin, paramsCustomer, petName, isAdmin);
-        
-        response.success_v2(res, 'Lấy dữ liệu thành công', result.data, result.pagination);
+        const result = await dieutri.getReExamByDate_v2(
+            pageSize,
+            pageNum,
+            date,
+            isAdmin,
+            paramsCustomer,
+            petName,
+            isAdmin,
+        );
 
+        response.success_v2(res, 'Lấy dữ liệu thành công', result.data, result.pagination);
     } catch (err) {
         console.log('Error at dieutri.router >> /reexam:', err.message);
         response.error(res, err.message, 500);
@@ -289,7 +303,14 @@ router.get('/getExaminationWithRabisin_v2', async (req, res) => {
     const petName = req.query.petName;
 
     try {
-        const result = await truyxuatbenhan.getExaminationWithRabisin_v2(pageSize, pageNum, fromDate, toDate, paramsCustomer, petName);
+        const result = await truyxuatbenhan.getExaminationWithRabisin_v2(
+            pageSize,
+            pageNum,
+            fromDate,
+            toDate,
+            paramsCustomer,
+            petName,
+        );
 
         response.success_v2(res, 'success', result.data, result.pagination);
     } catch (err) {
@@ -318,7 +339,14 @@ router.get('/getExaminationWithMedicin_v2/:id', async (req, res) => {
     const role = req.header('quyen');
     const isAdmin = ['ADMIN', 'MANAGER'].includes(role?.toUpperCase());
     try {
-        const result = await truyxuatbenhan.getExaminationWithMedicinName_v2(id, pageSize, pageNum, fromDate, toDate, isAdmin);
+        const result = await truyxuatbenhan.getExaminationWithMedicinName_v2(
+            id,
+            pageSize,
+            pageNum,
+            fromDate,
+            toDate,
+            isAdmin,
+        );
         response.success_v2(res, 'success', result.data, result.pagination);
     } catch (err) {
         console.log(err.message);
@@ -348,7 +376,7 @@ router.get('/getPetExamination', async (req, res) => {
     }
 });
 
-// Paging Pet Examination 
+// Paging Pet Examination
 router.get('/getPetExamination_v2', async (req, res) => {
     const role = req.header('quyen');
     const isAdmin = ['ADMIN', 'MANAGER'].includes(role?.toUpperCase());
@@ -358,17 +386,23 @@ router.get('/getPetExamination_v2', async (req, res) => {
     const name = req.query.name;
     const address = req.query.address;
     const petName = req.query.petName;
-    
-    try {
 
-        const result = await dieutri.getPetExaminationPaging(pageSize, pageNum, phone, name, address, petName, isAdmin);        
+    try {
+        const result = await dieutri.getPetExaminationPagingV2(
+            pageSize,
+            pageNum,
+            phone,
+            name,
+            address,
+            petName,
+            isAdmin,
+        );
         return response.success_v2(res, 'success', result.data, result.pagination);
     } catch (err) {
-        console.error("Lỗi Router getPetExamination_v2:", err.message);
+        console.error('Lỗi Router getPetExamination_v2:', err.message);
         return response.error(res, 'failed', 500);
     }
 });
-
 
 router.get('/getPetMedicalHistory/:id', async (req, res) => {
     const role = req.header('quyen');

@@ -962,14 +962,7 @@ module.exports = {
         const requestStartedAt = Date.now();
 
         try {
-            const customerFilterEnabled = Boolean(cleanPhone || cleanName || cleanAddress);
-            const joins = customerFilterEnabled
-                ? 'INNER JOIN khachhang ON giasuc.khachhang_id = khachhang.id'
-                : '';
-            const conditions = [
-                'giasuc.trangthai = 1',
-                'giasuc.sophieudieutri > 0',
-            ];
+            const conditions = ['giasuc.trangthai = 1'];
             const replacements = {};
 
             if (cleanPetName) {
@@ -989,45 +982,41 @@ module.exports = {
                 replacements.addressParam = `%${cleanAddress}%`;
             }
 
-            const filteredPetsSql = `
-                SELECT
-                    giasuc.id
-                FROM giasuc
-                ${joins}
-                WHERE ${conditions.join('\n                AND ')}
+            const customerJoin = `
+                LEFT JOIN khachhang ON giasuc.khachhang_id = khachhang.id
             `;
-            const countSql = `
-                SELECT COUNT(*) AS total
-                FROM giasuc
-                ${joins}
-                WHERE ${conditions.join('\n                AND ')}
-            `;
-            const pagedIdsSql = `
-                ${filteredPetsSql}
-                ORDER BY giasuc.ngaytao DESC, giasuc.id DESC
-                LIMIT :limit OFFSET :offset
-            `;
+            const eligiblePetsSql = isAdmin
+                ? `
+                    SELECT DISTINCT giasuc.id, giasuc.ngaytao
+                    FROM giasuc
+                    INNER JOIN phieudieutri AS pdt
+                        ON pdt.giasuc_id = giasuc.id
+                        AND pdt.trangthai = 1
+                    ${customerJoin}
+                    WHERE ${conditions.join('\n                    AND ')}
+                    ORDER BY giasuc.ngaytao DESC, giasuc.id DESC
+                `
+                : `
+                    SELECT giasuc.id
+                    FROM giasuc
+                    INNER JOIN (
+                        SELECT phieudieutri.giasuc_id
+                        FROM phieudieutri
+                        WHERE phieudieutri.trangthai = 1
+                        AND phieudieutri.option = 0
+                        GROUP BY phieudieutri.giasuc_id
+                        HAVING COUNT(phieudieutri.id) > 1
+                    ) AS pdt_count ON pdt_count.giasuc_id = giasuc.id
+                    ${customerJoin}
+                    WHERE ${conditions.join('\n                    AND ')}
+                    ORDER BY giasuc.ngaytao DESC, giasuc.id DESC
+                `;
 
-            const paginationStartedAt = Date.now();
-            const countPromise = model.sequelize.query(countSql, {
+            const eligiblePetRows = await model.sequelize.query(eligiblePetsSql, {
                 replacements,
                 type: model.sequelize.QueryTypes.SELECT,
             });
-            const listPromise = model.sequelize.query(pagedIdsSql, {
-                replacements: { ...replacements, limit, offset },
-                type: model.sequelize.QueryTypes.SELECT,
-            });
-            const [eligiblePetRows, countResult] = await Promise.all([listPromise, countPromise]);
-            const eligiblePetIds = eligiblePetRows.map((item) => item.id);
-            const total = Number(countResult[0]?.total) || 0;
-            console.info('[getPetExamination_v2] pagination queries:', {
-                durationMs: Date.now() - paginationStartedAt,
-                isAdmin,
-                pageSize: limit,
-                pageNum: currentPage,
-                hasCustomerFilter: customerFilterEnabled,
-                hasPetFilter: Boolean(cleanPetName),
-            });
+            const total = eligiblePetRows.length;
 
             if (total === 0) {
                 return {
@@ -1041,7 +1030,9 @@ module.exports = {
                 };
             }
 
-            const pagedPetIds = eligiblePetIds;
+            const pagedPetIds = eligiblePetRows
+                .slice(offset, offset + limit)
+                .map((item) => item.id);
             const totalPages = Math.ceil(total / limit);
 
             if (pagedPetIds.length === 0) {
@@ -1077,7 +1068,7 @@ module.exports = {
                     },
                 }),
             ]);
-            console.info('[getPetExamination_v2] detail queries:', {
+            console.info('[getPetExamination] detail queries:', {
                 durationMs: Date.now() - detailsStartedAt,
                 petCount: pets.length,
                 treatmentCount: treatments.length,
@@ -1104,7 +1095,7 @@ module.exports = {
                     (firstPet, secondPet) =>
                         petOrderById.get(firstPet.id) - petOrderById.get(secondPet.id),
                 );
-            console.info('[getPetExamination_v2] total:', {
+            console.info('[getPetExamination] total:', {
                 durationMs: Date.now() - requestStartedAt,
                 resultCount: petsData.length,
             });
@@ -1120,6 +1111,173 @@ module.exports = {
             };
         } catch (error) {
             console.error('Lỗi tại getPetExaminationPaging:', error);
+            throw error;
+        }
+    },
+
+    getPetExaminationPagingV2: async (
+        pageSize,
+        pageNum,
+        phone,
+        name,
+        address,
+        petName,
+        isAdmin,
+    ) => {
+        const parsedPageSize = parseInt(pageSize);
+        const parsedPageNum = parseInt(pageNum);
+        const limit = Math.min(parsedPageSize > 0 ? parsedPageSize : 20, 150);
+        const currentPage = parsedPageNum > 0 ? parsedPageNum : 1;
+        const offset = (currentPage - 1) * limit;
+
+        const cleanPhone = phone ? phone.replace(/\s+/g, '') : '';
+        const cleanName = name ? name.trim() : '';
+        const cleanAddress = address ? address.trim() : '';
+        const cleanPetName = petName ? petName.trim() : '';
+
+        try {
+            const customerFilterEnabled = Boolean(cleanPhone || cleanName || cleanAddress);
+            const joins = customerFilterEnabled
+                ? 'INNER JOIN khachhang ON giasuc.khachhang_id = khachhang.id'
+                : '';
+            const petConditions = ['giasuc.trangthai = 1'];
+            const replacements = {};
+            const treatmentVisibilityCondition = isAdmin ? '' : 'AND pdt.option = 0';
+
+            if (cleanPetName) {
+                petConditions.push('giasuc.ten LIKE :petParam');
+                replacements.petParam = `%${cleanPetName}%`;
+            }
+            if (cleanPhone) {
+                petConditions.push("REPLACE(khachhang.sodienthoai, ' ', '') LIKE :phoneParam");
+                replacements.phoneParam = `%${cleanPhone}%`;
+            }
+            if (cleanName) {
+                petConditions.push('khachhang.ten LIKE :nameParam');
+                replacements.nameParam = `%${cleanName}%`;
+            }
+            if (cleanAddress) {
+                petConditions.push('khachhang.diachi LIKE :addressParam');
+                replacements.addressParam = `%${cleanAddress}%`;
+            }
+
+            const listConditions = [...petConditions, 'phieumoinhat.id IS NOT NULL'];
+
+            const filteredPetsSql = `
+                SELECT
+                    giasuc.id,
+                    phieumoinhat.id AS phieudieutri_id,
+                    phieumoinhat.ngaytao AS ngaydieutrigannhat
+                FROM giasuc
+                LEFT JOIN phieudieutri AS phieumoinhat
+                    ON phieumoinhat.id = (
+                        SELECT pdt.id
+                        FROM phieudieutri AS pdt
+                        WHERE pdt.giasuc_id = giasuc.id
+                        AND pdt.trangthai = 1
+                        ${treatmentVisibilityCondition}
+                        ORDER BY pdt.ngaytao DESC, pdt.id DESC
+                        LIMIT 1
+                    )
+                ${joins}
+                WHERE ${listConditions.join('\n                AND ')}
+            `;
+            const countSql = `
+                SELECT COUNT(*) AS total
+                FROM giasuc
+                ${joins}
+                WHERE ${petConditions.join('\n                AND ')}
+                AND EXISTS (
+                    SELECT 1
+                    FROM phieudieutri AS pdt
+                    WHERE pdt.giasuc_id = giasuc.id
+                    AND pdt.trangthai = 1
+                    ${treatmentVisibilityCondition}
+                )
+            `;
+            const pagedIdsSql = `
+                ${filteredPetsSql}
+                ORDER BY giasuc.ngaytao DESC, giasuc.id DESC
+                LIMIT :limit OFFSET :offset
+            `;
+
+            const [pagedRows, countResult] = await Promise.all([
+                model.sequelize.query(pagedIdsSql, {
+                    replacements: { ...replacements, limit, offset },
+                    type: model.sequelize.QueryTypes.SELECT,
+                }),
+                model.sequelize.query(countSql, {
+                    replacements,
+                    type: model.sequelize.QueryTypes.SELECT,
+                }),
+            ]);
+
+            const total = Number(countResult[0]?.total) || 0;
+            const totalPages = Math.ceil(total / limit);
+            const pagedPetIds = pagedRows.map((item) => item.id);
+            const latestTreatmentIds = pagedRows.map((item) => item.phieudieutri_id);
+
+            if (pagedPetIds.length === 0) {
+                return {
+                    data: [],
+                    pagination: {
+                        totalPages,
+                        currentPage,
+                        pageSize: limit,
+                        totalItems: total,
+                    },
+                };
+            }
+
+            const [pets, latestTreatments] = await Promise.all([
+                giasuc.findAll({
+                    where: { id: { [Op.in]: pagedPetIds } },
+                    include: [
+                        { model: khachhang, as: 'khachhang' },
+                        {
+                            model: Giong,
+                            as: 'giong',
+                            include: [{ model: Chungloai, as: 'chungloai' }],
+                        },
+                    ],
+                }),
+                phieudieutri.findAll({
+                    where: { id: { [Op.in]: latestTreatmentIds } },
+                }),
+            ]);
+
+            const latestTreatmentByPetId = new Map(
+                latestTreatments.map((treatment) => {
+                    const rawTreatment = treatment.toJSON();
+                    return [rawTreatment.giasuc_id, rawTreatment];
+                }),
+            );
+            const petOrderById = new Map(pagedPetIds.map((id, index) => [id, index]));
+            const petsData = pets
+                .map((pet) => {
+                    const rawPet = pet.toJSON();
+                    const latestTreatment = latestTreatmentByPetId.get(rawPet.id);
+                    return {
+                        ...rawPet,
+                        phieudieutris: latestTreatment ? [latestTreatment] : [],
+                    };
+                })
+                .sort(
+                    (firstPet, secondPet) =>
+                        petOrderById.get(firstPet.id) - petOrderById.get(secondPet.id),
+                );
+
+            return {
+                data: petsData,
+                pagination: {
+                    totalPages,
+                    currentPage,
+                    pageSize: limit,
+                    totalItems: total,
+                },
+            };
+        } catch (error) {
+            console.error('Lỗi tại getPetExaminationPagingV2:', error);
             throw error;
         }
     },
